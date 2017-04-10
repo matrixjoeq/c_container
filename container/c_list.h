@@ -75,6 +75,19 @@ void c_list_unique_if(c_list_t* list, c_binary_predicate pred);
  * helpers
  */
 #define C_LIST_INT(__list) c_list_create(__list, c_int_t)
+#define C_LIST_SINT(__list) c_list_create(__list, c_signed_int_t)
+#define C_LIST_UINT(__list) c_list_create(__list, c_unsigned_int_t)
+#define C_LIST_SHORT(__list) c_list_create(__list, c_short_t)
+#define C_LIST_SSHORT(__list) c_list_create(__list, c_signed_short_t)
+#define C_LIST_USHORT(__list) c_list_create(__list, c_unsigned_short_t)
+#define C_LIST_LONG(__list) c_list_create(__list, c_long_t)
+#define C_LIST_SLONG(__list) c_list_create(__list, c_signed_long_t)
+#define C_LIST_ULONG(__list) c_list_create(__list, c_unsigned_long_t)
+#define C_LIST_CHAR(__list) c_list_create(__list, c_char_t)
+#define C_LIST_SCHAR(__list) c_list_create(__list, c_signed_char_t)
+#define C_LIST_UCHAR(__list) c_list_create(__list, c_unsigned_char_t)
+#define C_LIST_FLOAT(__list) c_list_create(__list, c_float_t)
+#define C_LIST_DOUBLE(__list) c_list_create(__list, c_double_t)
 
 #ifdef __cplusplus
 }

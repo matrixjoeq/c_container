@@ -167,5 +167,63 @@ TEST(CListModifier, InsertErase)
     c_list_destroy(list);
 }
 
+TEST(CListOperation, Merge)
+{
+}
+
+TEST(CListOperation, Remove)
+{
+}
+
+TEST(CListOperation, Sort)
+{
+	c_list_t* list = 0;
+    C_LIST_INT(&list);
+	int sorted[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int random[] = { 5, 8, 1, 0, 3, 2, 7, 6, 4, 9 };
+
+    for (int i = 0; i < 9; ++i)
+        c_list_push_back(list, C_REF_T(&random[i]));
+    
+	c_list_sort(list);
+	int index = 0;
+	c_list_iterator_t iter = c_list_begin(list);
+	c_list_iterator_t last = c_list_end(list);
+	while (C_ITER_NE(&iter, &last)) {
+		c_ref_t data = C_ITER_DEREF(&iter);
+		EXPECT_EQ(sorted[index++], C_DEREF_INT(data));
+		C_ITER_INC(&iter);
+	}
+	
+	c_list_destroy(list);
+}
+
+TEST(CListOperation, Reverse)
+{
+	c_list_t* list = 0;
+    C_LIST_INT(&list);
+	int origin[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int reverse[] = { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+
+    for (int i = 0; i < 9; ++i)
+        c_list_push_back(list, C_REF_T(&origin[i]));
+    
+	c_list_reverse(list);
+	int index = 0;
+	c_list_iterator_t iter = c_list_begin(list);
+	c_list_iterator_t last = c_list_end(list);
+	while (C_ITER_NE(&iter, &last)) {
+		c_ref_t data = C_ITER_DEREF(&iter);
+		EXPECT_EQ(reverse[index++], C_DEREF_INT(data));
+		C_ITER_INC(&iter);
+	}
+	
+	c_list_destroy(list);
+}
+
+TEST(CListOperation, Unique)
+{
+}
+
 } // namespace
 } // namespace c_container
