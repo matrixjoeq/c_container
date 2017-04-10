@@ -12,10 +12,14 @@ extern "C" {
 #endif // __cplusplus
 
 struct __c_list;
-struct __c_list_iterator;
+struct __c_list_node;
 
 typedef struct __c_list c_list_t;
-typedef struct __c_list_iterator c_list_iterator_t;
+
+typedef struct __c_list_iterator {
+    c_iterator_t base_iter;
+    struct __c_list_node* node;
+} c_list_iterator_t;
 
 /**
  * constructor/destructor
@@ -46,12 +50,12 @@ size_t c_list_max_size(void);
  * modifiers
  */
 void c_list_clear(c_list_t* list);
-c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, c_ref_t data);
+c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, const c_ref_t data);
 c_list_iterator_t c_list_erase(c_list_t* list, c_list_iterator_t pos);
 c_list_iterator_t c_list_erase_range(c_list_t* list, c_list_iterator_t first, c_list_iterator_t last);
-void c_list_push_back(c_list_t* list, c_ref_t data);
+void c_list_push_back(c_list_t* list, const c_ref_t data);
 void c_list_pop_back(c_list_t* list);
-void c_list_push_front(c_list_t* list, c_ref_t data);
+void c_list_push_front(c_list_t* list, const c_ref_t data);
 void c_list_pop_front(c_list_t* list);
 
 /**
@@ -59,7 +63,7 @@ void c_list_pop_front(c_list_t* list);
  */
 void c_list_merge(c_list_t* list, c_list_t* other);
 void c_list_merge_by(c_list_t* list, c_list_t* other, c_compare comp);
-void c_list_remove(c_list_t* list, c_ref_t data);
+void c_list_remove(c_list_t* list, const c_ref_t data);
 void c_list_remove_if(c_list_t* list, c_unary_predicate pred);
 void c_list_sort(c_list_t* list);
 void c_list_sort_by(c_list_t* list, c_compare comp);

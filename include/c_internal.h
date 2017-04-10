@@ -2,6 +2,10 @@
 #ifndef __C_INTERNAL_H__
 #define __C_INTERNAL_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 #ifndef GTEST_UNIT_TEST
 #define __c_static static
 #define __c_inline inline
@@ -27,5 +31,9 @@
 #define CREATE_DATA(x, type, value) \
     type* x = (type*) malloc(sizeof(type)); \
     memcpy(x, &(value), sizeof(type))
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // __C_INTERNAL_H__
