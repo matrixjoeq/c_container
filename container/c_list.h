@@ -59,12 +59,17 @@ void c_list_push_back(c_list_t* list, const c_ref_t data);
 void c_list_pop_back(c_list_t* list);
 void c_list_push_front(c_list_t* list, const c_ref_t data);
 void c_list_pop_front(c_list_t* list);
+void c_list_resize(c_list_t* list, size_t count, const c_ref_t data);
+void c_list_swap(c_list_t* list, c_list_t* other);
 
 /**
  * operations
  */
 void c_list_merge(c_list_t* list, c_list_t* other);
 void c_list_merge_by(c_list_t* list, c_list_t* other, c_compare comp);
+void c_list_splice(c_list_t* list, c_list_iterator_t pos, c_list_t* other);
+void c_list_splice_from(c_list_t* list, c_list_iterator_t pos, c_list_t* other, c_list_iterator_t from);
+void c_list_splice_range(c_list_t* list, c_list_iterator_t pos, c_list_t* other, c_list_iterator_t first, c_list_iterator_t last);
 void c_list_remove(c_list_t* list, const c_ref_t data);
 void c_list_remove_if(c_list_t* list, c_unary_predicate pred);
 void c_list_sort(c_list_t* list);

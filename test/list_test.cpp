@@ -101,6 +101,19 @@ TEST_F(CListTest, Clear)
     ExpectEmpty();
 }
 
+TEST_F(CListTest, BeginEnd)
+{
+	SetupList(default_data, default_length);
+	c_list_iterator_t first = c_list_begin(list);
+	c_list_iterator_t last = c_list_end(list);
+	c_list_iterator_t rfirst = c_list_rbegin(list);
+	c_list_iterator_t rlast = c_list_rend(list);
+	C_ITER_DEC(&last);
+	C_ITER_DEC(&rlast);
+	EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&first)), C_DEREF_INT(C_ITER_DEREF(&rlast)));
+	EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&rfirst)), C_DEREF_INT(C_ITER_DEREF(&last)));
+}
+
 TEST_F(CListTest, BackOperations)
 {
     SetupList(default_data, default_length);

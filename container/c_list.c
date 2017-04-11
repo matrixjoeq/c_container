@@ -18,13 +18,12 @@ struct __c_list {
     c_containable_t type_info;
 };
 
-static const char* const s_list_iterator_category = "bidirection_iterator";
-static const char* const s_list_iterator_type = "list_iterator";
-static const char* const s_list_reverse_iterator_category = "bidirection_iterator";
-static const char* const s_list_reverse_iterator_type = "list_reverse_iterator";
-
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 {
+	assert(iter);
+	assert(iter->iterator_category == C_ITER_CATE_BIDIRECTION);
+	assert(iter->iterator_type == C_ITER_TYPE_LIST);
+	
     c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
     _iter->node = _iter->node->next;
     return iter;
@@ -32,6 +31,10 @@ __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 
 __c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
 {
+	assert(iter);
+	assert(iter->iterator_category == C_ITER_CATE_BIDIRECTION);
+	assert(iter->iterator_type == C_ITER_TYPE_LIST);
+	
     c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
     _iter->node = _iter->node->prev;
     return iter;
@@ -39,12 +42,23 @@ __c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
 
 __c_static c_ref_t iter_dereference(c_iterator_t* iter)
 {
+	assert(iter);
+	assert(iter->iterator_category == C_ITER_CATE_BIDIRECTION);
+	assert(iter->iterator_type == C_ITER_TYPE_LIST);
+	
     c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
     return _iter->node->data;
 }
 
 __c_static bool iter_equal(c_iterator_t* x, c_iterator_t* y)
 {
+	assert(x);
+	assert(x->iterator_category == C_ITER_CATE_BIDIRECTION);
+	assert(x->iterator_type == C_ITER_TYPE_LIST);
+	assert(y);
+	assert(y->iterator_category == C_ITER_CATE_BIDIRECTION);
+	assert(y->iterator_type == C_ITER_TYPE_LIST);
+	
     c_list_iterator_t* _x = (c_list_iterator_t*)x;
     c_list_iterator_t* _y = (c_list_iterator_t*)y;
     return _x->node == _y->node;
@@ -55,6 +69,57 @@ __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
     return !iter_equal(x, y);
 }
 
+__c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
+{
+	assert(iter);
+	assert(iter->iterator_category == C_ITER_CATE_BIDIRECTION);
+	assert(iter->iterator_type == C_ITER_TYPE_LIST_REVERSE);
+	
+    c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
+    _iter->node = _iter->node->prev;
+    return iter;
+}
+
+__c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
+{
+	assert(iter);
+	assert(iter->iterator_category == C_ITER_CATE_BIDIRECTION);
+	assert(iter->iterator_type == C_ITER_TYPE_LIST_REVERSE);
+	
+    c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
+    _iter->node = _iter->node->next;
+    return iter;
+}
+
+__c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
+{
+	assert(iter);
+	assert(iter->iterator_category == C_ITER_CATE_BIDIRECTION);
+	assert(iter->iterator_type == C_ITER_TYPE_LIST_REVERSE);
+	
+    c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
+    return _iter->node->prev->data;
+}
+
+__c_static bool reverse_iter_equal(c_iterator_t* x, c_iterator_t* y)
+{
+	assert(x);
+	assert(x->iterator_category == C_ITER_CATE_BIDIRECTION);
+	assert(x->iterator_type == C_ITER_TYPE_LIST_REVERSE);
+	assert(y);
+	assert(y->iterator_category == C_ITER_CATE_BIDIRECTION);
+	assert(y->iterator_type == C_ITER_TYPE_LIST_REVERSE);
+	
+    c_list_iterator_t* _x = (c_list_iterator_t*)x;
+    c_list_iterator_t* _y = (c_list_iterator_t*)y;
+    return _x->node == _y->node;
+}
+
+__c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
+{
+    return !reverse_iter_equal(x, y);
+}
+
 __c_static c_list_iterator_t create_iterator(c_containable_t* type_info, c_list_node_t* node)
 {
     assert(type_info);
@@ -62,8 +127,8 @@ __c_static c_list_iterator_t create_iterator(c_containable_t* type_info, c_list_
 
     c_list_iterator_t iter = {
         .base_iter = {
-            .iterator_category = s_list_iterator_category,
-            .iterator_type = s_list_iterator_type,
+            .iterator_category = C_ITER_CATE_BIDIRECTION,
+            .iterator_type = C_ITER_TYPE_LIST,
             .increment = iter_increment,
             .decrement = iter_decrement,
             .dereference = iter_dereference,
@@ -83,13 +148,13 @@ __c_static c_list_iterator_t create_reverse_iterator(c_containable_t* type_info,
 
     c_list_iterator_t iter = {
         .base_iter = {
-            .iterator_category = s_list_reverse_iterator_category,
-            .iterator_type = s_list_reverse_iterator_type,
-            .increment = iter_decrement,
-            .decrement = iter_increment,
-            .dereference = iter_dereference,
-            .equal = iter_equal,
-            .not_equal = iter_not_equal,
+            .iterator_category = C_ITER_CATE_BIDIRECTION,
+            .iterator_type = C_ITER_TYPE_LIST_REVERSE,
+            .increment = reverse_iter_increment,
+            .decrement = reverse_iter_decrement,
+            .dereference = reverse_iter_dereference,
+            .equal = reverse_iter_equal,
+            .not_equal = reverse_iter_not_equal,
             .type_info = type_info
         },
         .node = node
@@ -315,6 +380,7 @@ c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, const c_r
 {
     assert(list);
     assert(data);
+	assert(pos.base_iter.iterator_type == C_ITER_TYPE_LIST);
 
     c_list_node_t* node = 0;
     if (!create_node(list, &node, data)) {
@@ -332,6 +398,7 @@ c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, const c_r
 c_list_iterator_t c_list_erase(c_list_t* list, c_list_iterator_t pos)
 {
     assert(list);
+	assert(pos.base_iter.iterator_type == C_ITER_TYPE_LIST);
     c_list_node_t* node = pop_node(list, pos.node);
     return create_iterator(&(list->type_info), node);
 }

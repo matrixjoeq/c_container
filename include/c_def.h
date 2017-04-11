@@ -9,6 +9,34 @@
 extern "C" {
 #endif // __cplusplus
 
+typedef enum __c_iterator_category {
+	C_ITER_CATE_OUTPUT,
+	C_ITER_CATE_INPUT,
+	C_ITER_CATE_BIDIRECTION,
+	C_ITER_CATE_RANDOM,
+	C_ITER_CATE_MAX,
+} c_iterator_category_t;
+
+typedef enum __c_iterator_type {
+	C_ITER_TYPE_LIST,
+	C_ITER_TYPE_LIST_REVERSE,
+	C_ITER_TYPE_TREE,
+	C_ITER_TYPE_TREE_REVERSE,
+	C_ITER_TYPE_SET,
+	C_ITER_TYPE_SET_REVERSE,
+	C_ITER_TYPE_MULTISET,
+	C_ITER_TYPE_MULTISET_REVERSE,
+	C_ITER_TYPE_MAP,
+	C_ITER_TYPE_MAP_REVERSE,
+	C_ITER_TYPE_MULTIMAP,
+	C_ITER_TYPE_MULTIMAP_REVERSE,
+	C_ITER_TYPE_VECTOR,
+	C_ITER_TYPE_VECTOR_REVERSE,
+	C_ITER_TYPE_DEQUE,
+	C_ITER_TYPE_DEQUE_REVERSE,
+	C_ITER_TYPE_MAX,
+} c_iterator_type_t;
+
 typedef void* c_ref_t;
 typedef void (*c_unary_func)(c_ref_t);
 
@@ -37,8 +65,8 @@ typedef struct __c_containable {
 } c_containable_t;
 
 typedef struct __c_iterator {
-    const char* const iterator_category;
-    const char* const iterator_type;
+    c_iterator_category_t iterator_category;
+    c_iterator_type_t iterator_type;
 
     // operator++
     struct __c_iterator* (*increment)(struct __c_iterator*);
@@ -99,6 +127,8 @@ extern const c_containable_t c_double_t;
 #define C_DEREF_UCHAR(x) (*(unsigned char*)(x))
 #define C_DEREF_FLOAT(x) (*(float*)(x))
 #define C_DEREF_DOUBLE(x) (*(double*)(x))
+
+
 
 #ifdef __cplusplus
 }
