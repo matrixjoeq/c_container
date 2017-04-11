@@ -1,5 +1,6 @@
 
 #include <gtest/gtest.h>
+#include <stdlib.h>
 #include "c_internal.h"
 #include "c_iterator.h"
 #include "c_list.h"
@@ -7,137 +8,159 @@
 namespace c_container {
 namespace {
 
-using ::testing::TestWithParam;
-using ::testing::ValuesIn;
+#define ARRAY_LENGTH(a) sizeof((a)) / sizeof((a)[0])
 
-TEST(CListTest, CreateDestroy)
+const int default_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+const int default_length = ARRAY_LENGTH(default_data);
+
+bool c_int_greater(const c_ref_t lhs, const c_ref_t rhs)
 {
-    c_list_t* list = 0;
-    c_list_t* ret = C_LIST_INT(&list);
-    EXPECT_TRUE(ret == list);
-    EXPECT_TRUE(c_list_empty(list));
-    EXPECT_EQ(0, c_list_size(list));
-    c_list_iterator_t first = c_list_begin(list);
-    c_list_iterator_t last = c_list_end(list);
-    EXPECT_TRUE(C_ITER_EQ(&first, &last));
-
-    c_list_destroy(list);
+    return C_DEREF_INT(lhs) > C_DEREF_INT(rhs);
 }
 
-TEST(CListModifier, Clear)
+bool greater_than_five(const c_ref_t data)
 {
-    c_list_t* list = 0;
-    C_LIST_INT(&list);
-
-    for (int i = 0; i < 9; ++i)
-        c_list_push_back(list, C_REF_T(&i));
-
-    c_list_iterator_t first = c_list_begin(list);
-    c_list_iterator_t last = c_list_end(list);
-    EXPECT_FALSE(c_list_empty(list));
-    EXPECT_NE(0, c_list_size(list));
-    EXPECT_TRUE(C_ITER_NE(&first, &last));
-
-    c_list_clear(list);
-    first = c_list_begin(list);
-    last = c_list_end(list);
-    EXPECT_TRUE(c_list_empty(list));
-    EXPECT_EQ(0, c_list_size(list));
-    EXPECT_TRUE(C_ITER_EQ(&first, &last));
-
-    c_list_destroy(list);
+    return C_DEREF_INT(data) > 5;
 }
 
-TEST(CListModifier, BackOperations)
+bool abs_equal(const c_ref_t lhs, const c_ref_t rhs)
 {
-    c_list_t* list = 0;
-    C_LIST_INT(&list);
+    return abs(C_DEREF_INT(lhs)) == abs(C_DEREF_INT(rhs));
+}
 
-    for (int i = 0; i < 9; ++i) {
-        c_list_push_back(list, C_REF_T(&i));
-        c_ref_t data = c_list_back(list);
-        EXPECT_EQ(i + 1, c_list_size(list));
-        EXPECT_EQ(i, C_DEREF_INT(data));
+#pragma GCC diagnostic ignored "-Weffc++"
+class CListTest : public ::testing::Test
+{
+public:
+    CListTest() : list(0) {}
+    ~CListTest() { c_list_destroy(list); }
+
+    void SetupList(const int *datas, int length)
+    {
+        for (int i = 0; i < length; ++i)
+            c_list_push_back(list, C_REF_T(&datas[i]));
+
+        ExpectNotEmpty();
+        EXPECT_EQ(length, c_list_size(list));
     }
 
-    c_list_iterator_t first = c_list_begin(list);
-    c_list_iterator_t last = c_list_end(list);
-    EXPECT_TRUE(C_ITER_NE(&first, &last));
-    EXPECT_FALSE(c_list_empty(list));
+    void ExpectEqualToArray(const int* datas, int length)
+    {
+        EXPECT_EQ(length, c_list_size(list));
+        c_list_iterator_t first = c_list_begin(list);
+        c_ref_t data = 0;
+        for (int i = 0; i < length; ++i) {
+            data = C_ITER_DEREF(&first);
+            EXPECT_EQ(datas[i], C_DEREF_INT(data));
+            C_ITER_INC(&first);
+        }
+    }
 
+    void ExpectEmpty()
+    {
+        c_list_iterator_t first = c_list_begin(list);
+        c_list_iterator_t last = c_list_end(list);
+        EXPECT_TRUE(c_list_empty(list));
+        EXPECT_EQ(0, c_list_size(list));
+        EXPECT_TRUE(C_ITER_EQ(&first, &last));
+    }
+
+    void ExpectNotEmpty()
+    {
+        c_list_iterator_t first = c_list_begin(list);
+        c_list_iterator_t last = c_list_end(list);
+        EXPECT_FALSE(c_list_empty(list));
+        EXPECT_NE(0, c_list_size(list));
+        EXPECT_TRUE(C_ITER_NE(&first, &last));
+    }
+
+    void SetUp()
+    {
+        c_list_t* ret = C_LIST_INT(&list);
+        EXPECT_TRUE(ret == list);
+        ExpectEmpty();
+    }
+
+    void TearDown()
+    {
+        c_list_destroy(list);
+        list = 0;
+        EXPECT_TRUE(c_list_empty(list));
+        EXPECT_EQ(0, c_list_size(list));
+    }
+
+protected:
+    c_list_t* list;
+};
+#pragma GCC diagnostic warning "-Weffc++"
+
+TEST_F(CListTest, Clear)
+{
+    SetupList(default_data, default_length);
+    c_list_clear(list);
+    ExpectEmpty();
+}
+
+TEST_F(CListTest, BackOperations)
+{
+    SetupList(default_data, default_length);
+
+    c_list_iterator_t first, last;
+    size_t size = 0;
+    c_ref_t data = 0;
     while (!c_list_empty(list)) {
-        size_t size = c_list_size(list);
+        size = c_list_size(list);
         first = c_list_begin(list);
         last = c_list_end(list);
         EXPECT_TRUE(C_ITER_NE(&first, &last));
-
+        data = c_list_back(list);
+        EXPECT_EQ(size - 1, C_DEREF_INT(data));
         c_list_pop_back(list);
         EXPECT_EQ(size - 1, c_list_size(list));
     }
 
-    first = c_list_begin(list);
-    last = c_list_end(list);
-    EXPECT_TRUE(C_ITER_EQ(&first, &last));
-    EXPECT_EQ(0, c_list_size(list));
-
-    c_list_destroy(list);
+    ExpectEmpty();
 }
 
-TEST(CListModifier, FrontOperations)
+TEST_F(CListTest, FrontOperations)
 {
-    c_list_t* list = 0;
-    C_LIST_INT(&list);
+    SetupList(default_data, default_length);
 
-    for (int i = 0; i < 9; ++i) {
-        c_list_push_front(list, C_REF_T(&i));
-        c_ref_t data = c_list_front(list);
-        EXPECT_EQ(i + 1, c_list_size(list));
-        EXPECT_EQ(i, C_DEREF_INT(data));
-    }
-
-    c_list_iterator_t first = c_list_begin(list);
-    c_list_iterator_t last = c_list_end(list);
-    EXPECT_TRUE(C_ITER_NE(&first, &last));
-    EXPECT_FALSE(c_list_empty(list));
-
+    c_list_iterator_t first, last;
+    size_t size = 0;
+    c_ref_t data = 0;
+    int i = 0;
     while (!c_list_empty(list)) {
-        size_t size = c_list_size(list);
+        size = c_list_size(list);
         first = c_list_begin(list);
         last = c_list_end(list);
         EXPECT_TRUE(C_ITER_NE(&first, &last));
-
+        data = c_list_front(list);
+        EXPECT_EQ(i++, C_DEREF_INT(data));
         c_list_pop_front(list);
         EXPECT_EQ(size - 1, c_list_size(list));
     }
 
-    first = c_list_begin(list);
-    last = c_list_end(list);
-    EXPECT_TRUE(C_ITER_EQ(&first, &last));
-    EXPECT_EQ(0, c_list_size(list));
-
-    c_list_destroy(list);
+    ExpectEmpty();
 }
 
-TEST(CListModifier, InsertErase)
+TEST_F(CListTest, InsertErase)
 {
-    c_list_t* list = 0;
-    C_LIST_INT(&list);
-
-    c_list_iterator_t first, last;
+    c_list_iterator_t first, last, iter;
+    c_ref_t data = 0;
 
     for (int i = 0; i < 9; ++i) {
         last = c_list_end(list);
-        c_list_iterator_t iter = c_list_insert(list, last, C_REF_T(&i));
-        c_ref_t data = C_ITER_DEREF(&iter);
+        iter = c_list_insert(list, last, C_REF_T(&i));
+        data = C_ITER_DEREF(&iter);
         EXPECT_EQ(i, C_DEREF_INT(data));
         EXPECT_EQ(i + 1, c_list_size(list));
     }
 
+    ExpectNotEmpty();
+
     first = c_list_begin(list);
     last = c_list_end(list);
-    EXPECT_TRUE(C_ITER_NE(&first, &last));
-    EXPECT_FALSE(c_list_empty(list));
-
     while (C_ITER_NE(&first, &last)) {
         size_t size = c_list_size(list);
         first = c_list_erase(list, first);
@@ -150,8 +173,8 @@ TEST(CListModifier, InsertErase)
 
     for (int i = 0; i < 9; ++i) {
         first = c_list_begin(list);
-        c_list_iterator_t iter = c_list_insert(list, first, C_REF_T(&i));
-        c_ref_t data = C_ITER_DEREF(&iter);
+        iter = c_list_insert(list, first, C_REF_T(&i));
+        data = C_ITER_DEREF(&iter);
         first = c_list_begin(list);
         EXPECT_TRUE(C_ITER_EQ(&first, &iter));
         EXPECT_EQ(i, C_DEREF_INT(data));
@@ -160,69 +183,131 @@ TEST(CListModifier, InsertErase)
     first = c_list_begin(list);
     last = c_list_end(list);
     first = c_list_erase_range(list, first, last);
-    EXPECT_TRUE(C_ITER_EQ(&first, &last));
-    EXPECT_TRUE(c_list_empty(list));
-    EXPECT_EQ(0, c_list_size(list));
-
-    c_list_destroy(list);
+    ExpectEmpty();
 }
 
-TEST(CListOperation, Merge)
+TEST_F(CListTest, Merge)
 {
+    c_list_t* other_list = 0;
+    C_LIST_INT(&other_list);
+
+    int origin[] = { -2, -2, -1, 1, 3, 3, 4, 5, 5, 5, 7, 10, 10, 11 };
+    int merged[] = { -2, -2, -1, 0, 1, 1, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5, 6, 7, 7, 8, 9, 10, 10, 11 };
+
+    for (unsigned int i = 0; i < ARRAY_LENGTH(origin); ++i)
+        c_list_push_back(other_list, C_REF_T(&origin[i]));
+
+    SetupList(default_data, default_length);
+    c_list_sort(list);
+    c_list_sort(other_list);
+    c_list_merge(list, other_list);
+    ExpectEqualToArray(merged, ARRAY_LENGTH(merged));
+
+    c_list_destroy(other_list);
 }
 
-TEST(CListOperation, Remove)
+TEST_F(CListTest, MergeBy)
 {
+    c_list_t* other_list = 0;
+    C_LIST_INT(&other_list);
+
+    int origin[] = { -2, -2, -1, 1, 3, 3, 4, 5, 5, 5, 7, 10, 10, 11 };
+    int merged[] = { 11, 10, 10, 9, 8, 7, 7, 6, 5, 5, 5, 5, 4, 4, 3, 3, 3, 2, 1, 1, 0, -1, -2, -2 };
+
+    for (unsigned int i = 0; i < ARRAY_LENGTH(origin); ++i)
+        c_list_push_back(other_list, C_REF_T(&origin[i]));
+
+    SetupList(default_data, default_length);
+    c_list_sort_by(list, c_int_greater);
+    c_list_sort_by(other_list, c_int_greater);
+    c_list_merge_by(list, other_list, c_int_greater);
+    ExpectEqualToArray(merged, ARRAY_LENGTH(merged));
+
+    c_list_destroy(other_list);
 }
 
-TEST(CListOperation, Sort)
+TEST_F(CListTest, Remove)
 {
-	c_list_t* list = 0;
-    C_LIST_INT(&list);
-	int sorted[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	int random[] = { 5, 8, 1, 0, 3, 2, 7, 6, 4, 9 };
+    int origin[] = { 1, 2, 3, 1, 3, 3, 2, 4, 4, 1, 4, 4, 4 };
+    int removed_4[] = { 1, 2, 3, 1, 3, 3, 2, 1 };
+    int removed_3[] = { 1, 2, 1, 2, 1 };
+    int removed_2[] = { 1, 1, 1 };
 
-    for (int i = 0; i < 9; ++i)
-        c_list_push_back(list, C_REF_T(&random[i]));
-    
-	c_list_sort(list);
-	int index = 0;
-	c_list_iterator_t iter = c_list_begin(list);
-	c_list_iterator_t last = c_list_end(list);
-	while (C_ITER_NE(&iter, &last)) {
-		c_ref_t data = C_ITER_DEREF(&iter);
-		EXPECT_EQ(sorted[index++], C_DEREF_INT(data));
-		C_ITER_INC(&iter);
-	}
-	
-	c_list_destroy(list);
+    SetupList(origin, ARRAY_LENGTH(origin));
+
+    int to_be_removed = 4;
+    c_list_remove(list, C_REF_T(&to_be_removed));
+    ExpectEqualToArray(removed_4, ARRAY_LENGTH(removed_4));
+
+    to_be_removed = 3;
+    c_list_remove(list, C_REF_T(&to_be_removed));
+    ExpectEqualToArray(removed_3, ARRAY_LENGTH(removed_3));
+
+    to_be_removed = 2;
+    c_list_remove(list, C_REF_T(&to_be_removed));
+    ExpectEqualToArray(removed_2, ARRAY_LENGTH(removed_2));
+
+    to_be_removed = 1;
+    c_list_remove(list, C_REF_T(&to_be_removed));
+    ExpectEmpty();
 }
 
-TEST(CListOperation, Reverse)
+TEST_F(CListTest, RemoveIf)
 {
-	c_list_t* list = 0;
-    C_LIST_INT(&list);
-	int origin[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	int reverse[] = { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+    int removed[] = { 0, 1, 2, 3, 4, 5 };
 
-    for (int i = 0; i < 9; ++i)
-        c_list_push_back(list, C_REF_T(&origin[i]));
-    
-	c_list_reverse(list);
-	int index = 0;
-	c_list_iterator_t iter = c_list_begin(list);
-	c_list_iterator_t last = c_list_end(list);
-	while (C_ITER_NE(&iter, &last)) {
-		c_ref_t data = C_ITER_DEREF(&iter);
-		EXPECT_EQ(reverse[index++], C_DEREF_INT(data));
-		C_ITER_INC(&iter);
-	}
-	
-	c_list_destroy(list);
+    SetupList(default_data, default_length);
+    c_list_remove_if(list, greater_than_five);
+    ExpectEqualToArray(removed, ARRAY_LENGTH(removed));
 }
 
-TEST(CListOperation, Unique)
+TEST_F(CListTest, Sort)
 {
+    int sorted[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    int random[] = { 5, 8, 1, 0, 3, 2, 7, 6, 4, 9 };
+
+    SetupList(random, ARRAY_LENGTH(random));
+    c_list_sort(list);
+    ExpectEqualToArray(sorted, ARRAY_LENGTH(sorted));
+}
+
+TEST_F(CListTest, SortBy)
+{
+    int sorted[] = { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+    int random[] = { 5, 8, 1, 0, 3, 2, 7, 6, 4, 9 };
+
+    SetupList(random, ARRAY_LENGTH(random));
+    c_list_sort_by(list, c_int_greater);
+    ExpectEqualToArray(sorted, ARRAY_LENGTH(sorted));
+}
+
+TEST_F(CListTest, Reverse)
+{
+    int reversed[] = { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+
+    SetupList(default_data, default_length);
+    c_list_reverse(list);
+    ExpectEqualToArray(reversed, ARRAY_LENGTH(reversed));
+}
+
+TEST_F(CListTest, Unique)
+{
+    int not_unique[] = { 0, 1, 2, 2, 1, 1, 3, 0, 0, 1, 2, 2 };
+    int uniqued[] = { 0, 1, 2, 1, 3, 0, 1, 2 };
+
+    SetupList(not_unique, ARRAY_LENGTH(not_unique));
+    c_list_unique(list);
+    ExpectEqualToArray(uniqued, ARRAY_LENGTH(uniqued));
+}
+
+TEST_F(CListTest, UniqueIf)
+{
+    int not_unique[] = { 0, 1, -2, 2, 1, -1, 3, 0, 0, 1, -2, 2, 2, -2 };
+    int uniqued[] = { 0, 1, -2, 1, 3, 0, 1, -2 };
+
+    SetupList(not_unique, ARRAY_LENGTH(not_unique));
+    c_list_unique_if(list, abs_equal);
+    ExpectEqualToArray(uniqued, ARRAY_LENGTH(uniqued));
 }
 
 } // namespace

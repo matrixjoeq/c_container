@@ -37,6 +37,9 @@ typedef struct __c_containable {
 } c_containable_t;
 
 typedef struct __c_iterator {
+    const char* const iterator_category;
+    const char* const iterator_type;
+
     // operator++
     struct __c_iterator* (*increment)(struct __c_iterator*);
     // operator--

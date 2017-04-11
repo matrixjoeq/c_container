@@ -37,7 +37,9 @@ c_ref_t c_list_back(c_list_t* list);
  * iterators
  */
 c_list_iterator_t c_list_begin(c_list_t* list);
+c_list_iterator_t c_list_rbegin(c_list_t* list);
 c_list_iterator_t c_list_end(c_list_t* list);
+c_list_iterator_t c_list_rend(c_list_t* list);
 
 /**
  * capacity
