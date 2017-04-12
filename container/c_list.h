@@ -21,6 +21,11 @@ typedef struct __c_list_iterator {
     struct __c_list_node* node;
 } c_list_iterator_t;
 
+typedef struct __c_backend_list {
+    c_backend_container_t ops;
+    c_list_t impl;
+} c_backend_list_t;
+
 /**
  * constructor/destructor
  */

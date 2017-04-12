@@ -69,9 +69,9 @@ typedef struct __c_iterator {
     c_iterator_type_t iterator_type;
 
     // operator++
-    struct __c_iterator* (*increment)(struct __c_iterator*);
+    struct __c_iterator* (*increment)(struct __c_iterator* self);
     // operator--
-    struct __c_iterator* (*decrement)(struct __c_iterator*);
+    struct __c_iterator* (*decrement)(struct __c_iterator* self);
 
     // TODO: there seems no way to implement the post-operators in C language
     // because post-operators return a temporary iterator object
@@ -84,16 +84,36 @@ typedef struct __c_iterator {
     //struct __c_iterator (*post_decrement)(struct __c_iterator*);
 
     // operator*
-    c_ref_t (*dereference)(struct __c_iterator*);
+    c_ref_t (*dereference)(struct __c_iterator* self);
 
     // operator==
-    bool (*equal)(struct __c_iterator*, struct __c_iterator*);
+    bool (*equal)(struct __c_iterator* self, struct __c_iterator* other);
 
     // operator!=
-    bool (*not_equal)(struct __c_iterator*, struct __c_iterator*);
+    bool (*not_equal)(struct __c_iterator* self, struct __c_iterator* other);
 
     c_containable_t* type_info;
 } c_iterator_t;
+
+typedef struct __c_backend_container {
+    // constructor
+    struct __c_backend_container* (*create)(struct __c_backend_container** self);
+    // destructor
+    void (*destroy)(struct __c_backend_container* self);
+    // element access
+    c_ref_t (*front)(struct __c_backend_container* self);
+    c_ref_t (*back)(struct __c_backend_container* self);
+    // capacity
+    bool (*empty)(struct __c_backend_container* self);
+    size_t (*size)(struct __c_backend_container* self);
+    size_t (*max_size)(void);
+    // modifier
+    void (*push_back)(struct __c_backend_container* self);
+    void (*pop_back)(struct __c_backend_container* self);
+    void (*push_front)(struct __c_backend_container* self);
+    void (*pop_front)(struct __c_backend_container* self);
+    void (*swap)(struct __c_backend_container* self, struct __c_backend_container* other);
+} c_backend_container_t;
 
 extern const c_containable_t c_int_t;
 extern const c_containable_t c_signed_int_t;
