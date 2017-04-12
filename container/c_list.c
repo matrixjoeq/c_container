@@ -19,6 +19,11 @@ struct __c_list {
     c_containable_t type_info;
 };
 
+struct __c_backend_list {
+    c_backend_container_t ops;
+    c_list_t* impl;
+};
+
 __c_static __c_inline bool is_list_iterator(c_iterator_t* iter)
 {
     return (iter != 0 &&
@@ -115,7 +120,8 @@ __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
     return !reverse_iter_equal(x, y);
 }
 
-__c_static c_list_iterator_t create_iterator(c_containable_t* type_info, c_list_node_t* node)
+__c_static c_list_iterator_t create_iterator(
+	c_containable_t* type_info, c_list_node_t* node)
 {
     assert(type_info);
     assert(node);
@@ -136,7 +142,8 @@ __c_static c_list_iterator_t create_iterator(c_containable_t* type_info, c_list_
     return iter;
 }
 
-__c_static c_list_iterator_t create_reverse_iterator(c_containable_t* type_info, c_list_node_t* node)
+__c_static c_list_iterator_t create_reverse_iterator(
+	c_containable_t* type_info, c_list_node_t* node)
 {
     assert(type_info);
     assert(node);
@@ -243,30 +250,118 @@ __c_static void transfer(c_list_node_t* pos, c_list_node_t* first, c_list_node_t
     }
 }
 
+__c_static void backend_destroy(c_backend_container_t* c)
+{
+	if (!c) return;
+	
+	c_backend_list_t* _c = (c_backend_list_t*)c;
+	c_list_destroy(_c->impl);
+	__c_free(_c);
+}
+
+__c_static c_ref_t backend_front(c_backend_container_t* c)
+{
+	if (!c) return 0;
+	
+	c_backend_list_t* _c = (c_backend_list_t*)c;
+	return c_list_front(_c->impl);
+}
+
+__c_static c_ref_t backend_back(c_backend_container_t* c)
+{
+	if (!c) return 0;
+	
+	c_backend_list_t* _c = (c_backend_list_t*)c;
+	return c_list_back(_c->impl);
+}
+
+__c_static bool backend_empty(c_backend_container_t* c)
+{
+	if (!c) return true;
+	
+	c_backend_list_t* _c = (c_backend_list_t*)c;
+	return c_list_empty(_c->impl);
+}
+
+__c_static size_t backend_size(c_backend_container_t* c)
+{
+	if (!c) return 0;
+	
+	c_backend_list_t* _c = (c_backend_list_t*)c;
+	return c_list_size(_c->impl);
+}
+
+__c_static size_t backend_max_size(void)
+{
+	return (-1);
+}
+
+__c_static void backend_push_back(c_backend_container_t* c, const c_ref_t data)
+{
+	if (!c || !data) return;
+	
+	c_backend_list_t* _c = (c_backend_list_t*)c;
+	c_list_push_back(_c->impl, data);
+}
+
+__c_static void backend_pop_back(c_backend_container_t* c)
+{
+	if (!c) return;
+	
+	c_backend_list_t* _c = (c_backend_list_t*)c;
+	c_list_pop_back(_c->impl);
+}
+
+__c_static void backend_push_front(c_backend_container_t* c, const c_ref_t data)
+{
+	if (!c || !data) return;
+	
+	c_backend_list_t* _c = (c_backend_list_t*)c;
+	c_list_push_front(_c->impl, data);
+}
+
+__c_static void backend_pop_front(c_backend_container_t* c)
+{
+	if (!c) return;
+	
+	c_backend_list_t* _c = (c_backend_list_t*)c;
+	c_list_pop_front(_c->impl);
+}
+
+__c_static void backend_swap(c_backend_container_t* c, c_backend_container_t* other)
+{
+	if (!c || !other) return;
+	
+	c_backend_list_t* _c = (c_backend_list_t*)c;
+	c_backend_list_t* _other = (c_backend_list_t*)other;
+	c_backend_container_t tmp = _c->ops;
+	c_list_swap(_c->impl, _other->impl);
+	_c->ops = _other->ops;
+	_other->ops = tmp;
+}
+
 /**
  * constructor/destructor
  */
-c_list_t* c_list_create(c_list_t** list, c_containable_t type_info)
+c_list_t* c_list_create(const c_containable_t* type_info)
 {
-    if (!list || *list)
-        return 0;
+    if (!type_info) return 0;
 
-    *list = (c_list_t*)malloc(sizeof(c_list_t));
-    if (!(*list))
-        return 0;
+    c_list_t* list = (c_list_t*)malloc(sizeof(c_list_t));
+    if (!list) return 0;
 
-    (*list)->node = (c_list_node_t*)malloc(sizeof(c_list_node_t));;
-    if (!(*list)->node) {
-        __c_free(*list);
+    list->node = (c_list_node_t*)malloc(sizeof(c_list_node_t));;
+    if (!list->node) {
+        __c_free(list);
         return 0;
     }
 
-    (*list)->type_info = type_info;
-    (*list)->node->prev = (*list)->node;
-    (*list)->node->next = (*list)->node;
-    (*list)->node->data = 0;
+    list->type_info = *type_info;
+    list->node->prev = list->node;
+    list->node->next = list->node;
+    list->node->data = 0;
 
-    return *list;
+    return list;
 }
 
 void c_list_destroy(c_list_t* list)
@@ -501,8 +596,8 @@ void c_list_swap(c_list_t* list, c_list_t* other)
 {
     if (!list || !other) return;
 
-    c_list_t* tmp = 0;
-    if (!c_list_create(&tmp, list->type_info)) return;
+    c_list_t* tmp = c_list_create(&list->type_info);
+    if (!tmp) return;
 
     transfer(end(tmp), begin(list), end(list));
     transfer(end(list), begin(other), end(other));
@@ -730,4 +825,37 @@ void c_list_unique_if(c_list_t* list, c_binary_predicate pred)
         }
         x = x->next;
     }
+}
+
+/**
+ * backend
+ */
+c_backend_list_t* c_list_create_backend(const c_containable_t* type_info)
+{
+	static const c_backend_container_t backend_list_ops = {
+		.destroy = backend_destroy,
+		.front = backend_front,
+		.back = backend_back,
+		.empty = backend_empty,
+		.size = backend_size,
+		.max_size = backend_max_size,
+		.push_back = backend_push_back,
+		.pop_back = backend_pop_back,
+		.push_front = backend_push_front,
+		.pop_front = backend_pop_front,
+		.swap = backend_swap
+	};
+	
+	c_backend_list_t* backend = (c_backend_list_t*)malloc(sizeof(c_backend_list_t));
+	if (!backend) return 0;
+	
+	backend->impl = c_list_create(type_info);
+	if (!backend->impl) {
+		__c_free(backend);
+		return 0;
+	}
+	
+	backend->ops = backend_list_ops;
+	
+	return backend;
 }

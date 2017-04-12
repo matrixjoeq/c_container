@@ -74,8 +74,7 @@ public:
 
     void SetUp()
     {
-        c_list_t* ret = C_LIST_INT(&list);
-        EXPECT_TRUE(ret == list);
+        list = C_LIST_INT;
         ExpectEmpty();
     }
 
@@ -181,8 +180,7 @@ TEST_F(CListTest, Swap)
 {
     SetupList(default_data, default_length);
 
-    c_list_t* other = 0;
-    C_LIST_INT(&other);
+    c_list_t* other = C_LIST_INT;
 
     c_list_swap(list, other);
     ExpectEmpty();
@@ -237,8 +235,7 @@ TEST_F(CListTest, InsertErase)
 
 TEST_F(CListTest, Merge)
 {
-    c_list_t* other_list = 0;
-    C_LIST_INT(&other_list);
+    c_list_t* other_list = C_LIST_INT;
 
     int origin[] = { -2, -2, -1, 1, 3, 3, 4, 5, 5, 5, 7, 10, 10, 11 };
     int merged[] = { -2, -2, -1, 0, 1, 1, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5, 6, 7, 7, 8, 9, 10, 10, 11 };
@@ -257,8 +254,7 @@ TEST_F(CListTest, Merge)
 
 TEST_F(CListTest, MergeBy)
 {
-    c_list_t* other_list = 0;
-    C_LIST_INT(&other_list);
+    c_list_t* other_list = C_LIST_INT;
 
     int origin[] = { -2, -2, -1, 1, 3, 3, 4, 5, 5, 5, 7, 10, 10, 11 };
     int merged[] = { 11, 10, 10, 9, 8, 7, 7, 6, 5, 5, 5, 5, 4, 4, 3, 3, 3, 2, 1, 1, 0, -1, -2, -2 };
@@ -280,8 +276,7 @@ TEST_F(CListTest, Splice)
     SetupList(default_data, default_length);
     int origin[] = { 10, 11, 12 };
 
-    c_list_t* other = 0;
-    C_LIST_INT(&other);
+    c_list_t* other = C_LIST_INT;
 
     __array_foreach(origin, i) {
         c_list_push_back(other, C_REF_T(&origin[i]));

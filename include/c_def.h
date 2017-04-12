@@ -96,8 +96,6 @@ typedef struct __c_iterator {
 } c_iterator_t;
 
 typedef struct __c_backend_container {
-    // constructor
-    struct __c_backend_container* (*create)(struct __c_backend_container** self);
     // destructor
     void (*destroy)(struct __c_backend_container* self);
     // element access
@@ -108,9 +106,9 @@ typedef struct __c_backend_container {
     size_t (*size)(struct __c_backend_container* self);
     size_t (*max_size)(void);
     // modifier
-    void (*push_back)(struct __c_backend_container* self);
+    void (*push_back)(struct __c_backend_container* self, const c_ref_t data);
     void (*pop_back)(struct __c_backend_container* self);
-    void (*push_front)(struct __c_backend_container* self);
+    void (*push_front)(struct __c_backend_container* self, const c_ref_t data);
     void (*pop_front)(struct __c_backend_container* self);
     void (*swap)(struct __c_backend_container* self, struct __c_backend_container* other);
 } c_backend_container_t;
