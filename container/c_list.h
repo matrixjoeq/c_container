@@ -59,7 +59,8 @@ void c_list_push_back(c_list_t* list, const c_ref_t data);
 void c_list_pop_back(c_list_t* list);
 void c_list_push_front(c_list_t* list, const c_ref_t data);
 void c_list_pop_front(c_list_t* list);
-void c_list_resize(c_list_t* list, size_t count, const c_ref_t data);
+void c_list_resize(c_list_t* list, size_t count);
+void c_list_resize_with_value(c_list_t* list, size_t count, const c_ref_t data);
 void c_list_swap(c_list_t* list, c_list_t* other);
 
 /**

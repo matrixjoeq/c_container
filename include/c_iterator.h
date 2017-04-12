@@ -9,6 +9,7 @@
 extern "C" {
 #endif // __cplusplus
 
+bool type_info_equal(c_containable_t* x, c_containable_t* y);
 c_iterator_t* c_iter_increment(c_iterator_t* iter);
 c_iterator_t* c_iter_decrement(c_iterator_t* iter);
 c_ref_t c_iter_dereference(c_iterator_t* iter);

@@ -2,6 +2,18 @@
 #include "c_internal.h"
 #include "c_iterator.h"
 
+bool type_info_equal(c_containable_t* x, c_containable_t* y)
+{
+    if (!x || !y) return false;
+    return (x->assign == y->assign &&
+            x->copy == y->copy &&
+            x->create == y->create &&
+            x->destroy == y->destroy &&
+            x->equal == y->equal &&
+            x->less == y->less &&
+            x->size == y->size);
+}
+
 c_iterator_t* c_iter_increment(c_iterator_t* iter)
 {
     return iter->increment(iter);

@@ -27,10 +27,6 @@ extern "C" {
 #define __array_length(__array) sizeof(__array)/sizeof(__array[0])
 #define __array_foreach(__array, __index) for (uint32_t __index = 0; __index < __array_length(__array); ++__index)
 
-// for container
-#define CREATE_DATA(x, type, value) \
-    type* x = (type*) malloc(sizeof(type)); \
-    memcpy(x, &(value), sizeof(type))
 
 #ifdef __cplusplus
 }
