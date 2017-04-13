@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include <stdlib.h>
 #include "c_internal.h"
+#include "c_list.h"
 #include "c_stack.h"
 
 namespace c_container {
@@ -57,12 +58,12 @@ TEST_F(CStackTest, Top)
 {
     SetupStack(default_data, default_length);
 
-	c_ref_t top = 0;
-	int index = default_length;
+    c_ref_t top = 0;
+    int index = default_length;
     while (!c_stack_empty(stack)) {
         top = c_stack_top(stack);
         EXPECT_EQ(default_data[--index], C_DEREF_INT(top));
-		c_stack_pop(stack);
+        c_stack_pop(stack);
     }
 
     ExpectEmpty();
@@ -76,19 +77,19 @@ TEST_F(CStackTest, Swap)
 
     c_stack_swap(stack, other);
     ExpectEmpty();
-	
+
     c_stack_swap(stack, other);
-	EXPECT_TRUE(c_stack_empty(other));
-	c_ref_t top = 0;
-	int index = default_length;
+    EXPECT_TRUE(c_stack_empty(other));
+    c_ref_t top = 0;
+    int index = default_length;
     while (!c_stack_empty(stack)) {
         top = c_stack_top(stack);
         EXPECT_EQ(default_data[--index], C_DEREF_INT(top));
-		c_stack_pop(stack);
+        c_stack_pop(stack);
     }
 
-	ExpectEmpty();
-	
+    ExpectEmpty();
+
     c_stack_destroy(other);
 }
 

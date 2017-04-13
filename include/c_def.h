@@ -12,12 +12,14 @@ extern "C" {
 typedef enum __c_iterator_category {
     C_ITER_CATE_OUTPUT,
     C_ITER_CATE_INPUT,
+    C_ITER_CATE_FORWARD,
     C_ITER_CATE_BIDIRECTION,
     C_ITER_CATE_RANDOM,
     C_ITER_CATE_MAX,
 } c_iterator_category_t;
 
 typedef enum __c_iterator_type {
+    C_ITER_TYPE_FORWARD_LIST,
     C_ITER_TYPE_LIST,
     C_ITER_TYPE_LIST_REVERSE,
     C_ITER_TYPE_TREE,
@@ -112,6 +114,8 @@ typedef struct __c_backend_container {
     void (*pop_front)(struct __c_backend_container* self);
     void (*swap)(struct __c_backend_container* self, struct __c_backend_container* other);
 } c_backend_container_t;
+
+typedef c_backend_container_t* (*BackendContainerCreator)(const c_containable_t* type_info);
 
 extern const c_containable_t c_int_t;
 extern const c_containable_t c_signed_int_t;

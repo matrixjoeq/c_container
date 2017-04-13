@@ -15,7 +15,7 @@ struct __c_list_node {
 typedef struct __c_list_node c_list_node_t;
 
 struct __c_list {
-    c_list_node_t* node;
+    c_list_node_t* node; // end() of list
     c_containable_t type_info;
 };
 
@@ -121,7 +121,7 @@ __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 }
 
 __c_static c_list_iterator_t create_iterator(
-	c_containable_t* type_info, c_list_node_t* node)
+    c_containable_t* type_info, c_list_node_t* node)
 {
     assert(type_info);
     assert(node);
@@ -143,7 +143,7 @@ __c_static c_list_iterator_t create_iterator(
 }
 
 __c_static c_list_iterator_t create_reverse_iterator(
-	c_containable_t* type_info, c_list_node_t* node)
+    c_containable_t* type_info, c_list_node_t* node)
 {
     assert(type_info);
     assert(node);
@@ -176,39 +176,35 @@ __c_static __c_inline c_list_node_t* end(c_list_t* list)
     return list->node;
 }
 
-__c_static c_list_node_t* create_node(
-    c_list_t* list, c_list_node_t** node, c_ref_t data)
+__c_static c_list_node_t* create_node(c_list_t* list, c_ref_t data)
 {
     assert(list);
-    assert(node);
-    assert(*node == 0);
 
-    *node = (c_list_node_t*)malloc(sizeof(c_list_node_t));
-    if (!(*node))
-        return 0;
+    c_list_node_t* node = (c_list_node_t*)malloc(sizeof(c_list_node_t));
+    if (!node) return 0;
 
-    (*node)->prev = 0;
-    (*node)->next = 0;
+    node->prev = 0;
+    node->next = 0;
 
     c_containable_t* type_info = &(list->type_info);
     assert(type_info);
     assert(type_info->size);
-    (*node)->data = malloc(type_info->size());
-    if (!(*node)->data) {
-        __c_free(*node);
+    node->data = malloc(type_info->size());
+    if (!node->data) {
+        __c_free(node);
         return 0;
     }
 
     if (data) {
         assert(type_info->copy);
-        type_info->copy((*node)->data, data);
+        type_info->copy(node->data, data);
     }
     else {
         assert(type_info->create);
-        type_info->create((*node)->data);
+        type_info->create(node->data);
     }
 
-    return *node;
+    return node;
 }
 
 __c_static c_list_node_t* pop_node(c_list_t* list, c_list_node_t* node)
@@ -252,92 +248,92 @@ __c_static void transfer(c_list_node_t* pos, c_list_node_t* first, c_list_node_t
 
 __c_static void backend_destroy(c_backend_container_t* c)
 {
-	if (!c) return;
-	
-	c_backend_list_t* _c = (c_backend_list_t*)c;
-	c_list_destroy(_c->impl);
-	__c_free(_c);
+    if (!c) return;
+
+    c_backend_list_t* _c = (c_backend_list_t*)c;
+    c_list_destroy(_c->impl);
+    __c_free(_c);
 }
 
 __c_static c_ref_t backend_front(c_backend_container_t* c)
 {
-	if (!c) return 0;
-	
-	c_backend_list_t* _c = (c_backend_list_t*)c;
-	return c_list_front(_c->impl);
+    if (!c) return 0;
+
+    c_backend_list_t* _c = (c_backend_list_t*)c;
+    return c_list_front(_c->impl);
 }
 
 __c_static c_ref_t backend_back(c_backend_container_t* c)
 {
-	if (!c) return 0;
-	
-	c_backend_list_t* _c = (c_backend_list_t*)c;
-	return c_list_back(_c->impl);
+    if (!c) return 0;
+
+    c_backend_list_t* _c = (c_backend_list_t*)c;
+    return c_list_back(_c->impl);
 }
 
 __c_static bool backend_empty(c_backend_container_t* c)
 {
-	if (!c) return true;
-	
-	c_backend_list_t* _c = (c_backend_list_t*)c;
-	return c_list_empty(_c->impl);
+    if (!c) return true;
+
+    c_backend_list_t* _c = (c_backend_list_t*)c;
+    return c_list_empty(_c->impl);
 }
 
 __c_static size_t backend_size(c_backend_container_t* c)
 {
-	if (!c) return 0;
-	
-	c_backend_list_t* _c = (c_backend_list_t*)c;
-	return c_list_size(_c->impl);
+    if (!c) return 0;
+
+    c_backend_list_t* _c = (c_backend_list_t*)c;
+    return c_list_size(_c->impl);
 }
 
 __c_static size_t backend_max_size(void)
 {
-	return (-1);
+    return (-1);
 }
 
 __c_static void backend_push_back(c_backend_container_t* c, const c_ref_t data)
 {
-	if (!c || !data) return;
-	
-	c_backend_list_t* _c = (c_backend_list_t*)c;
-	c_list_push_back(_c->impl, data);
+    if (!c || !data) return;
+
+    c_backend_list_t* _c = (c_backend_list_t*)c;
+    c_list_push_back(_c->impl, data);
 }
 
 __c_static void backend_pop_back(c_backend_container_t* c)
 {
-	if (!c) return;
-	
-	c_backend_list_t* _c = (c_backend_list_t*)c;
-	c_list_pop_back(_c->impl);
+    if (!c) return;
+
+    c_backend_list_t* _c = (c_backend_list_t*)c;
+    c_list_pop_back(_c->impl);
 }
 
 __c_static void backend_push_front(c_backend_container_t* c, const c_ref_t data)
 {
-	if (!c || !data) return;
-	
-	c_backend_list_t* _c = (c_backend_list_t*)c;
-	c_list_push_front(_c->impl, data);
+    if (!c || !data) return;
+
+    c_backend_list_t* _c = (c_backend_list_t*)c;
+    c_list_push_front(_c->impl, data);
 }
 
 __c_static void backend_pop_front(c_backend_container_t* c)
 {
-	if (!c) return;
-	
-	c_backend_list_t* _c = (c_backend_list_t*)c;
-	c_list_pop_front(_c->impl);
+    if (!c) return;
+
+    c_backend_list_t* _c = (c_backend_list_t*)c;
+    c_list_pop_front(_c->impl);
 }
 
 __c_static void backend_swap(c_backend_container_t* c, c_backend_container_t* other)
 {
-	if (!c || !other) return;
-	
-	c_backend_list_t* _c = (c_backend_list_t*)c;
-	c_backend_list_t* _other = (c_backend_list_t*)other;
-	c_backend_container_t tmp = _c->ops;
-	c_list_swap(_c->impl, _other->impl);
-	_c->ops = _other->ops;
-	_other->ops = tmp;
+    if (!c || !other) return;
+
+    c_backend_list_t* _c = (c_backend_list_t*)c;
+    c_backend_list_t* _other = (c_backend_list_t*)other;
+    c_backend_container_t tmp = _c->ops;
+    c_list_swap(_c->impl, _other->impl);
+    _c->ops = _other->ops;
+    _other->ops = tmp;
 }
 
 /**
@@ -350,7 +346,7 @@ c_list_t* c_list_create(const c_containable_t* type_info)
     c_list_t* list = (c_list_t*)malloc(sizeof(c_list_t));
     if (!list) return 0;
 
-    list->node = (c_list_node_t*)malloc(sizeof(c_list_node_t));;
+    list->node = (c_list_node_t*)malloc(sizeof(c_list_node_t));
     if (!list->node) {
         __c_free(list);
         return 0;
@@ -461,6 +457,8 @@ size_t c_list_max_size(void)
  */
 void c_list_clear(c_list_t* list)
 {
+    if (c_list_empty(list)) return;
+
     c_list_node_t* node = begin(list);
     c_list_node_t* last = end(list);
     while (node != last) {
@@ -474,10 +472,8 @@ c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, const c_r
     assert(data);
     assert(pos.base_iter.iterator_type == C_ITER_TYPE_LIST);
 
-    c_list_node_t* node = 0;
-    if (!create_node(list, &node, data)) {
-        return pos;
-    }
+    c_list_node_t* node = create_node(list, data);
+    if (!node) return pos;
 
     node->next = pos.node;
     node->prev = pos.node->prev;
@@ -510,9 +506,8 @@ void c_list_push_back(c_list_t* list, const c_ref_t data)
     if (!list || !data)
         return;
 
-    c_list_node_t* node = 0;
-    if (!create_node(list, &node, data))
-        return;
+    c_list_node_t* node = create_node(list, data);
+    if (!node) return;
 
     node->next = list->node;
     node->prev = list->node->prev;
@@ -531,9 +526,8 @@ void c_list_push_front(c_list_t* list, const c_ref_t data)
     if (!list || !data)
         return;
 
-    c_list_node_t* node = 0;
-    if (!create_node(list, &node, data))
-        return;
+    c_list_node_t* node = create_node(list, data);
+    if (!node) return;
 
     node->next = list->node->next;
     node->prev = list->node;
@@ -556,39 +550,26 @@ void c_list_resize_with_value(c_list_t* list, size_t count, const c_ref_t data)
 {
     if (!list) return;
 
-    size_t size = c_list_size(list);
-    if (count < size) {
-        c_list_node_t* node = 0;
-        size_t remain = 0;
-        if (count * 2 < size) {
-            remain = count;
-            node = begin(list);
-            while (remain-- > 0)
-                node = node->next;
-        }
-        else {
-            remain = size - count;
-            node = end(list);
-            while (remain-- > 0)
-                node = node->prev;
-        }
-
-        while (node != end(list))
-            node = pop_node(list, node);
+    c_list_node_t* node = list->node->next;
+    while (node != list->node && count > 0) {
+        node = node->next;
+        --count;
     }
-    else {
-        count -= size;
-        while (count > 0) {
-            c_list_node_t* node = 0;
-            if (!create_node(list, &node, data))
-                return;
+
+    if (count > 0) {
+        do {
+            c_list_node_t* node = create_node(list, data);
+            if (!node) return;
 
             node->next = list->node;
             node->prev = list->node->prev;
             list->node->prev->next = node;
             list->node->prev = node;
-            --count;
-        }
+        } while (--count > 0);
+    }
+    else {
+        while (node != list->node)
+            node = pop_node(list, node);
     }
 }
 
@@ -830,32 +811,32 @@ void c_list_unique_if(c_list_t* list, c_binary_predicate pred)
 /**
  * backend
  */
-c_backend_list_t* c_list_create_backend(const c_containable_t* type_info)
+c_backend_container_t* c_list_create_backend(const c_containable_t* type_info)
 {
-	static const c_backend_container_t backend_list_ops = {
-		.destroy = backend_destroy,
-		.front = backend_front,
-		.back = backend_back,
-		.empty = backend_empty,
-		.size = backend_size,
-		.max_size = backend_max_size,
-		.push_back = backend_push_back,
-		.pop_back = backend_pop_back,
-		.push_front = backend_push_front,
-		.pop_front = backend_pop_front,
-		.swap = backend_swap
-	};
-	
-	c_backend_list_t* backend = (c_backend_list_t*)malloc(sizeof(c_backend_list_t));
-	if (!backend) return 0;
-	
-	backend->impl = c_list_create(type_info);
-	if (!backend->impl) {
-		__c_free(backend);
-		return 0;
-	}
-	
-	backend->ops = backend_list_ops;
-	
-	return backend;
+    static const c_backend_container_t backend_list_ops = {
+        .destroy = backend_destroy,
+        .front = backend_front,
+        .back = backend_back,
+        .empty = backend_empty,
+        .size = backend_size,
+        .max_size = backend_max_size,
+        .push_back = backend_push_back,
+        .pop_back = backend_pop_back,
+        .push_front = backend_push_front,
+        .pop_front = backend_pop_front,
+        .swap = backend_swap
+    };
+
+    c_backend_list_t* backend = (c_backend_list_t*)malloc(sizeof(c_backend_list_t));
+    if (!backend) return 0;
+
+    backend->impl = c_list_create(type_info);
+    if (!backend->impl) {
+        __c_free(backend);
+        return 0;
+    }
+
+    backend->ops = backend_list_ops;
+
+    return (c_backend_container_t*)backend;
 }

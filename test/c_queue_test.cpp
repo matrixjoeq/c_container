@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include <stdlib.h>
 #include "c_internal.h"
+#include "c_list.h"
 #include "c_queue.h"
 
 namespace c_container {
@@ -57,14 +58,14 @@ TEST_F(CQueueTest, FrontBack)
 {
     SetupStack(default_data, default_length);
 
-	c_ref_t front = 0, back = 0;
-	int index = 0;
+    c_ref_t front = 0, back = 0;
+    int index = 0;
     while (!c_queue_empty(queue)) {
         front = c_queue_front(queue);
-		back = c_queue_back(queue);
+        back = c_queue_back(queue);
         EXPECT_EQ(default_data[index++], C_DEREF_INT(front));
-		EXPECT_EQ(default_data[default_length - 1], C_DEREF_INT(back));
-		c_queue_pop(queue);
+        EXPECT_EQ(default_data[default_length - 1], C_DEREF_INT(back));
+        c_queue_pop(queue);
     }
 
     ExpectEmpty();
@@ -78,18 +79,18 @@ TEST_F(CQueueTest, Swap)
 
     c_queue_swap(queue, other);
     ExpectEmpty();
-	
+
     c_queue_swap(queue, other);
-	EXPECT_TRUE(c_queue_empty(other));
-	c_ref_t front = 0;
-	int index = 0;
+    EXPECT_TRUE(c_queue_empty(other));
+    c_ref_t front = 0;
+    int index = 0;
     while (!c_queue_empty(queue)) {
         front = c_queue_front(queue);
         EXPECT_EQ(default_data[index++], C_DEREF_INT(front));
-		c_queue_pop(queue);
+        c_queue_pop(queue);
     }
-	
-	ExpectEmpty();
+
+    ExpectEmpty();
 
     c_queue_destroy(other);
 }
