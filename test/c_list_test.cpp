@@ -41,6 +41,17 @@ public:
         ExpectNotEmpty();
         EXPECT_EQ(length, c_list_size(list));
     }
+	
+	void Traverse(void)
+    {
+#ifdef CONFIG_TRAVERSE
+        c_list_iterator_t last = c_list_end(list);
+        for (c_list_iterator_t iter = c_list_begin(list); C_ITER_NE(&iter, &last); C_ITER_INC(&iter))
+            printf("%d ", C_DEREF_INT(C_ITER_DEREF(&iter)));
+
+        printf("\n");
+#endif
+    }
 
     void ExpectEqualToArray(const int* datas, int length)
     {

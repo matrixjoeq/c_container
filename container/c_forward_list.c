@@ -379,15 +379,51 @@ void c_slist_swap(c_slist_t* list, c_slist_t* other)
 /**
  * operations
  */
-/*
+
 void c_slist_merge(c_slist_t* list, c_slist_t* other)
 {
+	if (!list || c_slist_empty(other) ||
+		!type_info_equal(&list->type_info, &other->type_info))
+        return;
+
+    c_slist_node_t* node = before_begin(list);
+    c_slist_node_t* last = end(list);
+    c_slist_node_t* other_node = before_begin(other);
+    c_slist_node_t* other_last = end(other);
+    c_containable_t* type_info = &(list->type_info);
+    assert(type_info->less);
+    while (node->next != last && other_node->next != other_last) {
+        if (type_info->less(other_node->next->data, node->next->data))
+            transfer(node, other_node, other_node->next->next);
+        else
+            node = node->next;
+    }
+
+    if (other_node->next != other_last)
+        transfer(node, other_node, other_last);
 }
 
 void c_slist_merge_by(c_slist_t* list, c_slist_t* other, c_compare comp)
 {
+	if (!list || c_slist_empty(other) || !comp ||
+		!type_info_equal(&list->type_info, &other->type_info))
+        return;
+
+    c_slist_node_t* node = before_begin(list);
+    c_slist_node_t* last = end(list);
+    c_slist_node_t* other_node = before_begin(other);
+    c_slist_node_t* other_last = end(other);
+    while (node->next != last && other_node->next != other_last) {
+        if (comp(other_node->next->data, node->next->data))
+            transfer(node, other_node, other_node->next->next);
+        else
+            node = node->next;
+    }
+
+    if (other_node->next != other_last)
+        transfer(node, other_node, other_last);
 }
-*/
+
 void c_slist_splice_after(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* other)
 {
     if (!list || c_slist_empty(other) || !type_info_equal(&list->type_info, &other->type_info))
@@ -426,15 +462,19 @@ void c_slist_remove(c_slist_t* list, const c_ref_t data)
         if (type_info->equal) {
             if (type_info->equal(node->data, data))
                 node = pop_node_after(list, prev);
-            else
+            else {
                 prev = prev->next;
+				node = prev->next;
+			}
         }
         else {
             if (!type_info->less(node->data, data) &&
                 !type_info->less(data, node->data))
                 node = pop_node_after(list, prev);
-            else
+            else {
                 prev = prev->next;
+				node = prev->next;
+			}
         }
     }
 }
@@ -450,19 +490,23 @@ void c_slist_remove_if(c_slist_t* list, c_unary_predicate pred)
     while (node != last && prev != last) {
         if (pred(node->data))
             node = pop_node_after(list, prev);
-        else
+        else {
             prev = prev->next;
+			node = prev->next;
+		}
     }
 }
-/*
+
 void c_slist_sort(c_slist_t* list)
 {
+	if (c_slist_empty(list) || begin(list)->next == end(list)) return;
 }
 
 void c_slist_sort_by(c_slist_t* list, c_compare comp)
 {
+	if (c_slist_empty(list) || begin(list)->next == end(list) || !comp) return;
 }
-*/
+
 void c_slist_reverse(c_slist_t* list)
 {
     if (c_slist_empty(list) || begin(list)->next == end(list)) return;
@@ -478,12 +522,37 @@ void c_slist_reverse(c_slist_t* list)
         node = next;
     }
 }
-/*
+
 void c_slist_unique(c_slist_t* list)
 {
+	if (c_slist_empty(list) || begin(list)->next == end(list)) return;
+
+	c_slist_node_t* last = end(list);
+    c_slist_node_t* x = begin(list);
+    c_slist_node_t* y = 0;
+    c_containable_t* type_info = &(list->type_info);
+    assert(type_info->equal);
+    while (x != last && x->next != last) {
+        y = x->next;
+        while (y != last && type_info->equal(x->data, y->data)) {
+            y = pop_node_after(list, x);
+        }
+        x = x->next;
+    }
 }
 
 void c_slist_unique_if(c_slist_t* list, c_binary_predicate pred)
 {
+	if (c_slist_empty(list) || begin(list)->next == end(list)) return;
+
+    c_slist_node_t* last = end(list);
+    c_slist_node_t* x = begin(list);
+    c_slist_node_t* y = 0;
+    while (x != last && x->next != last) {
+        y = x->next;
+        while (y != last && pred(x->data, y->data)) {
+            y = pop_node_after(list, x);
+        }
+        x = x->next;
+    }
 }
-*/

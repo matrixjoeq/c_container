@@ -14,6 +14,7 @@ file(GLOB ALGORITHM_SOURCES "algorithm/*.c")
 c_static_library(c_algorithm "" ${ALGORITHM_SOURCES})
 
 file(GLOB UT_SOURCES "test/*.cpp")
+set(gtest_flags "${gtest_flags} -DCONFIG_TRAVERSE")
 cxx_gtest_executable(c_container_test "c_algorithm;c_container;c_prime" ${UT_SOURCES})
 add_test(c_container c_container_test)
 

@@ -186,7 +186,7 @@ __c_static c_list_node_t* create_node(c_list_t* list, c_ref_t data)
     node->prev = 0;
     node->next = 0;
 
-    c_containable_t* type_info = &(list->type_info);
+    c_containable_t* type_info = &list->type_info;
     assert(type_info);
     assert(type_info->size);
     node->data = malloc(type_info->size());
@@ -215,7 +215,7 @@ __c_static c_list_node_t* pop_node(c_list_t* list, c_list_node_t* node)
     if (node == list->node)
         return node;
 
-    c_containable_t* type_info = &(list->type_info);
+    c_containable_t* type_info = &list->type_info;
     assert(type_info);
     assert(type_info->destroy);
 
@@ -365,7 +365,7 @@ void c_list_destroy(c_list_t* list)
     if (!list)
         return;
 
-    c_containable_t* type_info = &(list->type_info);
+    c_containable_t* type_info = &list->type_info;
     c_list_node_t* first = begin(list);
     c_list_node_t* last = end(list);
     c_list_node_t* next = 0;
@@ -402,25 +402,25 @@ c_ref_t c_list_back(c_list_t* list)
 c_list_iterator_t c_list_begin(c_list_t* list)
 {
     assert(list);
-    return create_iterator(&(list->type_info), begin(list));
+    return create_iterator(&list->type_info, begin(list));
 }
 
 c_list_iterator_t c_list_rbegin(c_list_t* list)
 {
     assert(list);
-    return create_reverse_iterator(&(list->type_info), end(list));
+    return create_reverse_iterator(&list->type_info, end(list));
 }
 
 c_list_iterator_t c_list_end(c_list_t* list)
 {
     assert(list);
-    return create_iterator(&(list->type_info), end(list));
+    return create_iterator(&list->type_info, end(list));
 }
 
 c_list_iterator_t c_list_rend(c_list_t* list)
 {
     assert(list);
-    return create_reverse_iterator(&(list->type_info), begin(list));
+    return create_reverse_iterator(&list->type_info, begin(list));
 }
 
 /**
@@ -480,7 +480,7 @@ c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, const c_r
     pos.node->prev->next = node;
     pos.node->prev = node;
 
-    return create_iterator(&(list->type_info), node);
+    return create_iterator(&list->type_info, node);
 }
 
 c_list_iterator_t c_list_erase(c_list_t* list, c_list_iterator_t pos)
@@ -488,7 +488,7 @@ c_list_iterator_t c_list_erase(c_list_t* list, c_list_iterator_t pos)
     assert(list);
     assert(pos.base_iter.iterator_type == C_ITER_TYPE_LIST);
     c_list_node_t* node = pop_node(list, pos.node);
-    return create_iterator(&(list->type_info), node);
+    return create_iterator(&list->type_info, node);
 }
 
 c_list_iterator_t c_list_erase_range(c_list_t* list, c_list_iterator_t first, c_list_iterator_t last)
@@ -600,7 +600,7 @@ void c_list_merge(c_list_t* list, c_list_t* other)
     c_list_node_t* last = end(list);
     c_list_node_t* other_node = begin(other);
     c_list_node_t* other_last = end(other);
-    c_containable_t* type_info = &(list->type_info);
+    c_containable_t* type_info = &list->type_info;
     assert(type_info->less);
     while (node != last && other_node != other_last) {
         if (type_info->less(other_node->data, node->data)) {
@@ -670,7 +670,7 @@ void c_list_remove(c_list_t* list, const c_ref_t data)
 
     c_list_node_t* node = begin(list);
     c_list_node_t* last = end(list);
-    c_containable_t* type_info = &(list->type_info);
+    c_containable_t* type_info = &list->type_info;
     assert(type_info->equal || type_info->less);
     while (node != last) {
         if (type_info->equal) {
@@ -723,7 +723,7 @@ void c_list_sort(c_list_t* list)
         A[j + 1]=key;
     }
     */
-    c_containable_t* type_info = &(list->type_info);
+    c_containable_t* type_info = &list->type_info;
     assert(type_info->less);
     // start from the second element
     for (c_list_node_t* i = begin(list)->next; i != end(list); i = i->next) {
@@ -781,7 +781,7 @@ void c_list_unique(c_list_t* list)
 
     c_list_node_t* x = begin(list);
     c_list_node_t* y = 0;
-    c_containable_t* type_info = &(list->type_info);
+    c_containable_t* type_info = &list->type_info;
     assert(type_info->equal);
     while (x != end(list) && x->next != end(list)) {
         y = x->next;
