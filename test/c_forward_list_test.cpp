@@ -1,6 +1,10 @@
 
 #include <gtest/gtest.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <time.h>
+#include <sys/time.h>
+#include <forward_list>
 #include "c_internal.h"
 #include "c_iterator.h"
 #include "c_forward_list.h"
@@ -11,6 +15,22 @@ namespace {
 const int default_data[] = { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
 const int expect_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 const int default_length = __array_length(default_data);
+
+uint64_t get_time_ms(void)
+{
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+
+    uint64_t ret = tv.tv_usec;
+    /* Convert from micro seconds (10^-6) to milliseconds (10^-3) */
+    ret /= 1000;
+
+    /* Adds the seconds (10^0) after converting them to milliseconds (10^-3) */
+    ret += (tv.tv_sec * 1000);
+
+    return ret;
+}
 
 bool c_int_greater(const c_ref_t lhs, const c_ref_t rhs)
 {
@@ -223,18 +243,18 @@ TEST_F(CForwardListTest, Merge)
 {
     c_slist_t* other_list = C_SLIST_INT;
 
-	int origin[] = { 11, 10, 10, 7, 5, 5, 5, 4, 3, 3, 1, -1, -2, -2 };
+    int origin[] = { 11, 10, 10, 7, 5, 5, 5, 4, 3, 3, 1, -1, -2, -2 };
     int merged[] = { -2, -2, -1, 0, 1, 1, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5, 6, 7, 7, 8, 9, 10, 10, 11 };
 
     __array_foreach(origin, i) {
         c_slist_push_front(other_list, C_REF_T(&origin[i]));
-	}
+    }
 
     SetupList(default_data, default_length);
     //c_slist_sort(list);
     //c_slist_sort(other_list);
     c_slist_merge(list, other_list);
-	Traverse();
+    Traverse();
     ExpectEqualToArray(merged, __array_length(merged));
 
     c_slist_destroy(other_list);
@@ -249,13 +269,13 @@ TEST_F(CForwardListTest, MergeBy)
 
     __array_foreach(origin, i) {
         c_slist_push_front(other_list, C_REF_T(&origin[i]));
-	}
+    }
 
-	int default_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	__array_foreach(default_data, i) {
+    int default_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    __array_foreach(default_data, i) {
         c_slist_push_front(list, C_REF_T(&default_data[i]));
-	}
-	
+    }
+
     //SetupList(default_data, default_length);
     //c_slist_sort_by(list, c_int_greater);
     //c_slist_sort_by(other_list, c_int_greater);
@@ -276,7 +296,7 @@ TEST_F(CForwardListTest, Splice)
         c_slist_push_front(other, C_REF_T(&origin[i]));
     }
     c_slist_splice_after(list, c_slist_before_begin(list), other);
-	Traverse();
+    Traverse();
     int spliced_before_begin[] = { 10, 11, 12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ExpectEqualToArray(spliced_before_begin, __array_length(spliced_before_begin));
     EXPECT_TRUE(c_slist_empty(other));
@@ -285,7 +305,7 @@ TEST_F(CForwardListTest, Splice)
         c_slist_push_front(other, C_REF_T(&origin[i]));
     }
     c_slist_splice_after(list, c_slist_begin(list), other);
-	Traverse();
+    Traverse();
     int spliced_begin[] = { 10, 10, 11, 12, 11, 12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ExpectEqualToArray(spliced_begin, __array_length(spliced_begin));
     EXPECT_TRUE(c_slist_empty(other));
@@ -294,7 +314,7 @@ TEST_F(CForwardListTest, Splice)
         c_slist_push_front(other, C_REF_T(&origin[i]));
     }
     c_slist_splice_after_from(list, c_slist_before_begin(list), other, c_slist_before_begin(other));
-	Traverse();
+    Traverse();
     int spliced_from[] = { 10, 11, 12, 10, 10, 11, 12, 11, 12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ExpectEqualToArray(spliced_from, __array_length(spliced_from));
     EXPECT_TRUE(c_slist_empty(other));
@@ -303,7 +323,7 @@ TEST_F(CForwardListTest, Splice)
         c_slist_push_front(other, C_REF_T(&origin[i]));
     }
     c_slist_splice_after_range(list, c_slist_before_begin(list), other, c_slist_begin(other), c_slist_end(other));
-	Traverse();
+    Traverse();
     int spliced_range[] = { 11, 12, 10, 11, 12, 10, 10, 11, 12, 11, 12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ExpectEqualToArray(spliced_range, __array_length(spliced_range));
     EXPECT_FALSE(c_slist_empty(other));
@@ -347,7 +367,7 @@ TEST_F(CForwardListTest, RemoveIf)
 
     SetupList(default_data, default_length);
     c_slist_remove_if(list, greater_than_five);
-	Traverse();
+    Traverse();
     ExpectEqualToArray(removed, __array_length(removed));
 }
 
@@ -369,6 +389,28 @@ TEST_F(CForwardListTest, SortBy)
     SetupList(random, __array_length(random));
     c_slist_sort_by(list, c_int_greater);
     ExpectEqualToArray(sorted, __array_length(sorted));
+}
+
+TEST_F(CForwardListTest, SortPerformance)
+{
+    std::forward_list<int> fl(1000);
+    srandom(static_cast<unsigned int>(time(0)));
+    int data = 0;
+    for (std::forward_list<int>::iterator iter = fl.begin(); iter != fl.end(); ++iter) {
+        data = random() % INT32_MAX;
+        *iter = data;
+        c_slist_push_front(list, C_REF_T(&data));
+    }
+
+    uint64_t b_time = get_time_ms();
+    fl.sort();
+    uint64_t e_time = get_time_ms();
+    printf("STL takes %lu ms to sort\n", e_time - b_time);
+
+    b_time = get_time_ms();
+    c_slist_sort(list);
+    e_time = get_time_ms();
+    printf("C takes %lu ms to sort\n", e_time - b_time);
 }
 
 TEST_F(CForwardListTest, Reverse)
