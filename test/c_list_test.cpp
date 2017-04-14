@@ -444,7 +444,7 @@ TEST_F(CListTest, SortBy)
 
 TEST_F(CListTest, SortPerformance)
 {
-    std::list<int> l(1000);
+    std::list<int> l(100000);
     srandom(static_cast<unsigned int>(time(0)));
     int data = 0;
     for (std::list<int>::iterator iter = l.begin(); iter != l.end(); ++iter) {

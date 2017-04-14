@@ -479,24 +479,35 @@ void c_slist_sort_by(c_slist_t* list, c_compare comp)
 {
     if (c_slist_empty(list) || begin(list)->next == end(list) || !comp) return;
 
-    // merge sort
     c_slist_t* carry = c_slist_create(&list->type_info);
     if (!carry) return;
 
-    c_slist_t* one_piece = c_slist_create(&list->type_info);
-    if (!one_piece) {
-        c_slist_destroy(carry);
-        return;
+    c_slist_t* counter[64] = { 0 };
+    __array_foreach(counter, i) {
+        counter[i] = c_slist_create(&list->type_info);
+        if (!counter[i]) goto out;
     }
 
+    int fill = 0;
     while (!c_slist_empty(list)) {
-        transfer(before_begin(one_piece), before_begin(list), begin(list)->next);
-        c_slist_merge_by(carry, one_piece, comp);
+        transfer(before_begin(carry), before_begin(list), begin(list)->next);
+        int i = 0;
+        while (i < fill && !c_slist_empty(counter[i])) {
+            c_slist_merge_by(counter[i], carry, comp);
+            c_slist_swap(carry, counter[i++]);
+        }
+        c_slist_swap(carry, counter[i]);
+        if (i == fill) ++fill;
     }
 
-    transfer(before_begin(list), before_begin(carry), end(carry));
+    for (int i = 1; i < fill; ++i)
+        c_slist_merge_by(counter[i], counter[i - 1], comp);
+    c_slist_swap(list, counter[fill - 1]);
 
-    c_slist_destroy(one_piece);
+out:
+    __array_foreach(counter, i) {
+        c_slist_destroy(counter[i]);
+    }
     c_slist_destroy(carry);
 }
 

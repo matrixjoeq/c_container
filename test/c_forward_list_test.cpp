@@ -393,7 +393,7 @@ TEST_F(CForwardListTest, SortBy)
 
 TEST_F(CForwardListTest, SortPerformance)
 {
-    std::forward_list<int> fl(1000);
+    std::forward_list<int> fl(100000);
     srandom(static_cast<unsigned int>(time(0)));
     int data = 0;
     for (std::forward_list<int>::iterator iter = fl.begin(); iter != fl.end(); ++iter) {
