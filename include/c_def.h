@@ -15,7 +15,6 @@ typedef enum __c_iterator_category {
     C_ITER_CATE_FORWARD,
     C_ITER_CATE_BIDIRECTION,
     C_ITER_CATE_RANDOM,
-    C_ITER_CATE_MAX,
 } c_iterator_category_t;
 
 typedef enum __c_iterator_type {
@@ -36,7 +35,6 @@ typedef enum __c_iterator_type {
     C_ITER_TYPE_VECTOR_REVERSE,
     C_ITER_TYPE_DEQUE,
     C_ITER_TYPE_DEQUE_REVERSE,
-    C_ITER_TYPE_MAX,
 } c_iterator_type_t;
 
 typedef void* c_ref_t;
@@ -72,7 +70,7 @@ typedef struct __c_iterator {
 
     // operator++
     struct __c_iterator* (*increment)(struct __c_iterator* self);
-    // operator--
+    // operator-- (bidirection and random only)
     struct __c_iterator* (*decrement)(struct __c_iterator* self);
 
     // TODO: there seems no way to implement the post-operators in C language
@@ -93,6 +91,12 @@ typedef struct __c_iterator {
 
     // operator!=
     bool (*not_equal)(struct __c_iterator* self, struct __c_iterator* other);
+	
+	// advance
+	void (*advance)(struct __c_iterator* self, size_t n);
+	
+	// distance
+	size_t (*distance)(struct __c_iterator* first, struct __c_iterator* last);
 
     c_containable_t* type_info;
 } c_iterator_t;

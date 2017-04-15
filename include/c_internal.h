@@ -26,7 +26,7 @@ extern "C" {
 #define __c_unuse(x) (void)(x)
 #define __array_length(__array) sizeof(__array)/sizeof(__array[0])
 #define __array_foreach(__array, __index) for (unsigned int __index = 0; __index < __array_length(__array); ++__index)
-
+#define __c_max(x, y) (((x) < (y)) ? (y) : (x))
 
 #ifdef __cplusplus
 }

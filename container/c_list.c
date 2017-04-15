@@ -79,6 +79,29 @@ __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
     return !iter_equal(x, y);
 }
 
+__c_static void iter_advance(c_iterator_t* iter, size_t n)
+{
+	if (is_list_iterator(iter)) {
+		c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
+		while (n--) _iter->node = _iter->node->next;
+	}
+}
+
+__c_static size_t iter_distance(c_iterator_t* first, c_iterator_t* last)
+{
+	if (!is_list_iterator(first) || !is_list_iterator(last)) return 0;
+	
+	c_list_node_t* _first = ((c_list_iterator_t*)first)->node;
+    c_list_node_t* _last = ((c_list_iterator_t*)last)->node;
+	size_t n = 0;
+	while (_first != _last) {
+		_first = _first->next;
+		++n;
+	}
+	
+	return n;
+}
+
 __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 {
     if (is_list_reverse_iterator(iter)) {
@@ -120,6 +143,29 @@ __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
     return !reverse_iter_equal(x, y);
 }
 
+__c_static void reverse_iter_advance(c_iterator_t* iter, size_t n)
+{
+	if (is_list_reverse_iterator(iter)) {
+		c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
+		while (n--) _iter->node = _iter->node->prev;
+	}
+}
+
+__c_static size_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* last)
+{
+	if (!is_list_reverse_iterator(first) || !is_list_reverse_iterator(last)) return 0;
+	
+	c_list_node_t* _first = ((c_list_iterator_t*)first)->node;
+    c_list_node_t* _last = ((c_list_iterator_t*)last)->node;
+	size_t n = 0;
+	while (_first != _last) {
+		_first = _first->prev;
+		++n;
+	}
+	
+	return n;
+}
+
 __c_static c_list_iterator_t create_iterator(
     c_containable_t* type_info, c_list_node_t* node)
 {
@@ -135,6 +181,8 @@ __c_static c_list_iterator_t create_iterator(
             .dereference = iter_dereference,
             .equal = iter_equal,
             .not_equal = iter_not_equal,
+			.advance = iter_advance,
+			.distance = iter_distance,
             .type_info = type_info
         },
         .node = node
@@ -157,6 +205,8 @@ __c_static c_list_iterator_t create_reverse_iterator(
             .dereference = reverse_iter_dereference,
             .equal = reverse_iter_equal,
             .not_equal = reverse_iter_not_equal,
+			.advance = reverse_iter_advance,
+			.distance = reverse_iter_distance,
             .type_info = type_info
         },
         .node = node
@@ -362,24 +412,10 @@ c_list_t* c_list_create(const c_containable_t* type_info)
 
 void c_list_destroy(c_list_t* list)
 {
-    if (!list)
-        return;
+    if (!list) return;
 
-    c_containable_t* type_info = &list->type_info;
-    c_list_node_t* first = begin(list);
-    c_list_node_t* last = end(list);
-    c_list_node_t* next = 0;
-    assert(type_info->destroy);
-    while (first != last) {
-        assert(first);
-        next = first->next;
-        type_info->destroy(first->data);
-        __c_free(first->data);
-        __c_free(first);
-        first = next;
-    }
-
-    __c_free(last);
+    c_list_clear(list);
+    __c_free(list->node);
     __c_free(list);
 }
 
@@ -433,18 +469,10 @@ bool c_list_empty(c_list_t* list)
 
 size_t c_list_size(c_list_t* list)
 {
-    if (!list)
-        return 0;
-
-    size_t size = 0;
-    for (c_list_node_t* node = begin(list);
-         node != end(list);
-         node = node->next) {
-        assert(node);
-        ++size;
-    }
-
-    return size;
+    if (!list) return 0;
+	c_list_iterator_t first = c_list_begin(list);
+	c_list_iterator_t last = c_list_end(list);
+    return iter_distance((c_iterator_t*)&first, (c_iterator_t*)&last);
 }
 
 size_t c_list_max_size(void)

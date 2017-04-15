@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.4)
 project(c_container)
 
 include("common.cmake")
-include_directories("include" "container")
+include_directories("include")
 
 file(GLOB PRIME_SOURCES "prime/*.c")
 c_static_library(c_prime "" ${PRIME_SOURCES})
