@@ -2,8 +2,6 @@
 #include <gtest/gtest.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <time.h>
-#include <sys/time.h>
 #include <vector>
 #include "c_internal.h"
 #include "c_iterator.h"
@@ -14,22 +12,6 @@ namespace {
 
 const int default_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 const int default_length = __array_length(default_data);
-
-uint64_t get_time_ms(void)
-{
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-
-    uint64_t ret = tv.tv_usec;
-    /* Convert from micro seconds (10^-6) to milliseconds (10^-3) */
-    ret /= 1000;
-
-    /* Adds the seconds (10^0) after converting them to milliseconds (10^-3) */
-    ret += (tv.tv_sec * 1000);
-
-    return ret;
-}
 
 #pragma GCC diagnostic ignored "-Weffc++"
 class CVectorTest : public ::testing::Test
@@ -140,6 +122,15 @@ TEST_F(CVectorTest, BeginEnd)
     rlast = c_vector_rend(vector);
     EXPECT_TRUE(C_ITER_EQ(&first, &last));
     EXPECT_TRUE(C_ITER_EQ(&rfirst, &rlast));
+}
+
+TEST_F(CVectorTest, At)
+{
+	SetupVector(default_data, default_length);
+	
+	for (int i = 0; i < default_length; ++i) {
+		EXPECT_EQ(i, C_DEREF_INT(c_vector_at(vector, i)));
+	}
 }
 
 TEST_F(CVectorTest, BackOperations)

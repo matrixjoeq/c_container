@@ -25,6 +25,14 @@ __c_static __c_inline bool is_slist_iterator(c_iterator_t* iter)
             iter->iterator_type == C_ITER_TYPE_FORWARD_LIST);
 }
 
+__c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
+{
+	if (self && !(*self) && is_slist_iterator(other)) {
+		*self = (c_iterator_t*)malloc(sizeof(c_slist_iterator_t));
+		if (*self) memcpy(*self, other, sizeof(c_slist_iterator_t));
+	}
+}
+
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 {
     if (is_slist_iterator(iter)) {
@@ -32,6 +40,17 @@ __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
         _iter->node = _iter->node->next;
     }
     return iter;
+}
+
+__c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t* tmp)
+{
+	if (is_slist_iterator(iter) && is_slist_iterator(tmp)) {
+        c_slist_iterator_t* _iter = (c_slist_iterator_t*)iter;
+		c_slist_iterator_t* _tmp = (c_slist_iterator_t*)tmp;
+		_tmp->node = _iter->node;
+        _iter->node = _iter->node->next;
+    }
+    return tmp;
 }
 
 __c_static c_ref_t iter_dereference(c_iterator_t* iter)
@@ -90,8 +109,11 @@ __c_static c_slist_iterator_t create_iterator(
         .base_iter = {
             .iterator_category = C_ITER_CATE_FORWARD,
             .iterator_type = C_ITER_TYPE_FORWARD_LIST,
+			.alloc_and_copy = iter_alloc_and_copy,
             .increment = iter_increment,
             .decrement = 0,
+			.post_increment = iter_post_increment,
+			.post_decrement = 0,
             .dereference = iter_dereference,
             .equal = iter_equal,
             .not_equal = iter_not_equal,

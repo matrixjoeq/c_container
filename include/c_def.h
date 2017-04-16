@@ -41,11 +41,11 @@ typedef void* c_ref_t;
 typedef void (*c_unary_func)(c_ref_t);
 
 // return true if data matches condition
-typedef bool (*c_unary_predicate)(c_ref_t);
-typedef bool (*c_binary_predicate)(c_ref_t, c_ref_t);
+typedef bool (*c_unary_predicate)(const c_ref_t);
+typedef bool (*c_binary_predicate)(const c_ref_t, const c_ref_t);
 
 // return true if compare(lhs, rhs)
-typedef bool (*c_compare)(c_ref_t lhs, c_ref_t rhs);
+typedef bool (*c_compare)(const c_ref_t lhs, const c_ref_t rhs);
 
 typedef struct __c_containable {
     // size information
@@ -67,21 +67,31 @@ typedef struct __c_containable {
 typedef struct __c_iterator {
     c_iterator_category_t iterator_category;
     c_iterator_type_t iterator_type;
+	
+	// copy
+	// needed for algorithms, since iterators passed to algorithms are by reference
+	// algorithms need to make a copy first
+	// however, it does not need a destructor, because iterators are "smart pointers"
+	// refer to a position in a container, they don't occupy any resources actually
+	void (*alloc_and_copy)(struct __c_iterator** self, struct __c_iterator* other);
 
     // operator++
+	// return self
     struct __c_iterator* (*increment)(struct __c_iterator* self);
+	
     // operator-- (bidirection and random only)
+	// return self
     struct __c_iterator* (*decrement)(struct __c_iterator* self);
 
-    // TODO: there seems no way to implement the post-operators in C language
-    // because post-operators return a temporary iterator object
-    // if it is a c_iterator_t object, it loses container specific informations
-    // if it is a c_iterator_t pointer, it must be allocated on heap and requires free after use, which is not good
-    // the most reasonable way it NOT to provide post-operators in C language
     // operator++(int)
-    //struct __c_iterator (*post_increment)(struct __c_iterator*);
+	// tmp stores the iterator before increment
+	// return tmp
+    struct __c_iterator* (*post_increment)(struct __c_iterator* self, struct __c_iterator* tmp);
+	
     // operator--(int)
-    //struct __c_iterator (*post_decrement)(struct __c_iterator*);
+	// tmp stores the iterator before decrement
+	// return tmp
+    struct __c_iterator* (*post_decrement)(struct __c_iterator* self, struct __c_iterator* tmp);
 
     // operator*
     c_ref_t (*dereference)(struct __c_iterator* self);
@@ -107,6 +117,11 @@ typedef struct __c_backend_container {
     // element access
     c_ref_t (*front)(struct __c_backend_container* self);
     c_ref_t (*back)(struct __c_backend_container* self);
+	// iterator
+	// set begin of self to *iter and return *iter
+	c_iterator_t* (*begin)(struct __c_backend_container* self, c_iterator_t** iter);
+	// set end of self to *iter and return *iter
+	c_iterator_t* (*end)(struct __c_backend_container* self, c_iterator_t** iter);
     // capacity
     bool (*empty)(struct __c_backend_container* self);
     size_t (*size)(struct __c_backend_container* self);
@@ -137,7 +152,7 @@ extern const c_containable_t c_float_t;
 extern const c_containable_t c_double_t;
 
 #define C_REF_T(x) (c_ref_t)(x)
-#define C_ITERATOR_T(x) (c_iterator_t*)(x)
+#define C_ITER_T(x) (c_iterator_t*)(x)
 
 #define C_CONV_TYPE(type, x)    ((type*)(x))
 #define C_DEREF_TYPE(type, x)   (*(type*)(x))

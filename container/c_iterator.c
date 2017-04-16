@@ -14,6 +14,11 @@ bool type_info_equal(c_containable_t* x, c_containable_t* y)
             x->size == y->size);
 }
 
+void c_iter_copy(c_iterator_t** iter, c_iterator_t* other)
+{
+	if (other) other->alloc_and_copy(iter, other);
+}
+
 c_iterator_t* c_iter_increment(c_iterator_t* iter)
 {
 	if (!iter) return 0;
@@ -58,4 +63,14 @@ size_t c_iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
 	if (!first || !last) return 0;
 	return first->distance(first, last);
+}
+
+bool c_iter_category_at_least(c_iterator_t* iter, c_iterator_category_t cate)
+{
+	return iter ? iter->iterator_category >= cate : false;
+}
+
+bool c_iter_category_exact(c_iterator_t* iter, c_iterator_category_t cate)
+{
+	return iter ? iter->iterator_category == cate : false;
 }
