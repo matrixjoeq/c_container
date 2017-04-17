@@ -3,12 +3,19 @@
 #ifndef __C_ITERATOR_H__
 #define __C_ITERATOR_H__
 
-#include "c_internal.h"
 #include "c_def.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
+
+#define __c_output_iterator
+#define __c_input_iterator
+#define __c_forward_iterator
+#define __c_bidirection_iterator
+#define __c_random_iterator
+
+#define __c_get_less(iter) C_ITER_T((iter))->type_info->less
 
 bool type_info_equal(c_containable_t* x, c_containable_t* y);
 void c_iter_copy(c_iterator_t** iter, c_iterator_t* other);

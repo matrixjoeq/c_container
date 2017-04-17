@@ -27,10 +27,10 @@ __c_static __c_inline bool is_slist_iterator(c_iterator_t* iter)
 
 __c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
 {
-	if (self && !(*self) && is_slist_iterator(other)) {
-		*self = (c_iterator_t*)malloc(sizeof(c_slist_iterator_t));
-		if (*self) memcpy(*self, other, sizeof(c_slist_iterator_t));
-	}
+    if (self && !(*self) && is_slist_iterator(other)) {
+        *self = (c_iterator_t*)malloc(sizeof(c_slist_iterator_t));
+        if (*self) memcpy(*self, other, sizeof(c_slist_iterator_t));
+    }
 }
 
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
@@ -44,10 +44,10 @@ __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 
 __c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t* tmp)
 {
-	if (is_slist_iterator(iter) && is_slist_iterator(tmp)) {
+    if (is_slist_iterator(iter) && is_slist_iterator(tmp)) {
         c_slist_iterator_t* _iter = (c_slist_iterator_t*)iter;
-		c_slist_iterator_t* _tmp = (c_slist_iterator_t*)tmp;
-		_tmp->node = _iter->node;
+        c_slist_iterator_t* _tmp = (c_slist_iterator_t*)tmp;
+        _tmp->node = _iter->node;
         _iter->node = _iter->node->next;
     }
     return tmp;
@@ -76,27 +76,27 @@ __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
     return !iter_equal(x, y);
 }
 
-__c_static void iter_advance(c_iterator_t* iter, size_t n)
+__c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
-	if (is_slist_iterator(iter)) {
-		c_slist_iterator_t* _iter = (c_slist_iterator_t*)iter;
-		while (n--) _iter->node = _iter->node->next;
-	}
+    if (is_slist_iterator(iter)) {
+        c_slist_iterator_t* _iter = (c_slist_iterator_t*)iter;
+        while (n-- > 0) _iter->node = _iter->node->next;
+    }
 }
 
-__c_static size_t iter_distance(c_iterator_t* first, c_iterator_t* last)
+__c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
-	if (!is_slist_iterator(first) || !is_slist_iterator(last)) return 0;
-	
-	c_slist_node_t* _first = ((c_slist_iterator_t*)first)->node;
+    if (!is_slist_iterator(first) || !is_slist_iterator(last)) return 0;
+
+    c_slist_node_t* _first = ((c_slist_iterator_t*)first)->node;
     c_slist_node_t* _last = ((c_slist_iterator_t*)last)->node;
-	size_t n = 0;
-	while (_first != _last) {
-		_first = _first->next;
-		++n;
-	}
-	
-	return n;
+    size_t n = 0;
+    while (_first != _last) {
+        _first = _first->next;
+        ++n;
+    }
+
+    return n;
 }
 
 __c_static c_slist_iterator_t create_iterator(
@@ -109,16 +109,16 @@ __c_static c_slist_iterator_t create_iterator(
         .base_iter = {
             .iterator_category = C_ITER_CATE_FORWARD,
             .iterator_type = C_ITER_TYPE_FORWARD_LIST,
-			.alloc_and_copy = iter_alloc_and_copy,
+            .alloc_and_copy = iter_alloc_and_copy,
             .increment = iter_increment,
             .decrement = 0,
-			.post_increment = iter_post_increment,
-			.post_decrement = 0,
+            .post_increment = iter_post_increment,
+            .post_decrement = 0,
             .dereference = iter_dereference,
             .equal = iter_equal,
             .not_equal = iter_not_equal,
-			.advance = iter_advance,
-			.distance = iter_distance,
+            .advance = iter_advance,
+            .distance = iter_distance,
             .type_info = type_info
         },
         .node = node
@@ -249,7 +249,7 @@ void c_slist_destroy(c_slist_t* list)
 
     c_slist_clear(list);
     __c_free(list->ancient);
-	__c_free(list->node);
+    __c_free(list->node);
     __c_free(list);
 }
 

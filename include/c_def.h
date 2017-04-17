@@ -67,30 +67,30 @@ typedef struct __c_containable {
 typedef struct __c_iterator {
     c_iterator_category_t iterator_category;
     c_iterator_type_t iterator_type;
-	
-	// copy
-	// needed for algorithms, since iterators passed to algorithms are by reference
-	// algorithms need to make a copy first
-	// however, it does not need a destructor, because iterators are "smart pointers"
-	// refer to a position in a container, they don't occupy any resources actually
-	void (*alloc_and_copy)(struct __c_iterator** self, struct __c_iterator* other);
+
+    // copy
+    // needed for algorithms, since iterators passed to algorithms are by reference
+    // algorithms need to make a copy first
+    // however, it does not need a destructor, because iterators are "smart pointers"
+    // refer to a position in a container, they don't occupy any resources actually
+    void (*alloc_and_copy)(struct __c_iterator** self, struct __c_iterator* other);
 
     // operator++
-	// return self
+    // return self
     struct __c_iterator* (*increment)(struct __c_iterator* self);
-	
+
     // operator-- (bidirection and random only)
-	// return self
+    // return self
     struct __c_iterator* (*decrement)(struct __c_iterator* self);
 
     // operator++(int)
-	// tmp stores the iterator before increment
-	// return tmp
+    // tmp stores the iterator before increment
+    // return tmp
     struct __c_iterator* (*post_increment)(struct __c_iterator* self, struct __c_iterator* tmp);
-	
+
     // operator--(int)
-	// tmp stores the iterator before decrement
-	// return tmp
+    // tmp stores the iterator before decrement
+    // return tmp
     struct __c_iterator* (*post_decrement)(struct __c_iterator* self, struct __c_iterator* tmp);
 
     // operator*
@@ -103,10 +103,10 @@ typedef struct __c_iterator {
     bool (*not_equal)(struct __c_iterator* self, struct __c_iterator* other);
 
     // advance
-    void (*advance)(struct __c_iterator* self, size_t n);
+    void (*advance)(struct __c_iterator* self, ptrdiff_t n);
 
     // distance
-    size_t (*distance)(struct __c_iterator* first, struct __c_iterator* last);
+    ptrdiff_t (*distance)(struct __c_iterator* first, struct __c_iterator* last);
 
     c_containable_t* type_info;
 } c_iterator_t;
@@ -117,11 +117,11 @@ typedef struct __c_backend_container {
     // element access
     c_ref_t (*front)(struct __c_backend_container* self);
     c_ref_t (*back)(struct __c_backend_container* self);
-	// iterator
-	// set begin of self to *iter and return *iter
-	c_iterator_t* (*begin)(struct __c_backend_container* self, c_iterator_t** iter);
-	// set end of self to *iter and return *iter
-	c_iterator_t* (*end)(struct __c_backend_container* self, c_iterator_t** iter);
+    // iterator
+    // set begin of self to *iter and return *iter
+    c_iterator_t* (*begin)(struct __c_backend_container* self, c_iterator_t** iter);
+    // set end of self to *iter and return *iter
+    c_iterator_t* (*end)(struct __c_backend_container* self, c_iterator_t** iter);
     // capacity
     bool (*empty)(struct __c_backend_container* self);
     size_t (*size)(struct __c_backend_container* self);
