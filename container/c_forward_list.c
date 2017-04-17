@@ -33,6 +33,13 @@ __c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
     }
 }
 
+__c_static void iter_assign(c_iterator_t* dst, c_iterator_t* src)
+{
+	if (is_slist_iterator(dst) && is_slist_iterator(src)) {
+		((c_slist_iterator_t*)dst)->node = ((c_slist_iterator_t*)src)->node;
+	}
+}
+
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 {
     if (is_slist_iterator(iter)) {
@@ -110,6 +117,7 @@ __c_static c_slist_iterator_t create_iterator(
             .iterator_category = C_ITER_CATE_FORWARD,
             .iterator_type = C_ITER_TYPE_FORWARD_LIST,
             .alloc_and_copy = iter_alloc_and_copy,
+			.assign = iter_assign,
             .increment = iter_increment,
             .decrement = 0,
             .post_increment = iter_post_increment,

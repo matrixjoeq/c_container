@@ -57,6 +57,13 @@ __c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
     }
 }
 
+__c_static void iter_assign(c_iterator_t* dst, c_iterator_t* src)
+{
+	if (is_vector_iterator(dst) && is_vector_iterator(src)) {
+		((c_vector_iterator_t*)dst)->pos = ((c_vector_iterator_t*)src)->pos;
+	}
+}
+
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 {
     if (is_vector_iterator(iter)) {
@@ -142,6 +149,13 @@ __c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* o
     }
 }
 
+__c_static void reverse_iter_assign(c_iterator_t* dst, c_iterator_t* src)
+{
+	if (is_vector_reverse_iterator(dst) && is_vector_reverse_iterator(src)) {
+		((c_vector_iterator_t*)dst)->pos = ((c_vector_iterator_t*)src)->pos;
+	}
+}
+
 __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 {
     if (is_vector_reverse_iterator(iter)) {
@@ -205,7 +219,7 @@ __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
     return !reverse_iter_equal(x, y);
 }
 
-__c_static void reverse_iter_advance(c_iterator_t* iter, size_t n)
+__c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (!is_vector_reverse_iterator(iter)) return;
     assert(iter->type_info);
@@ -213,12 +227,12 @@ __c_static void reverse_iter_advance(c_iterator_t* iter, size_t n)
     ((c_vector_iterator_t*)iter)->pos -= (n * iter->type_info->size());
 }
 
-__c_static size_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* last)
+__c_static ptrdiff_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
     if (!is_vector_reverse_iterator(first) || !is_vector_reverse_iterator(last)) return 0;
     assert(first->type_info);
     assert(first->type_info->size);
-    return (size_t)(((c_vector_iterator_t*)first)->pos - ((c_vector_iterator_t*)last)->pos) / first->type_info->size();
+    return (ptrdiff_t)(((c_vector_iterator_t*)first)->pos - ((c_vector_iterator_t*)last)->pos) / first->type_info->size();
 }
 
 __c_static c_vector_iterator_t create_iterator(
@@ -231,6 +245,7 @@ __c_static c_vector_iterator_t create_iterator(
             .iterator_category = C_ITER_CATE_RANDOM,
             .iterator_type = C_ITER_TYPE_VECTOR,
             .alloc_and_copy = iter_alloc_and_copy,
+			.assign = iter_assign,
             .increment = iter_increment,
             .decrement = iter_decrement,
             .post_increment = iter_post_increment,
@@ -258,6 +273,7 @@ __c_static c_vector_iterator_t create_reverse_iterator(
             .iterator_category = C_ITER_CATE_RANDOM,
             .iterator_type = C_ITER_TYPE_VECTOR_REVERSE,
             .alloc_and_copy = reverse_iter_alloc_and_copy,
+			.assign = reverse_iter_assign,
             .increment = reverse_iter_increment,
             .decrement = reverse_iter_decrement,
             .post_increment = reverse_iter_post_increment,

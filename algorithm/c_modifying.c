@@ -11,12 +11,13 @@ void c_algo_swap(const c_containable_t* type_info, c_ref_t x, c_ref_t y)
 	if (!type_info || !x || !y) return;
 	assert(type_info->size);
 	assert(type_info->copy);
+	assert(type_info->assign);
 	
 	c_ref_t tmp = malloc(type_info->size());
 	if (tmp) {
 		type_info->copy(tmp, x);
-		type_info->copy(x, y);
-		type_info->copy(y, tmp);
+		type_info->assign(x, y);
+		type_info->assign(y, tmp);
 	}
 	__c_free(tmp);
 }
