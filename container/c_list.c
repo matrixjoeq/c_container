@@ -46,11 +46,12 @@ __c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
     }
 }
 
-__c_static void iter_assign(c_iterator_t* dst, c_iterator_t* src)
+__c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
 {
-	if (is_list_iterator(dst) && is_list_iterator(src)) {
-		((c_list_iterator_t*)dst)->node = ((c_list_iterator_t*)src)->node;
-	}
+    if (is_list_iterator(dst) && is_list_iterator(src)) {
+        ((c_list_iterator_t*)dst)->node = ((c_list_iterator_t*)src)->node;
+    }
+    return dst;
 }
 
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
@@ -152,11 +153,12 @@ __c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* o
     }
 }
 
-__c_static void reverse_iter_assign(c_iterator_t* dst, c_iterator_t* src)
+__c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* src)
 {
-	if (is_list_reverse_iterator(dst) && is_list_reverse_iterator(src)) {
-		((c_list_iterator_t*)dst)->node = ((c_list_iterator_t*)src)->node;
-	}
+    if (is_list_reverse_iterator(dst) && is_list_reverse_iterator(src)) {
+        ((c_list_iterator_t*)dst)->node = ((c_list_iterator_t*)src)->node;
+    }
+    return dst;
 }
 
 __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
@@ -226,12 +228,12 @@ __c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (is_list_reverse_iterator(iter)) {
         c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-		if (n > 0) {
-			while (n--) _iter->node = _iter->node->prev;
-		}
-		else {
-			while (n++) _iter->node = _iter->node->next;
-		}
+        if (n > 0) {
+            while (n--) _iter->node = _iter->node->prev;
+        }
+        else {
+            while (n++) _iter->node = _iter->node->next;
+        }
     }
 }
 
@@ -261,7 +263,7 @@ __c_static c_list_iterator_t create_iterator(
             .iterator_category = C_ITER_CATE_BIDIRECTION,
             .iterator_type = C_ITER_TYPE_LIST,
             .alloc_and_copy = iter_alloc_and_copy,
-			.assign = iter_assign,
+            .assign = iter_assign,
             .increment = iter_increment,
             .decrement = iter_decrement,
             .post_increment = iter_post_increment,
@@ -289,7 +291,7 @@ __c_static c_list_iterator_t create_reverse_iterator(
             .iterator_category = C_ITER_CATE_BIDIRECTION,
             .iterator_type = C_ITER_TYPE_LIST_REVERSE,
             .alloc_and_copy = reverse_iter_alloc_and_copy,
-			.assign = reverse_iter_assign,
+            .assign = reverse_iter_assign,
             .increment = reverse_iter_increment,
             .decrement = reverse_iter_decrement,
             .post_increment = reverse_iter_post_increment,

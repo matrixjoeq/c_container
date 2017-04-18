@@ -74,9 +74,9 @@ typedef struct __c_iterator {
     // however, it does not need a destructor, because iterators are "smart pointers"
     // refer to a position in a container, they don't occupy any resources actually
     void (*alloc_and_copy)(struct __c_iterator** dst, struct __c_iterator* src);
-	
-	// assign
-	void (*assign)(struct __c_iterator* dst, struct __c_iterator* src);
+
+    // assign
+    struct __c_iterator* (*assign)(struct __c_iterator* dst, struct __c_iterator* src);
 
     // operator++
     // return self
