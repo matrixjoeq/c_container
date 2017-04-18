@@ -65,11 +65,43 @@ bool c_algo_is_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
 
-    bool ret = true;
+    bool is_heap = true;
     __C_ALGO_BEGIN
+	ptrdiff_t __distance = __first->distance(__first, __last);
+	ptrdiff_t __parent_index = 0;
+	ptrdiff_t __left_index = (__parent_index + 1) * 2 - 1;
+	ptrdiff_t __right_index = (__parent_index + 1) * 2;
+	c_iterator_t* __parent = 0;
+	c_iterator_t* __left = 0;
+	c_iterator_t* __right = 0;
+	__first->alloc_and_copy(&__parent, __first);
+	random_add(&__left, __first, __left_index);
+	random_add(&__right, __first, __right_index);
+	while (__left_index < __distance) {
+		if (comp(C_ITER_DEREF(__parent), C_ITER_DEREF(__left))) {
+			is_heap = false;
+			break;
+		}
+		
+		if ((__right_index < __distance) &&
+			(comp(C_ITER_DEREF(__parent), C_ITER_DEREF(__right)))) {
+			is_heap = false;
+			break;
+		}
+		
+		++__parent_index;
+		__left_index = (__parent_index + 1) * 2 - 1;
+	    __right_index = (__parent_index + 1) * 2;
+		random_add(&__parent, __first, __parent_index);
+		random_add(&__left, __first, __left_index);
+		random_add(&__right, __first, __right_index);
+	}
+	__c_free(__right);
+	__c_free(__left);
+	__c_free(__parent);
     __C_ALGO_END
 
-    return ret;
+    return is_heap;
 }
 
 void c_algo_is_heap_until_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t** until, c_compare comp)
