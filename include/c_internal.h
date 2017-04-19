@@ -35,19 +35,19 @@ extern "C" {
 
 // algorithm macro
 #define __C_ALGO_BEGIN \
-	assert(first); \
-	assert(last); \
-	c_iterator_t* __first = 0; \
-	c_iterator_t* __last = 0; \
-	C_ITER_COPY(__first, first); \
-	if (!__first) goto __out; \
-	C_ITER_COPY(__last, last); \
-	if (!__last) goto __out;
+    assert(first); \
+    assert(last); \
+    c_iterator_t* __first = 0; \
+    c_iterator_t* __last = 0; \
+    C_ITER_COPY(&__first, first); \
+    if (!__first) goto __out; \
+    C_ITER_COPY(&__last, last); \
+    if (!__last) goto __out;
 
 #define __C_ALGO_END \
 __out: \
-	__c_free(__first); \
-	__c_free(__last);
+    __c_free(__first); \
+    __c_free(__last);
 
 #ifdef __cplusplus
 }

@@ -60,7 +60,7 @@ __c_static void adjust_heap(c_iterator_t* first, c_iterator_t* last, c_compare c
     __c_unuse(comp);
 }
 
-bool c_algo_is_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
+bool algo_is_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
 {
     if (!first || !last || !comp) return false;
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
@@ -68,7 +68,7 @@ bool c_algo_is_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
 
     __C_ALGO_BEGIN
     c_iterator_t* __until = 0;
-    c_algo_is_heap_until_by(__first, __last, &__until, comp);
+    algo_is_heap_until_by(__first, __last, &__until, comp);
     bool is_heap = C_ITER_EQ(__until, __last);
     __c_free(__until);
     __C_ALGO_END
@@ -76,7 +76,7 @@ bool c_algo_is_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
     return is_heap;
 }
 
-void c_algo_is_heap_until_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t** until, c_compare comp)
+void algo_is_heap_until_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t** until, c_compare comp)
 {
     if (!first || !last || !until || !comp) return;
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
@@ -85,9 +85,8 @@ void c_algo_is_heap_until_by(c_iterator_t* first, c_iterator_t* last, c_iterator
     __C_ALGO_BEGIN
 
     c_iterator_operation_t* iter_ops = __first->iterator_ops;
-    if (*until == 0) {
+    if (*until == 0)
         iter_ops->alloc_and_copy(until, __first);
-    }
 
     bool is_heap = true;
     ptrdiff_t __distance = iter_ops->distance(__first, __last);
@@ -125,7 +124,7 @@ void c_algo_is_heap_until_by(c_iterator_t* first, c_iterator_t* last, c_iterator
     __C_ALGO_END
 }
 
-void c_algo_push_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
+void algo_push_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
 {
     if (!first || !last || !comp) return;
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
@@ -138,12 +137,12 @@ void c_algo_push_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp
     __C_ALGO_END
 }
 
-void c_algo_pop_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
+void algo_pop_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
 {
     adjust_heap(first, last, comp);
 }
 
-void c_algo_make_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
+void algo_make_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
 {
     if (!first || !last || !comp) return;
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
@@ -153,7 +152,7 @@ void c_algo_make_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp
     __C_ALGO_END
 }
 
-void c_algo_sort_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
+void algo_sort_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp)
 {
     if (!first || !last || !comp) return;
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
@@ -161,7 +160,7 @@ void c_algo_sort_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp
 
     __C_ALGO_BEGIN
     while (__first->iterator_ops->distance(__first, __last) > 1) {
-        c_algo_pop_heap_by(__first, __last, comp);
+        algo_pop_heap_by(__first, __last, comp);
         C_ITER_DEC(__last);
     }
     __C_ALGO_END

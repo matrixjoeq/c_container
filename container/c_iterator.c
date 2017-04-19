@@ -13,6 +13,12 @@ void c_iter_copy(c_iterator_t** iter, c_iterator_t* other)
     if (other) other->iterator_ops->alloc_and_copy(iter, other);
 }
 
+c_iterator_t* c_iter_assign(c_iterator_t* iter, c_iterator_t* other)
+{
+    if (iter) iter->iterator_ops->assign(iter, other);
+    return iter;
+}
+
 c_iterator_t* c_iter_increment(c_iterator_t* iter)
 {
     return (!iter) ? 0 : iter->iterator_ops->increment(iter);

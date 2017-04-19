@@ -159,6 +159,7 @@ c_containable_t* c_get_double_type_info(void);
 
 #define C_REF_T(x) (c_ref_t)(x)
 #define C_ITER_T(x) (c_iterator_t*)(x)
+#define C_ITER_PTR(x) (c_iterator_t**)(x)
 
 #define C_CONV_TYPE(type, x)    ((type*)(x))
 #define C_DEREF_TYPE(type, x)   (*(type*)(x))
