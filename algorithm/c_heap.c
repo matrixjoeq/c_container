@@ -10,13 +10,15 @@ __c_static c_iterator_t* random_add(c_iterator_t** dst, c_iterator_t* src, ptrdi
 {
     if (!dst) return 0;
 
+    c_iterator_operation_t* iter_ops = src->iterator_ops;
+
     if (*dst) {
-        src->assign(*dst, src);
+        iter_ops->assign(*dst, src);
     }
     else {
-        src->alloc_and_copy(dst, src);
+        iter_ops->alloc_and_copy(dst, src);
     }
-    (*dst)->advance(*dst, n);
+    iter_ops->advance(*dst, n);
 
     return *dst;
 }
@@ -82,12 +84,13 @@ void c_algo_is_heap_until_by(c_iterator_t* first, c_iterator_t* last, c_iterator
 
     __C_ALGO_BEGIN
 
+    c_iterator_operation_t* iter_ops = __first->iterator_ops;
     if (*until == 0) {
-        __first->alloc_and_copy(until, __first);
+        iter_ops->alloc_and_copy(until, __first);
     }
 
     bool is_heap = true;
-    ptrdiff_t __distance = __first->distance(__first, __last);
+    ptrdiff_t __distance = iter_ops->distance(__first, __last);
     ptrdiff_t __parent_index = 0;
     ptrdiff_t __left_index = (__parent_index + 1) * 2 - 1;
     ptrdiff_t __right_index = (__parent_index + 1) * 2;
@@ -115,7 +118,7 @@ void c_algo_is_heap_until_by(c_iterator_t* first, c_iterator_t* last, c_iterator
         __right_index = (__parent_index + 1) * 2;
     }
 
-    (*until)->assign(*until, is_heap ? __last : __parent);
+    iter_ops->assign(*until, is_heap ? __last : __parent);
     __c_free(__right);
     __c_free(__left);
     __c_free(__parent);
@@ -130,7 +133,7 @@ void c_algo_push_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp
 
     __C_ALGO_BEGIN
     ptrdiff_t top_index = 0;
-    ptrdiff_t hole_index = __first->distance(__first, __last) - 1;
+    ptrdiff_t hole_index = __first->iterator_ops->distance(__first, __last) - 1;
     push_heap(__first, __last, top_index, hole_index, comp);
     __C_ALGO_END
 }
@@ -157,7 +160,7 @@ void c_algo_sort_heap_by(c_iterator_t* first, c_iterator_t* last, c_compare comp
     assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
 
     __C_ALGO_BEGIN
-    while (__first->distance(__first, __last) > 1) {
+    while (__first->iterator_ops->distance(__first, __last) > 1) {
         c_algo_pop_heap_by(__first, __last, comp);
         C_ITER_DEC(__last);
     }

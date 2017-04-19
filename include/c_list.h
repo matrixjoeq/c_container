@@ -89,20 +89,20 @@ c_backend_container_t* c_list_create_backend(const c_containable_t* type_info);
 /**
  * helpers
  */
-#define C_LIST_INT c_list_create(&c_int_t)
-#define C_LIST_SINT c_list_create(&c_signed_int_t)
-#define C_LIST_UINT c_list_create(&c_unsigned_int_t)
-#define C_LIST_SHORT c_list_create(&c_short_t)
-#define C_LIST_SSHORT c_list_create(&c_signed_short_t)
-#define C_LIST_USHORT c_list_create(&c_unsigned_short_t)
-#define C_LIST_LONG c_list_create(&c_long_t)
-#define C_LIST_SLONG c_list_create(&c_signed_long_t)
-#define C_LIST_ULONG c_list_create(&c_unsigned_long_t)
-#define C_LIST_CHAR c_list_create(&c_char_t)
-#define C_LIST_SCHAR c_list_create(&c_signed_char_t)
-#define C_LIST_UCHAR c_list_create(&c_unsigned_char_t)
-#define C_LIST_FLOAT c_list_create(&c_float_t)
-#define C_LIST_DOUBLE c_list_create(&c_double_t)
+#define C_LIST_INT c_list_create(c_get_int_type_info())
+#define C_LIST_SINT c_list_create(c_get_sint_type_info())
+#define C_LIST_UINT c_list_create(c_get_uint_type_info())
+#define C_LIST_SHORT c_list_create(c_get_short_type_info())
+#define C_LIST_SSHORT c_list_create(c_get_sshort_type_info())
+#define C_LIST_USHORT c_list_create(c_get_ushort_type_info())
+#define C_LIST_LONG c_list_create(c_get_long_type_info())
+#define C_LIST_SLONG c_list_create(c_get_slong_type_info())
+#define C_LIST_ULONG c_list_create(c_get_ulong_type_info())
+#define C_LIST_CHAR c_list_create(c_get_char_type_info())
+#define C_LIST_SCHAR c_list_create(c_get_schar_type_info())
+#define C_LIST_UCHAR c_list_create(c_get_uchar_type_info())
+#define C_LIST_FLOAT c_list_create(c_get_float_type_info())
+#define C_LIST_DOUBLE c_list_create(c_get_double_type_info())
 
 #ifdef __cplusplus
 }

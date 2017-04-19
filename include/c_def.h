@@ -64,10 +64,8 @@ typedef struct __c_containable {
     bool (*equal)(const c_ref_t lhs, const c_ref_t rhs);
 } c_containable_t;
 
-typedef struct __c_iterator {
-    c_iterator_category_t iterator_category;
-    c_iterator_type_t iterator_type;
-
+struct __c_iterator;
+typedef struct __c_iterator_operation {
     // copy
     // needed for algorithms, since iterators passed to algorithms are by reference
     // algorithms need to make a copy first
@@ -110,7 +108,12 @@ typedef struct __c_iterator {
 
     // distance
     ptrdiff_t (*distance)(struct __c_iterator* first, struct __c_iterator* last);
+} c_iterator_operation_t;
 
+typedef struct __c_iterator {
+    c_iterator_category_t iterator_category;
+    c_iterator_type_t iterator_type;
+    c_iterator_operation_t* iterator_ops;
     c_containable_t* type_info;
 } c_iterator_t;
 
@@ -139,20 +142,20 @@ typedef struct __c_backend_container {
 
 typedef c_backend_container_t* (*BackendContainerCreator)(const c_containable_t* type_info);
 
-extern const c_containable_t c_int_t;
-extern const c_containable_t c_signed_int_t;
-extern const c_containable_t c_unsigned_int_t;
-extern const c_containable_t c_short_t;
-extern const c_containable_t c_signed_short_t;
-extern const c_containable_t c_unsigned_short_t;
-extern const c_containable_t c_long_t;
-extern const c_containable_t c_signed_long_t;
-extern const c_containable_t c_unsigned_long_t;
-extern const c_containable_t c_char_t;
-extern const c_containable_t c_signed_char_t;
-extern const c_containable_t c_unsigned_char_t;
-extern const c_containable_t c_float_t;
-extern const c_containable_t c_double_t;
+c_containable_t* c_get_sint_type_info(void);
+c_containable_t* c_get_uint_type_info(void);
+c_containable_t* c_get_int_type_info(void);
+c_containable_t* c_get_sshort_type_info(void);
+c_containable_t* c_get_ushort_type_info(void);
+c_containable_t* c_get_short_type_info(void);
+c_containable_t* c_get_slong_type_info(void);
+c_containable_t* c_get_ulong_type_info(void);
+c_containable_t* c_get_long_type_info(void);
+c_containable_t* c_get_schar_type_info(void);
+c_containable_t* c_get_uchar_type_info(void);
+c_containable_t* c_get_char_type_info(void);
+c_containable_t* c_get_float_type_info(void);
+c_containable_t* c_get_double_type_info(void);
 
 #define C_REF_T(x) (c_ref_t)(x)
 #define C_ITER_T(x) (c_iterator_t*)(x)

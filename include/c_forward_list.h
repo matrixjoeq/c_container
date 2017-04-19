@@ -77,20 +77,20 @@ void c_slist_unique_if(c_slist_t* list, c_binary_predicate pred);
 /**
  * helpers
  */
-#define C_SLIST_INT c_slist_create(&c_int_t)
-#define C_SLIST_SINT c_slist_create(&c_signed_int_t)
-#define C_SLIST_UINT c_slist_create(&c_unsigned_int_t)
-#define C_SLIST_SHORT c_slist_create(&c_short_t)
-#define C_SLIST_SSHORT c_slist_create(&c_signed_short_t)
-#define C_SLIST_USHORT c_slist_create(&c_unsigned_short_t)
-#define C_SLIST_LONG c_slist_create(&c_long_t)
-#define C_SLIST_SLONG c_slist_create(&c_signed_long_t)
-#define C_SLIST_ULONG c_slist_create(&c_unsigned_long_t)
-#define C_SLIST_CHAR c_slist_create(&c_char_t)
-#define C_SLIST_SCHAR c_slist_create(&c_signed_char_t)
-#define C_SLIST_UCHAR c_slist_create(&c_unsigned_char_t)
-#define C_SLIST_FLOAT c_slist_create(&c_float_t)
-#define C_SLIST_DOUBLE c_slist_create(&c_double_t)
+#define C_SLIST_INT c_slist_create(c_get_int_type_info())
+#define C_SLIST_SINT c_slist_create(c_get_sint_type_info())
+#define C_SLIST_UINT c_slist_create(c_get_uint_type_info())
+#define C_SLIST_SHORT c_slist_create(c_get_short_type_info())
+#define C_SLIST_SSHORT c_slist_create(c_get_sshort_type_info())
+#define C_SLIST_USHORT c_slist_create(c_get_ushort_type_info())
+#define C_SLIST_LONG c_slist_create(c_get_long_type_info())
+#define C_SLIST_SLONG c_slist_create(c_get_slong_type_info())
+#define C_SLIST_ULONG c_slist_create(c_get_ulong_type_info())
+#define C_SLIST_CHAR c_slist_create(c_get_char_type_info())
+#define C_SLIST_SCHAR c_slist_create(c_get_schar_type_info())
+#define C_SLIST_UCHAR c_slist_create(c_get_uchar_type_info())
+#define C_SLIST_FLOAT c_slist_create(c_get_float_type_info())
+#define C_SLIST_DOUBLE c_slist_create(c_get_double_type_info())
 
 #ifdef __cplusplus
 }

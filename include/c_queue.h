@@ -42,20 +42,20 @@ void c_queue_swap(c_queue_t* queue, c_queue_t* other);
 /**
  * helpers
  */
-#define C_QUEUE_INT c_queue_create(&c_int_t, c_list_create_backend)
-#define C_QUEUE_SINT c_queue_create(&c_signed_int_t, c_list_create_backend)
-#define C_QUEUE_UINT c_queue_create(&c_unsigned_int_t, c_list_create_backend)
-#define C_QUEUE_SHORT c_queue_create(&c_short_t, c_list_create_backend)
-#define C_QUEUE_SSHORT c_queue_create(&c_signed_short_t, c_list_create_backend)
-#define C_QUEUE_USHORT c_queue_create(&c_unsigned_short_t, c_list_create_backend)
-#define C_QUEUE_LONG c_queue_create(&c_long_t, c_list_create_backend)
-#define C_QUEUE_SLONG c_queue_create(&c_signed_long_t, c_list_create_backend)
-#define C_QUEUE_ULONG c_queue_create(&c_unsigned_long_t, c_list_create_backend)
-#define C_QUEUE_CHAR c_queue_create(&c_char_t, c_list_create_backend)
-#define C_QUEUE_SCHAR c_queue_create(&c_signed_char_t, c_list_create_backend)
-#define C_QUEUE_UCHAR c_queue_create(&c_unsigned_char_t, c_list_create_backend)
-#define C_QUEUE_FLOAT c_queue_create(&c_float_t, c_list_create_backend)
-#define C_QUEUE_DOUBLE c_queue_create(&c_double_t, c_list_create_backend)
+#define C_QUEUE_INT c_queue_create(c_get_int_type_info(), c_list_create_backend)
+#define C_QUEUE_SINT c_queue_create(c_get_sint_type_info(), c_list_create_backend)
+#define C_QUEUE_UINT c_queue_create(c_get_uint_type_info(), c_list_create_backend)
+#define C_QUEUE_SHORT c_queue_create(c_get_short_type_info(), c_list_create_backend)
+#define C_QUEUE_SSHORT c_queue_create(c_get_sshort_type_info(), c_list_create_backend)
+#define C_QUEUE_USHORT c_queue_create(c_get_ushort_type_info(), c_list_create_backend)
+#define C_QUEUE_LONG c_queue_create(c_get_long_type_info(), c_list_create_backend)
+#define C_QUEUE_SLONG c_queue_create(c_get_slong_type_info(), c_list_create_backend)
+#define C_QUEUE_ULONG c_queue_create(c_get_ulong_type_info(), c_list_create_backend)
+#define C_QUEUE_CHAR c_queue_create(c_get_char_type_info(), c_list_create_backend)
+#define C_QUEUE_SCHAR c_queue_create(c_get_schar_type_info(), c_list_create_backend)
+#define C_QUEUE_UCHAR c_queue_create(c_get_uchar_type_info(), c_list_create_backend)
+#define C_QUEUE_FLOAT c_queue_create(c_get_float_type_info(), c_list_create_backend)
+#define C_QUEUE_DOUBLE c_queue_create(c_get_double_type_info(), c_list_create_backend)
 
 #ifdef __cplusplus
 }

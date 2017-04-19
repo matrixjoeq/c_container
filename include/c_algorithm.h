@@ -15,7 +15,7 @@ size_t c_algo_count(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_in
 size_t c_algo_count_if(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last, c_unary_predicate pred);
 
 // modifying sequence operations
-void c_algo_swap(const c_containable_t* type_info, c_ref_t x, c_ref_t y);
+void c_algo_swap(c_containable_t* type_info, c_ref_t x, c_ref_t y);
 void c_algo_iter_swap(c_iterator_t* __c_forward_iterator x, c_iterator_t* __c_forward_iterator y);
 
 // partition operations

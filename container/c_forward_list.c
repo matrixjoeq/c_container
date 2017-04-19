@@ -113,21 +113,25 @@ __c_static c_slist_iterator_t create_iterator(
     assert(type_info);
     assert(node);
 
+    static c_iterator_operation_t ops = {
+        .alloc_and_copy = iter_alloc_and_copy,
+        .assign = iter_assign,
+        .increment = iter_increment,
+        .decrement = 0,
+        .post_increment = iter_post_increment,
+        .post_decrement = 0,
+        .dereference = iter_dereference,
+        .equal = iter_equal,
+        .not_equal = iter_not_equal,
+        .advance = iter_advance,
+        .distance = iter_distance
+    };
+
     c_slist_iterator_t iter = {
         .base_iter = {
             .iterator_category = C_ITER_CATE_FORWARD,
             .iterator_type = C_ITER_TYPE_FORWARD_LIST,
-            .alloc_and_copy = iter_alloc_and_copy,
-            .assign = iter_assign,
-            .increment = iter_increment,
-            .decrement = 0,
-            .post_increment = iter_post_increment,
-            .post_decrement = 0,
-            .dereference = iter_dereference,
-            .equal = iter_equal,
-            .not_equal = iter_not_equal,
-            .advance = iter_advance,
-            .distance = iter_distance,
+            .iterator_ops = &ops,
             .type_info = type_info
         },
         .node = node
@@ -163,22 +167,16 @@ __c_static c_slist_node_t* create_node(c_slist_t* list, c_ref_t data)
     node->next = 0;
 
     c_containable_t* type_info = &(list->type_info);
-    assert(type_info);
-    assert(type_info->size);
     node->data = malloc(type_info->size());
     if (!node->data) {
         __c_free(node);
         return 0;
     }
 
-    if (data) {
-        assert(type_info->copy);
+    if (data)
         type_info->copy(node->data, data);
-    }
-    else {
-        assert(type_info->create);
+    else
         type_info->create(node->data);
-    }
 
     return node;
 }
@@ -195,8 +193,6 @@ __c_static c_slist_node_t* pop_node_after(c_slist_t* list, c_slist_node_t* node)
         return list->node;
 
     c_containable_t* type_info = &list->type_info;
-    assert(type_info);
-    assert(type_info->destroy);
 
     node->next = pos->next;
     type_info->destroy(pos->data);
@@ -483,7 +479,6 @@ void c_slist_remove(c_slist_t* list, const c_ref_t data)
     c_slist_node_t* node = prev->next;
     c_slist_node_t* last = end(list);
     c_containable_t* type_info = &list->type_info;
-    assert(type_info->equal);
     while (node != last && prev != last) {
         if (type_info->equal(node->data, data))
             node = pop_node_after(list, prev);
