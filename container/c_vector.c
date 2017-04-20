@@ -57,7 +57,7 @@ __c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
 
 __c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
 {
-    if (is_vector_iterator(dst) && is_vector_iterator(src)) {
+    if (is_vector_iterator(dst) && is_vector_iterator(src) && dst != src) {
         ((c_vector_iterator_t*)dst)->pos = ((c_vector_iterator_t*)src)->pos;
     }
     return dst;
@@ -138,7 +138,7 @@ __c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* o
 
 __c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* src)
 {
-    if (is_vector_reverse_iterator(dst) && is_vector_reverse_iterator(src)) {
+    if (is_vector_reverse_iterator(dst) && is_vector_reverse_iterator(src) && dst != src) {
         ((c_vector_iterator_t*)dst)->pos = ((c_vector_iterator_t*)src)->pos;
     }
     return dst;

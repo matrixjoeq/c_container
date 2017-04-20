@@ -71,19 +71,19 @@ void algo_for_each_n(c_iterator_t* first, size_t n, c_iterator_t** reach, c_unar
     if (!first || !reach || !func) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_INPUT));
 
-    c_iterator_t* __first = 0;
-    C_ITER_COPY(&__first, first);
-
-    if (*reach == 0)
-        C_ITER_COPY(reach, first);
+    c_iterator_t* __reach = 0;
+    C_ITER_COPY(&__reach, first);
 
     while (n--) {
-        func(C_ITER_DEREF(__first));
-        C_ITER_INC(__first);
+        func(C_ITER_DEREF(__reach));
+        C_ITER_INC(__reach);
     }
 
-    C_ITER_ASSIGN(*reach, __first);
-    __c_free(__first);
+    if (*reach == 0)
+        C_ITER_COPY(reach, __reach);
+    else
+        C_ITER_ASSIGN(*reach, __reach);
+    __c_free(__reach);
 }
 
 size_t algo_count(c_iterator_t* first, c_iterator_t* last, c_ref_t data)
@@ -146,21 +146,29 @@ bool algo_equal_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t* first2
     return is_equal;
 }
 
-bool algo_find(c_iterator_t* first, c_iterator_t* last, c_iterator_t** found, const c_ref_t value)
+bool algo_find_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t** found,
+                  const c_ref_t value, c_binary_predicate pred)
 {
-    if (!first || !last || !found || !value) return false;
+    if (!first || !last || !found || !value || !pred) return false;
 
     bool is_found = false;
 
-    if (*found == 0)
-        C_ITER_COPY(found, last);
-
     __C_ALGO_BEGIN
-    c_containable_t* type_info = __first->type_info;
-    while (C_ITER_NE(__first, __last) && !type_info->equal(C_ITER_DEREF(__first), value))
+
+    c_iterator_t* __found = 0; // in case *found == first
+    C_ITER_COPY(&__found, __last);
+
+    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first), value))
         C_ITER_INC(__first);
-    C_ITER_ASSIGN(*found, __first);
     is_found = C_ITER_NE(__first, __last);
+    if (is_found) C_ITER_ASSIGN(__found, __first);
+
+    if (*found == 0)
+        C_ITER_COPY(found, __found);
+    else
+        C_ITER_ASSIGN(*found, __found);
+
+    __c_free(__found);
     __C_ALGO_END
 
     return is_found;
@@ -172,14 +180,22 @@ bool algo_find_if(c_iterator_t* first, c_iterator_t* last, c_iterator_t** found,
 
     bool is_found = false;
 
-    if (*found == 0)
-        C_ITER_COPY(found, last);
-
     __C_ALGO_BEGIN
+
+    c_iterator_t* __found = 0; // in case *found == first
+    C_ITER_COPY(&__found, __last);
+
     while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first)))
         C_ITER_INC(__first);
-    C_ITER_ASSIGN(*found, __first);
     is_found = C_ITER_NE(__first, __last);
+    if (is_found) C_ITER_ASSIGN(__found, __first);
+
+    if (*found == 0)
+        C_ITER_COPY(found, __found);
+    else
+        C_ITER_ASSIGN(*found, __found);
+    __c_free(__found);
+
     __C_ALGO_END
 
     return is_found;
@@ -191,14 +207,22 @@ bool algo_find_if_not(c_iterator_t* first, c_iterator_t* last, c_iterator_t** fo
 
     bool is_found = false;
 
-    if (*found == 0)
-        C_ITER_COPY(found, last);
-
     __C_ALGO_BEGIN
+
+    c_iterator_t* __found = 0; // in case *found == first
+    C_ITER_COPY(&__found, __last);
+
     while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first)))
         C_ITER_INC(__first);
-    C_ITER_ASSIGN(*found, __first);
     is_found = C_ITER_NE(__first, __last);
+    if (is_found) C_ITER_ASSIGN(__found, __first);
+
+    if (*found == 0)
+        C_ITER_COPY(found, __found);
+    else
+        C_ITER_ASSIGN(*found, __found);
+    __c_free(__found);
+
     __C_ALGO_END
 
     return is_found;
@@ -212,12 +236,12 @@ bool algo_find_first_of_by(c_iterator_t* first, c_iterator_t* last,
 
     bool is_found = false;
 
-    if (*found == 0)
-        C_ITER_COPY(found, last);
-
     __C_ALGO_BEGIN
+
+    c_iterator_t* __found = 0; // in case *found == first
     c_iterator_t* __s_first = 0;
     c_iterator_t* __s_last = 0;
+    C_ITER_COPY(&__found, __last);
     C_ITER_COPY(&__s_first, s_first);
     C_ITER_COPY(&__s_last, s_last);
     while (!is_found && C_ITER_NE(__first, __last)) {
@@ -230,9 +254,16 @@ bool algo_find_first_of_by(c_iterator_t* first, c_iterator_t* last,
         }
         if (!is_found) C_ITER_INC(__first);
     }
-    C_ITER_ASSIGN(*found, __first);
+    if (is_found) C_ITER_ASSIGN(__found, __first);
+
+    if (*found == 0)
+        C_ITER_COPY(found, __found);
+    else
+        C_ITER_ASSIGN(*found, __found);
+    __c_free(__found);
     __c_free(__s_last);
     __c_free(__s_first);
+
     __C_ALGO_END
 
     return is_found;
@@ -242,23 +273,137 @@ bool algo_adjacent_find_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t
 {
     if (!first || !last || !found || !pred) return false;
 
-    if (*found == 0)
-        C_ITER_COPY(found, last);
+    if (C_ITER_EQ(first, last)) {
+        if (*found == 0)
+            C_ITER_COPY(found, last);
+        else
+            C_ITER_ASSIGN(*found, last);
+        return false;
+    }
 
     bool is_found = false;
+
     __C_ALGO_BEGIN
+
+    c_iterator_t* __found = 0; // in case *found == first
     c_iterator_t* __next = 0;
+    C_ITER_COPY(&__found, __last);
     C_ITER_COPY(&__next, __first);
     C_ITER_INC(__next);
     while (C_ITER_NE(__next, __last) && !pred(C_ITER_DEREF(__first), C_ITER_DEREF(__next))) {
-        C_ITER_INC(__first);
+        C_ITER_ASSIGN(__first, __next);
         C_ITER_INC(__next);
     }
-    C_ITER_ASSIGN(*found, __first);
     is_found = C_ITER_NE(__next, __last);
+    if (is_found) C_ITER_ASSIGN(__found, __first);
+
+    if (*found == 0)
+        C_ITER_COPY(found, __found);
+    else
+        C_ITER_ASSIGN(*found, __found);
+    __c_free(__found);
     __c_free(__next);
+
     __C_ALGO_END
 
     return is_found;
 }
 
+bool algo_search_by(c_iterator_t* first, c_iterator_t* last,
+                    c_iterator_t* s_first, c_iterator_t* s_last,
+                    c_iterator_t** found, c_binary_predicate pred)
+{
+    if (!first || !last || !s_first || !s_last || !found || !pred) return false;
+
+    bool is_found = false;
+
+    __C_ALGO_BEGIN
+
+    c_iterator_t* __found = 0;
+    c_iterator_t* __i = 0;
+    c_iterator_t* __s = 0;
+    C_ITER_COPY(&__found, __last);
+    C_ITER_COPY(&__i, __first);
+    C_ITER_COPY(&__s, s_first);
+
+    while (C_ITER_NE(__first, __last)) {
+        while (C_ITER_NE(__i, __last) && C_ITER_NE(__s, s_last) &&
+               pred(C_ITER_DEREF(__i), C_ITER_DEREF(__s))) {
+            C_ITER_INC(__i);
+            C_ITER_INC(__s);
+        }
+
+        if (C_ITER_EQ(__s, s_last)) {
+            is_found = true;
+            break;
+        }
+
+        C_ITER_INC(__first);
+        C_ITER_ASSIGN(__i, __first);
+        C_ITER_ASSIGN(__s, s_first);
+    }
+
+    if (is_found) C_ITER_ASSIGN(__found, __first);
+
+    if (*found == 0)
+        C_ITER_COPY(found, __found);
+    else
+        C_ITER_ASSIGN(*found, __found);
+
+    __c_free(__s);
+    __c_free(__i);
+    __c_free(__found);
+
+    __C_ALGO_END
+
+    return is_found;
+}
+
+bool algo_search_n_by(c_iterator_t* first, c_iterator_t* last,
+                      size_t n, const c_ref_t value,
+                      c_iterator_t** found, c_binary_predicate pred)
+{
+    if (!first || !last || !value || !found || !pred) return false;
+
+    if (n == 0) {
+        if (*found == 0)
+            C_ITER_COPY(found, last);
+        else
+            C_ITER_ASSIGN(*found, last);
+        return false;
+    }
+
+    bool is_found = false;
+
+    __C_ALGO_BEGIN
+
+    c_iterator_t* __found = 0;
+    c_iterator_t* __i = 0;
+    C_ITER_COPY(&__found, __last);
+    C_ITER_COPY(&__i, __first);
+    while (algo_find_by(__i, __last, &__first, value, pred)) {
+        size_t __n = n - 1;
+        C_ITER_ASSIGN(__i, __first);
+        C_ITER_INC(__i);
+        while (__n != 0 && C_ITER_NE(__i, __last) && pred(C_ITER_DEREF(__i), value)) {
+            C_ITER_INC(__i);
+            --__n;
+        }
+
+        if (__n == 0) {
+            is_found = true;
+            break;
+        }
+    }
+    if (is_found) C_ITER_ASSIGN(__found, __first);
+
+    if (*found == 0)
+        C_ITER_COPY(found, __found);
+    else
+        C_ITER_ASSIGN(*found, __found);
+    __c_free(__i);
+    __c_free(__found);
+    __C_ALGO_END
+
+    return is_found;
+}

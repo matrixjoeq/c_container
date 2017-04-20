@@ -140,19 +140,19 @@ TEST_F(CNonModifyingTest, Count)
     c_vector_iterator_t v_last = c_vector_end(__v);
     size_t count = 0;
     for (int i = 0; i < 5; ++i) {
-        count = c_algo_count(C_ITER_T(&l_first), C_ITER_T(&l_last), C_REF_T(&i));
+        count = c_algo_count(&l_first, &l_last, &i);
         EXPECT_EQ(i, count);
-        count = c_algo_count(C_ITER_T(&fl_first), C_ITER_T(&fl_last), C_REF_T(&i));
+        count = c_algo_count(&fl_first, &fl_last, &i);
         EXPECT_EQ(i, count);
-        count = c_algo_count(C_ITER_T(&v_first), C_ITER_T(&v_last), C_REF_T(&i));
+        count = c_algo_count(&v_first, &v_last, &i);
         EXPECT_EQ(i, count);
     }
 
-    count = c_algo_count_if(C_ITER_T(&l_first), C_ITER_T(&l_last), greater_than_two);
+    count = c_algo_count_if(&l_first, &l_last, greater_than_two);
     EXPECT_EQ(7, count);
-    count = c_algo_count_if(C_ITER_T(&fl_first), C_ITER_T(&fl_last), greater_than_two);
+    count = c_algo_count_if(&fl_first, &fl_last, greater_than_two);
     EXPECT_EQ(7, count);
-    count = c_algo_count_if(C_ITER_T(&v_first), C_ITER_T(&v_last), greater_than_two);
+    count = c_algo_count_if(&v_first, &v_last, greater_than_two);
     EXPECT_EQ(7, count);
 }
 
