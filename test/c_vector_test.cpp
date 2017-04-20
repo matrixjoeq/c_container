@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <vector>
 #include "c_internal.h"
-#include "c_iterator.h"
 #include "c_vector.h"
 
 namespace c_container {
@@ -126,11 +125,11 @@ TEST_F(CVectorTest, BeginEnd)
 
 TEST_F(CVectorTest, At)
 {
-	SetupVector(default_data, default_length);
-	
-	for (int i = 0; i < default_length; ++i) {
-		EXPECT_EQ(i, C_DEREF_INT(c_vector_at(vector, i)));
-	}
+    SetupVector(default_data, default_length);
+
+    for (int i = 0; i < default_length; ++i) {
+        EXPECT_EQ(i, C_DEREF_INT(c_vector_at(vector, i)));
+    }
 }
 
 TEST_F(CVectorTest, BackOperations)

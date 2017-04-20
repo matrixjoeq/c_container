@@ -6,7 +6,6 @@
 #include <sys/time.h>
 #include <forward_list>
 #include "c_internal.h"
-#include "c_iterator.h"
 #include "c_forward_list.h"
 
 namespace c_container {

@@ -1,9 +1,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "c_def.h"
 #include "c_internal.h"
-#include "c_iterator.h"
 #include "c_algorithm.h"
 
 void algo_swap(c_containable_t* type_info, c_ref_t x, c_ref_t y)

@@ -157,27 +157,48 @@ c_containable_t* c_get_char_type_info(void);
 c_containable_t* c_get_float_type_info(void);
 c_containable_t* c_get_double_type_info(void);
 
-#define C_REF_T(x) (c_ref_t)(x)
-#define C_ITER_T(x) (c_iterator_t*)(x)
-#define C_ITER_PTR(x) (c_iterator_t**)(x)
+#define C_REF_T(x)      ((c_ref_t)(x))
+#define C_ITER_T(x)     ((c_iterator_t*)(x))
+#define C_ITER_PTR(x)   ((c_iterator_t**)(x))
 
 #define C_CONV_TYPE(type, x)    ((type*)(x))
 #define C_DEREF_TYPE(type, x)   (*(type*)(x))
 
-#define C_DEREF_INT(x)      C_DEREF_TYPE(int, x)
-#define C_DEREF_SINT(x)     C_DEREF_TYPE(signed int, x)
-#define C_DEREF_UINT(x)     C_DEREF_TYPE(unsigned int, x)
-#define C_DEREF_SHORT(x)    C_DEREF_TYPE(short, x)
-#define C_DEREF_SSHORT(x)   C_DEREF_TYPE(signed short, x)
-#define C_DEREF_USHORT(x)   C_DEREF_TYPE(unsigned short, x)
-#define C_DEREF_LONG(x)     C_DEREF_TYPE(long, x)
-#define C_DEREF_SLONG(x)    C_DEREF_TYPE(signed long, x)
-#define C_DEREF_ULONG(x)    C_DEREF_TYPE(unsigned long, x)
-#define C_DEREF_CHAR(x)     C_DEREF_TYPE(char, x)
-#define C_DEREF_SCHAR(x)    C_DEREF_TYPE(signed char, x)
-#define C_DEREF_UCHAR(x)    C_DEREF_TYPE(unsigned char, x)
-#define C_DEREF_FLOAT(x)    C_DEREF_TYPE(float, x)
-#define C_DEREF_DOUBLE(x)   C_DEREF_TYPE(double, x)
+#define C_DEREF_INT(x)      C_DEREF_TYPE(int, (x))
+#define C_DEREF_SINT(x)     C_DEREF_TYPE(signed int, (x))
+#define C_DEREF_UINT(x)     C_DEREF_TYPE(unsigned int, (x))
+#define C_DEREF_SHORT(x)    C_DEREF_TYPE(short, (x))
+#define C_DEREF_SSHORT(x)   C_DEREF_TYPE(signed short, (x))
+#define C_DEREF_USHORT(x)   C_DEREF_TYPE(unsigned short, (x))
+#define C_DEREF_LONG(x)     C_DEREF_TYPE(long, (x))
+#define C_DEREF_SLONG(x)    C_DEREF_TYPE(signed long, (x))
+#define C_DEREF_ULONG(x)    C_DEREF_TYPE(unsigned long, (x))
+#define C_DEREF_CHAR(x)     C_DEREF_TYPE(char, (x))
+#define C_DEREF_SCHAR(x)    C_DEREF_TYPE(signed char, (x))
+#define C_DEREF_UCHAR(x)    C_DEREF_TYPE(unsigned char, (x))
+#define C_DEREF_FLOAT(x)    C_DEREF_TYPE(float, (x))
+#define C_DEREF_DOUBLE(x)   C_DEREF_TYPE(double, (x))
+
+#define C_ITER_COPY(x, y)       C_ITER_T(y)->iterator_ops->alloc_and_copy(C_ITER_PTR(x), C_ITER_T(y))
+#define C_ITER_ASSIGN(x, y)     C_ITER_T(x)->iterator_ops->assign(C_ITER_T(x), C_ITER_T(y))
+#define C_ITER_INC(x)           C_ITER_T(x)->iterator_ops->increment(C_ITER_T(x))
+#define C_ITER_DEC(x)           C_ITER_T(x)->iterator_ops->decrement(C_ITER_T(x))
+#define C_ITER_DEREF(x)         C_ITER_T(x)->iterator_ops->dereference(C_ITER_T(x))
+#define C_ITER_EQ(x, y)         C_ITER_T(x)->iterator_ops->equal(C_ITER_T(x), C_ITER_T(y))
+#define C_ITER_NE(x, y)         C_ITER_T(x)->iterator_ops->not_equal(C_ITER_T(x), C_ITER_T(y))
+#define C_ITER_DISTANCE(x, y)   C_ITER_T(x)->iterator_ops->distance(C_ITER_T(x), C_ITER_T(y))
+#define C_ITER_AT_LEAST(x, c)   (C_ITER_T(x)->iterator_category >= (c_iterator_category_t)(c))
+#define C_ITER_EXACT(x, c)      (C_ITER_T(x)->iterator_category == (c_iterator_category_t)(c))
+
+#define __c_output_iterator
+#define __c_input_iterator
+#define __c_forward_iterator
+#define __c_bidirection_iterator
+#define __c_random_iterator
+
+#define __c_is_same(x, y)       ((!(x) || !(y)) ? false : memcmp((x), (y), sizeof(*(x))) == 0)
+#define __c_get_less(iter)      C_ITER_T(iter)->type_info->less
+#define __c_get_equal(iter)     C_ITER_T(iter)->type_info->equal
 
 #ifdef __cplusplus
 }

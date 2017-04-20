@@ -1,9 +1,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "c_def.h"
 #include "c_internal.h"
-#include "c_iterator.h"
 #include "c_algorithm.h"
 
 __c_static c_iterator_t* random_add(c_iterator_t** dst, c_iterator_t* src, ptrdiff_t n)

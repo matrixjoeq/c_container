@@ -1,9 +1,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "c_def.h"
 #include "c_internal.h"
-#include "c_iterator.h"
 #include "c_algorithm.h"
 
 bool algo_all_of(c_iterator_t* first, c_iterator_t* last, c_unary_predicate pred)
@@ -12,15 +10,11 @@ bool algo_all_of(c_iterator_t* first, c_iterator_t* last, c_unary_predicate pred
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_INPUT));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_INPUT));
 
-    bool ret = true;
+    bool ret = false;
     __C_ALGO_BEGIN
-    while (C_ITER_NE(__first, __last)) {
-        if (!pred(C_ITER_DEREF(__first))) {
-            ret = false;
-            break;
-        }
+    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first)))
         C_ITER_INC(__first);
-    }
+    ret = C_ITER_EQ(__first, __last);
     __C_ALGO_END
 
     return ret;
@@ -34,13 +28,9 @@ bool algo_any_of(c_iterator_t* first, c_iterator_t* last, c_unary_predicate pred
 
     bool ret = false;
     __C_ALGO_BEGIN
-    while (C_ITER_NE(__first, __last)) {
-        if (pred(C_ITER_DEREF(__first))) {
-            ret = true;
-            break;
-        }
+    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first)))
         C_ITER_INC(__first);
-    }
+    ret = C_ITER_NE(__first, __last);
     __C_ALGO_END
 
     return ret;
@@ -52,15 +42,11 @@ bool algo_none_of(c_iterator_t* first, c_iterator_t* last, c_unary_predicate pre
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_INPUT));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_INPUT));
 
-    bool ret = true;
+    bool ret = false;
     __C_ALGO_BEGIN
-    while (C_ITER_NE(__first, __last)) {
-        if (pred(C_ITER_DEREF(__first))) {
-            ret = false;
-            break;
-        }
+    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first)))
         C_ITER_INC(__first);
-    }
+    ret = C_ITER_EQ(__first, __last);
     __C_ALGO_END
 
     return ret;
@@ -85,20 +71,18 @@ void algo_for_each_n(c_iterator_t* first, size_t n, c_iterator_t** reach, c_unar
     if (!first || !reach || !func) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_INPUT));
 
-    c_iterator_operation_t* iter_ops = first->iterator_ops;
     c_iterator_t* __first = 0;
-    iter_ops->alloc_and_copy(&__first, first);
+    C_ITER_COPY(&__first, first);
 
     if (*reach == 0)
-        iter_ops->alloc_and_copy(reach, first);
+        C_ITER_COPY(reach, first);
 
     while (n--) {
         func(C_ITER_DEREF(__first));
         C_ITER_INC(__first);
     }
 
-    iter_ops->assign(*reach, __first);
-
+    C_ITER_ASSIGN(*reach, __first);
     __c_free(__first);
 }
 
@@ -108,17 +92,17 @@ size_t algo_count(c_iterator_t* first, c_iterator_t* last, c_ref_t data)
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_INPUT));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_INPUT));
 
-    size_t ret = 0;
+    size_t count = 0;
 
     __C_ALGO_BEGIN
     c_containable_t* type_info = __first->type_info;
     while (C_ITER_NE(__first, __last)) {
-        if (type_info->equal(data, C_ITER_DEREF(__first))) ++ret;
+        if (type_info->equal(data, C_ITER_DEREF(__first))) ++count;
         C_ITER_INC(__first);
     }
     __C_ALGO_END
 
-    return ret;
+    return count;
 }
 
 size_t algo_count_if(c_iterator_t* first, c_iterator_t* last, c_unary_predicate pred)
@@ -127,16 +111,16 @@ size_t algo_count_if(c_iterator_t* first, c_iterator_t* last, c_unary_predicate 
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_INPUT));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_INPUT));
 
-    size_t ret = 0;
+    size_t count = 0;
 
     __C_ALGO_BEGIN
     while (C_ITER_NE(__first, __last)) {
-        if (pred(C_ITER_DEREF(__first))) ++ret;
+        if (pred(C_ITER_DEREF(__first))) ++count;
         C_ITER_INC(__first);
     }
     __C_ALGO_END
 
-    return ret;
+    return count;
 }
 
 bool algo_equal_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t* first2, c_binary_predicate pred)
@@ -146,26 +130,20 @@ bool algo_equal_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t* first2
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_INPUT));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_INPUT));
 
-    bool equal = true;
-    __C_ALGO_BEGIN
+    bool is_equal = false;
 
+    __C_ALGO_BEGIN
     c_iterator_t* __first2 = 0;
     C_ITER_COPY(&__first2, first2);
-
-    while (C_ITER_NE(__first, __last)) {
-        if (!pred(C_ITER_DEREF(__first), C_ITER_DEREF(__first2))) {
-            equal = false;
-            break;
-        }
+    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first), C_ITER_DEREF(__first2))) {
         C_ITER_INC(__first);
         C_ITER_INC(__first2);
     }
-
+    is_equal = C_ITER_EQ(__first, __last);
     __c_free(__first2);
-
     __C_ALGO_END
 
-    return equal;
+    return is_equal;
 }
 
 bool algo_find(c_iterator_t* first, c_iterator_t* last, c_iterator_t** found, const c_ref_t value)
@@ -179,14 +157,10 @@ bool algo_find(c_iterator_t* first, c_iterator_t* last, c_iterator_t** found, co
 
     __C_ALGO_BEGIN
     c_containable_t* type_info = __first->type_info;
-    while (C_ITER_NE(__first, __last)) {
-        if (type_info->equal(C_ITER_DEREF(__first), value)) {
-            is_found = true;
-            break;
-        }
+    while (C_ITER_NE(__first, __last) && !type_info->equal(C_ITER_DEREF(__first), value))
         C_ITER_INC(__first);
-    }
     C_ITER_ASSIGN(*found, __first);
+    is_found = C_ITER_NE(__first, __last);
     __C_ALGO_END
 
     return is_found;
@@ -202,14 +176,10 @@ bool algo_find_if(c_iterator_t* first, c_iterator_t* last, c_iterator_t** found,
         C_ITER_COPY(found, last);
 
     __C_ALGO_BEGIN
-    while (C_ITER_NE(__first, __last)) {
-        if (pred(C_ITER_DEREF(__first))) {
-            is_found = true;
-            break;
-        }
+    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first)))
         C_ITER_INC(__first);
-    }
     C_ITER_ASSIGN(*found, __first);
+    is_found = C_ITER_NE(__first, __last);
     __C_ALGO_END
 
     return is_found;
@@ -225,14 +195,10 @@ bool algo_find_if_not(c_iterator_t* first, c_iterator_t* last, c_iterator_t** fo
         C_ITER_COPY(found, last);
 
     __C_ALGO_BEGIN
-    while (C_ITER_NE(__first, __last)) {
-        if (!pred(C_ITER_DEREF(__first))) {
-            is_found = true;
-            break;
-        }
+    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first)))
         C_ITER_INC(__first);
-    }
     C_ITER_ASSIGN(*found, __first);
+    is_found = C_ITER_NE(__first, __last);
     __C_ALGO_END
 
     return is_found;
@@ -276,24 +242,20 @@ bool algo_adjacent_find_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t
 {
     if (!first || !last || !found || !pred) return false;
 
-    bool is_found = false;
-
     if (*found == 0)
         C_ITER_COPY(found, last);
 
+    bool is_found = false;
     __C_ALGO_BEGIN
     c_iterator_t* __next = 0;
     C_ITER_COPY(&__next, __first);
     C_ITER_INC(__next);
-    while (C_ITER_NE(__next, __last)) {
-        if (pred(C_ITER_DEREF(__first), C_ITER_DEREF(__next))) {
-            is_found = true;
-            break;
-        }
+    while (C_ITER_NE(__next, __last) && !pred(C_ITER_DEREF(__first), C_ITER_DEREF(__next))) {
         C_ITER_INC(__first);
         C_ITER_INC(__next);
     }
     C_ITER_ASSIGN(*found, __first);
+    is_found = C_ITER_NE(__next, __last);
     __c_free(__next);
     __C_ALGO_END
 

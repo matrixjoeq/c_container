@@ -4,7 +4,6 @@
 #define __C_ALGORITHM_H__
 
 #include "c_def.h"
-#include "c_iterator.h"
 
 #ifdef __cplusplus
 extern "C" {
