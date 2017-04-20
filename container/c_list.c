@@ -4,7 +4,6 @@
 #include <assert.h>
 #include <string.h>
 #include "c_internal.h"
-#include "c_iterator.h"
 #include "c_list.h"
 
 struct __c_list_node {
@@ -747,7 +746,7 @@ void c_list_merge(c_list_t* list, c_list_t* other)
 
 void c_list_merge_by(c_list_t* list, c_list_t* other, c_compare comp)
 {
-    if (!list || c_list_empty(other) || !comp || !type_info_equal(&list->type_info, &other->type_info))
+    if (!list || c_list_empty(other) || !comp || !__c_is_same(&list->type_info, &other->type_info))
         return;
 
     c_list_node_t* node = begin(list);
@@ -770,7 +769,7 @@ void c_list_merge_by(c_list_t* list, c_list_t* other, c_compare comp)
 
 void c_list_splice(c_list_t* list, c_list_iterator_t pos, c_list_t* other)
 {
-    if (!list || c_list_empty(other) || !type_info_equal(&list->type_info, &other->type_info))
+    if (!list || c_list_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
         return;
 
     transfer(pos.node, begin(other), end(other));
@@ -778,7 +777,7 @@ void c_list_splice(c_list_t* list, c_list_iterator_t pos, c_list_t* other)
 
 void c_list_splice_from(c_list_t* list, c_list_iterator_t pos, c_list_t* other, c_list_iterator_t from)
 {
-    if (!list || c_list_empty(other) || !type_info_equal(&list->type_info, &other->type_info))
+    if (!list || c_list_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
         return;
 
     transfer(pos.node, from.node, end(other));
@@ -786,7 +785,7 @@ void c_list_splice_from(c_list_t* list, c_list_iterator_t pos, c_list_t* other, 
 
 void c_list_splice_range(c_list_t* list, c_list_iterator_t pos, c_list_t* other, c_list_iterator_t first, c_list_iterator_t last)
 {
-    if (!list || c_list_empty(other) || !type_info_equal(&list->type_info, &other->type_info))
+    if (!list || c_list_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
         return;
 
     transfer(pos.node, first.node, last.node);

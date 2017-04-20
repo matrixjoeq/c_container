@@ -1,7 +1,6 @@
 
 #include <stdlib.h>
 #include "c_internal.h"
-#include "c_iterator.h"
 #include "c_algorithm.h"
 #include "c_priority_queue.h"
 

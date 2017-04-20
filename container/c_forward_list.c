@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <string.h>
 #include "c_internal.h"
-#include "c_iterator.h"
 #include "c_forward_list.h"
 
 struct __c_slist_node {
@@ -428,7 +427,7 @@ void c_slist_merge(c_slist_t* list, c_slist_t* other)
 void c_slist_merge_by(c_slist_t* list, c_slist_t* other, c_compare comp)
 {
     if (!list || c_slist_empty(other) || !comp ||
-        !type_info_equal(&list->type_info, &other->type_info))
+        !__c_is_same(&list->type_info, &other->type_info))
         return;
 
     c_slist_node_t* node = before_begin(list);
@@ -448,7 +447,7 @@ void c_slist_merge_by(c_slist_t* list, c_slist_t* other, c_compare comp)
 
 void c_slist_splice_after(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* other)
 {
-    if (!list || c_slist_empty(other) || !type_info_equal(&list->type_info, &other->type_info))
+    if (!list || c_slist_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
         return;
 
     transfer(pos.node, before_begin(other), end(other));
@@ -456,7 +455,7 @@ void c_slist_splice_after(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* ot
 
 void c_slist_splice_after_from(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* other, c_slist_iterator_t from)
 {
-    if (!list || c_slist_empty(other) || !type_info_equal(&list->type_info, &other->type_info))
+    if (!list || c_slist_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
         return;
 
     transfer(pos.node, from.node, end(other));
@@ -464,7 +463,7 @@ void c_slist_splice_after_from(c_slist_t* list, c_slist_iterator_t pos, c_slist_
 
 void c_slist_splice_after_range(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* other, c_slist_iterator_t first, c_slist_iterator_t last)
 {
-    if (!list || c_slist_empty(other) || !type_info_equal(&list->type_info, &other->type_info))
+    if (!list || c_slist_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
         return;
 
     transfer(pos.node, first.node, last.node);

@@ -6,7 +6,6 @@
 #include <string.h>
 #include <math.h>
 #include "c_internal.h"
-#include "c_iterator.h"
 #include "c_vector.h"
 
 struct __c_vector {
