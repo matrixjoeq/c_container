@@ -17,7 +17,7 @@ typedef struct __c_priority_queue c_priority_queue_t;
 /**
  * constructor/destructor
  */
-c_priority_queue_t* c_priority_queue_create(const c_containable_t* type_info, BackendContainerCreator creator, c_compare comp);
+c_priority_queue_t* c_priority_queue_create(c_containable_t* type_info, BackendContainerCreator creator, c_compare comp);
 void c_priority_queue_destroy(c_priority_queue_t* queue);
 
 /**
@@ -34,7 +34,7 @@ size_t c_priority_queue_size(c_priority_queue_t* queue);
 /**
  * modifiers
  */
-void c_priority_queue_push(c_priority_queue_t* queue, const c_ref_t data);
+void c_priority_queue_push(c_priority_queue_t* queue, c_ref_t data);
 void c_priority_queue_pop(c_priority_queue_t* queue);
 void c_priority_queue_swap(c_priority_queue_t* queue, c_priority_queue_t* other);
 

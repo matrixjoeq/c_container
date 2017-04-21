@@ -123,6 +123,45 @@ size_t algo_count_if(c_iterator_t* first, c_iterator_t* last, c_unary_predicate 
     return count;
 }
 
+bool algo_mismatch_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t* first2,
+                      c_iterator_t** mismatch1, c_iterator_t** mismatch2, c_binary_predicate pred)
+{
+    if (!first || !last || !first2 || !mismatch1 || !mismatch2 || !pred) return false;
+
+    bool is_mismatch = false;
+
+    __C_ALGO_BEGIN
+
+    c_iterator_t* __m1 = 0;
+    c_iterator_t* __m2 = 0;
+    c_iterator_t* __first2 = 0;
+    C_ITER_COPY(&__first2, first2);
+    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first), C_ITER_DEREF(__first2))) {
+        C_ITER_INC(__first);
+        C_ITER_INC(__first2);
+    }
+
+    is_mismatch = C_ITER_NE(__first, __last);
+    C_ITER_COPY(&__m1, __first);
+    C_ITER_COPY(&__m2, __first2);
+
+    if (*mismatch1 == 0)
+        C_ITER_COPY(mismatch1, __m1);
+    else
+        C_ITER_ASSIGN(*mismatch1, __m1);
+
+    if (*mismatch2 == 0)
+        C_ITER_COPY(mismatch2, __m2);
+    else
+        C_ITER_ASSIGN(*mismatch2, __m2);
+    __c_free(__first2);
+    __c_free(__m2);
+    __c_free(__m1);
+    __C_ALGO_END
+
+    return is_mismatch;
+}
+
 bool algo_equal_by(c_iterator_t* first, c_iterator_t* last, c_iterator_t* first2, c_binary_predicate pred)
 {
     if (!first || !last || !first2 || !pred) return false;
@@ -245,6 +284,7 @@ bool algo_find_first_of_by(c_iterator_t* first, c_iterator_t* last,
     C_ITER_COPY(&__s_first, s_first);
     C_ITER_COPY(&__s_last, s_last);
     while (!is_found && C_ITER_NE(__first, __last)) {
+        C_ITER_ASSIGN(__s_first, s_first);
         while (C_ITER_NE(__s_first, __s_last)) {
             if (pred(C_ITER_DEREF(__first), C_ITER_DEREF(__s_first))) {
                 is_found = true;
@@ -263,6 +303,34 @@ bool algo_find_first_of_by(c_iterator_t* first, c_iterator_t* last,
     __c_free(__found);
     __c_free(__s_last);
     __c_free(__s_first);
+
+    __C_ALGO_END
+
+    return is_found;
+}
+
+bool algo_find_last_of_by(c_iterator_t* first, c_iterator_t* last,
+                          c_iterator_t* s_first, c_iterator_t* s_last,
+                          c_iterator_t** found, c_binary_predicate pred)
+{
+    if (!first || !last || !s_first || !s_last || !found || !pred) return false;
+
+    bool is_found = false;
+
+    __C_ALGO_BEGIN
+    c_iterator_t* __found = 0;
+    C_ITER_COPY(&__found, __last);
+    while (c_algo_find_first_of_by(__first, __last, s_first, s_last, &__first, pred)) {
+        is_found = true;
+        C_ITER_ASSIGN(__found, __first);
+        C_ITER_INC(__first);
+    }
+
+    if (*found == 0)
+        C_ITER_COPY(found, __found);
+    else
+        C_ITER_ASSIGN(*found, __found);
+    __c_free(__found);
 
     __C_ALGO_END
 
@@ -354,6 +422,33 @@ bool algo_search_by(c_iterator_t* first, c_iterator_t* last,
     __c_free(__i);
     __c_free(__found);
 
+    __C_ALGO_END
+
+    return is_found;
+}
+
+bool algo_search_last_by(c_iterator_t* first, c_iterator_t* last,
+                         c_iterator_t* s_first, c_iterator_t* s_last,
+                         c_iterator_t** found, c_binary_predicate pred)
+{
+    if (!first || !last || !s_first || !s_last || !found || !pred) return false;
+
+    bool is_found = false;
+
+    __C_ALGO_BEGIN
+    c_iterator_t* __found = 0;
+    C_ITER_COPY(&__found, __last);
+    while (c_algo_search_by(__first, __last, s_first, s_last, &__first, pred)) {
+        is_found = true;
+        C_ITER_ASSIGN(__found, __first);
+        C_ITER_INC(__first);
+    }
+
+    if (*found == 0)
+        C_ITER_COPY(found, __found);
+    else
+        C_ITER_ASSIGN(*found, __found);
+    __c_free(__found);
     __C_ALGO_END
 
     return is_found;

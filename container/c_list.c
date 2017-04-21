@@ -15,11 +15,11 @@ typedef struct __c_list_node c_list_node_t;
 
 struct __c_list {
     c_list_node_t* node; // end() of list
-    c_containable_t type_info;
+    c_containable_t* type_info;
 };
 
 struct __c_backend_list {
-    c_backend_container_t ops;
+    c_backend_container_t interface;
     c_list_t* impl;
 };
 
@@ -337,17 +337,16 @@ __c_static c_list_node_t* create_node(c_list_t* list, c_ref_t data)
     node->prev = 0;
     node->next = 0;
 
-    c_containable_t* type_info = &list->type_info;
-    node->data = malloc(type_info->size());
+    node->data = malloc(list->type_info->size());
     if (!node->data) {
         __c_free(node);
         return 0;
     }
 
     if (data)
-        type_info->copy(node->data, data);
+        list->type_info->copy(node->data, data);
     else
-        type_info->create(node->data);
+        list->type_info->create(node->data);
 
     return node;
 }
@@ -360,14 +359,12 @@ __c_static c_list_node_t* pop_node(c_list_t* list, c_list_node_t* node)
     if (node == list->node)
         return node;
 
-    c_containable_t* type_info = &list->type_info;
-
     c_list_node_t* next_node = node->next;
     c_list_node_t* prev_node = node->prev;
 
     next_node->prev = prev_node;
     prev_node->next = next_node;
-    type_info->destroy(node->data);
+    list->type_info->destroy(node->data);
     __c_free(node->data);
     __c_free(node);
 
@@ -463,7 +460,7 @@ __c_static size_t backend_max_size(void)
     return (-1);
 }
 
-__c_static void backend_push_back(c_backend_container_t* c, const c_ref_t data)
+__c_static void backend_push_back(c_backend_container_t* c, c_ref_t data)
 {
     if (!c || !data) return;
 
@@ -479,7 +476,7 @@ __c_static void backend_pop_back(c_backend_container_t* c)
     c_list_pop_back(_c->impl);
 }
 
-__c_static void backend_push_front(c_backend_container_t* c, const c_ref_t data)
+__c_static void backend_push_front(c_backend_container_t* c, c_ref_t data)
 {
     if (!c || !data) return;
 
@@ -501,16 +498,16 @@ __c_static void backend_swap(c_backend_container_t* c, c_backend_container_t* ot
 
     c_backend_list_t* _c = (c_backend_list_t*)c;
     c_backend_list_t* _other = (c_backend_list_t*)other;
-    c_backend_container_t tmp = _c->ops;
+    c_backend_container_t tmp = _c->interface;
     c_list_swap(_c->impl, _other->impl);
-    _c->ops = _other->ops;
-    _other->ops = tmp;
+    _c->interface = _other->interface;
+    _other->interface = tmp;
 }
 
 /**
  * constructor/destructor
  */
-c_list_t* c_list_create(const c_containable_t* type_info)
+c_list_t* c_list_create(c_containable_t* type_info)
 {
     if (!type_info) return 0;
 
@@ -523,12 +520,55 @@ c_list_t* c_list_create(const c_containable_t* type_info)
         return 0;
     }
 
-    list->type_info = *type_info;
+    list->type_info = type_info;
     list->node->prev = list->node;
     list->node->next = list->node;
     list->node->data = 0;
 
     return list;
+}
+
+c_list_t* c_list_create_from(c_containable_t* type_info, c_ref_t datas, size_t length)
+{
+    if (!type_info || !datas || length == 0) return 0;
+
+    c_list_t* list = c_list_create(type_info);
+    if (!list) return 0;
+
+    c_ref_t data = datas;
+    for (size_t n = 0; n < length; ++n) {
+        c_list_push_back(list, data);
+        data += type_info->size();
+    }
+
+    return list;
+}
+
+c_list_t* c_list_copy(c_list_t* other)
+{
+    if (!other) return 0;
+
+    c_list_t* list = c_list_create(other->type_info);
+    if (!list) return 0;
+
+    for (c_list_node_t* node = begin(other); node != end(other); node = node->next)
+        c_list_push_back(list, node->data);
+
+    return list;
+}
+
+c_list_t* c_list_assign(c_list_t* self, c_list_t* other)
+{
+    if (!self || !other) return self;
+
+    if (self != other) {
+        c_list_clear(self);
+        self->type_info = other->type_info;
+        for (c_list_node_t* node = begin(other); node != end(other); node = node->next)
+            c_list_push_back(self, node->data);
+    }
+
+    return self;
 }
 
 void c_list_destroy(c_list_t* list)
@@ -559,25 +599,25 @@ c_ref_t c_list_back(c_list_t* list)
 c_list_iterator_t c_list_begin(c_list_t* list)
 {
     assert(list);
-    return create_iterator(&list->type_info, begin(list));
+    return create_iterator(list->type_info, begin(list));
 }
 
 c_list_iterator_t c_list_rbegin(c_list_t* list)
 {
     assert(list);
-    return create_reverse_iterator(&list->type_info, end(list));
+    return create_reverse_iterator(list->type_info, end(list));
 }
 
 c_list_iterator_t c_list_end(c_list_t* list)
 {
     assert(list);
-    return create_iterator(&list->type_info, end(list));
+    return create_iterator(list->type_info, end(list));
 }
 
 c_list_iterator_t c_list_rend(c_list_t* list)
 {
     assert(list);
-    return create_reverse_iterator(&list->type_info, begin(list));
+    return create_reverse_iterator(list->type_info, begin(list));
 }
 
 /**
@@ -615,7 +655,7 @@ void c_list_clear(c_list_t* list)
     }
 }
 
-c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, const c_ref_t data)
+c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, c_ref_t data)
 {
     if (!list || !data) return pos;
 
@@ -627,7 +667,7 @@ c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, const c_r
     pos.node->prev->next = node;
     pos.node->prev = node;
 
-    return create_iterator(&list->type_info, node);
+    return create_iterator(list->type_info, node);
 }
 
 c_list_iterator_t c_list_erase(c_list_t* list, c_list_iterator_t pos)
@@ -635,7 +675,7 @@ c_list_iterator_t c_list_erase(c_list_t* list, c_list_iterator_t pos)
     if (!list) return pos;
 
     c_list_node_t* node = pop_node(list, pos.node);
-    return create_iterator(&list->type_info, node);
+    return create_iterator(list->type_info, node);
 }
 
 c_list_iterator_t c_list_erase_range(c_list_t* list, c_list_iterator_t first, c_list_iterator_t last)
@@ -648,7 +688,7 @@ c_list_iterator_t c_list_erase_range(c_list_t* list, c_list_iterator_t first, c_
     return pos;
 }
 
-void c_list_push_back(c_list_t* list, const c_ref_t data)
+void c_list_push_back(c_list_t* list, c_ref_t data)
 {
     if (!list || !data)
         return;
@@ -668,7 +708,7 @@ void c_list_pop_back(c_list_t* list)
         pop_node(list, list->node->prev);
 }
 
-void c_list_push_front(c_list_t* list, const c_ref_t data)
+void c_list_push_front(c_list_t* list, c_ref_t data)
 {
     if (!list || !data)
         return;
@@ -693,7 +733,7 @@ void c_list_resize(c_list_t* list, size_t count)
     c_list_resize_with_value(list, count, 0);
 }
 
-void c_list_resize_with_value(c_list_t* list, size_t count, const c_ref_t data)
+void c_list_resize_with_value(c_list_t* list, size_t count, c_ref_t data)
 {
     if (!list) return;
 
@@ -724,7 +764,7 @@ void c_list_swap(c_list_t* list, c_list_t* other)
 {
     if (!list || !other) return;
 
-    c_list_t* tmp = c_list_create(&list->type_info);
+    c_list_t* tmp = c_list_create(list->type_info);
     if (!tmp) return;
 
     transfer(end(tmp), begin(list), end(list));
@@ -741,12 +781,12 @@ void c_list_swap(c_list_t* list, c_list_t* other)
 void c_list_merge(c_list_t* list, c_list_t* other)
 {
     if (!list) return;
-    c_list_merge_by(list, other, list->type_info.less);
+    c_list_merge_by(list, other, list->type_info->less);
 }
 
 void c_list_merge_by(c_list_t* list, c_list_t* other, c_compare comp)
 {
-    if (!list || c_list_empty(other) || !comp || !__c_is_same(&list->type_info, &other->type_info))
+    if (!list || c_list_empty(other) || !comp || !__c_is_same(list->type_info, other->type_info))
         return;
 
     c_list_node_t* node = begin(list);
@@ -769,7 +809,7 @@ void c_list_merge_by(c_list_t* list, c_list_t* other, c_compare comp)
 
 void c_list_splice(c_list_t* list, c_list_iterator_t pos, c_list_t* other)
 {
-    if (!list || c_list_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
+    if (!list || c_list_empty(other) || !__c_is_same(list->type_info, other->type_info))
         return;
 
     transfer(pos.node, begin(other), end(other));
@@ -777,7 +817,7 @@ void c_list_splice(c_list_t* list, c_list_iterator_t pos, c_list_t* other)
 
 void c_list_splice_from(c_list_t* list, c_list_iterator_t pos, c_list_t* other, c_list_iterator_t from)
 {
-    if (!list || c_list_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
+    if (!list || c_list_empty(other) || !__c_is_same(list->type_info, other->type_info))
         return;
 
     transfer(pos.node, from.node, end(other));
@@ -785,22 +825,21 @@ void c_list_splice_from(c_list_t* list, c_list_iterator_t pos, c_list_t* other, 
 
 void c_list_splice_range(c_list_t* list, c_list_iterator_t pos, c_list_t* other, c_list_iterator_t first, c_list_iterator_t last)
 {
-    if (!list || c_list_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
+    if (!list || c_list_empty(other) || !__c_is_same(list->type_info, other->type_info))
         return;
 
     transfer(pos.node, first.node, last.node);
 }
 
-void c_list_remove(c_list_t* list, const c_ref_t data)
+void c_list_remove(c_list_t* list, c_ref_t data)
 {
     if (c_list_empty(list) || !data)
         return;
 
     c_list_node_t* node = begin(list);
     c_list_node_t* last = end(list);
-    c_containable_t* type_info = &list->type_info;
     while (node != last) {
-        if (type_info->equal(node->data, data))
+        if (list->type_info->equal(node->data, data))
             node = pop_node(list, node);
         else
             node = node->next;
@@ -827,7 +866,7 @@ void c_list_sort(c_list_t* list)
     if (c_list_empty(list) || c_list_size(list) == 1)
         return;
 
-    c_list_sort_by(list, list->type_info.less);
+    c_list_sort_by(list, list->type_info->less);
 }
 
 void c_list_sort_by(c_list_t* list, c_compare comp)
@@ -835,12 +874,12 @@ void c_list_sort_by(c_list_t* list, c_compare comp)
     if (c_list_empty(list) || c_list_size(list) == 1 || !comp)
         return;
 
-    c_list_t* carry = c_list_create(&list->type_info);
+    c_list_t* carry = c_list_create(list->type_info);
     if (!carry) return;
 
     c_list_t* counter[64] = { 0 };
     __array_foreach(counter, i) {
-        counter[i] = c_list_create(&list->type_info);
+        counter[i] = c_list_create(list->type_info);
         if (!counter[i]) goto out;
     }
 
@@ -890,7 +929,7 @@ void c_list_reverse(c_list_t* list)
 void c_list_unique(c_list_t* list)
 {
     if (!list) return;
-    c_list_unique_if(list, list->type_info.equal);
+    c_list_unique_if(list, list->type_info->equal);
 }
 
 void c_list_unique_if(c_list_t* list, c_binary_predicate pred)
@@ -912,9 +951,9 @@ void c_list_unique_if(c_list_t* list, c_binary_predicate pred)
 /**
  * backend
  */
-c_backend_container_t* c_list_create_backend(const c_containable_t* type_info)
+c_backend_container_t* c_list_create_backend(c_containable_t* type_info)
 {
-    static const c_backend_container_t backend_list_ops = {
+    static c_backend_operation_t backend_list_ops = {
         .destroy = backend_destroy,
         .front = backend_front,
         .back = backend_back,
@@ -939,7 +978,7 @@ c_backend_container_t* c_list_create_backend(const c_containable_t* type_info)
         return 0;
     }
 
-    backend->ops = backend_list_ops;
+    backend->interface.ops = &backend_list_ops;
 
     return (c_backend_container_t*)backend;
 }

@@ -25,7 +25,10 @@ typedef struct __c_vector_iterator {
 /**
  * constructor/destructor
  */
-c_vector_t* c_vector_create(const c_containable_t* type_info);
+c_vector_t* c_vector_create(c_containable_t* type_info);
+c_vector_t* c_vector_create_from(c_containable_t* type_info, c_ref_t datas, size_t length);
+c_vector_t* c_vector_copy(c_vector_t* other);
+c_vector_t* c_vector_assign(c_vector_t* self, c_vector_t* other);
 void c_vector_destroy(c_vector_t* vector);
 
 /**
@@ -58,21 +61,21 @@ void c_vector_shrink_to_fit(c_vector_t* vector);
  * modifiers
  */
 void c_vector_clear(c_vector_t* vector);
-c_vector_iterator_t c_vector_insert(c_vector_t* vector, c_vector_iterator_t pos, const c_ref_t data);
-c_vector_iterator_t c_vector_insert_n(c_vector_t* vector, c_vector_iterator_t pos, size_t count, const c_ref_t data);
+c_vector_iterator_t c_vector_insert(c_vector_t* vector, c_vector_iterator_t pos, c_ref_t data);
+c_vector_iterator_t c_vector_insert_n(c_vector_t* vector, c_vector_iterator_t pos, size_t count, c_ref_t data);
 c_vector_iterator_t c_vector_insert_range(c_vector_t* vector, c_vector_iterator_t pos, c_iterator_t first, c_iterator_t last);
 c_vector_iterator_t c_vector_erase(c_vector_t* vector, c_vector_iterator_t pos);
 c_vector_iterator_t c_vector_erase_range(c_vector_t* vector, c_vector_iterator_t first, c_vector_iterator_t last);
-void c_vector_push_back(c_vector_t* vector, const c_ref_t data);
+void c_vector_push_back(c_vector_t* vector, c_ref_t data);
 void c_vector_pop_back(c_vector_t* vector);
 void c_vector_resize(c_vector_t* vector, size_t count);
-void c_vector_resize_with_value(c_vector_t* vector, size_t count, const c_ref_t data);
+void c_vector_resize_with_value(c_vector_t* vector, size_t count, c_ref_t data);
 void c_vector_swap(c_vector_t* vector, c_vector_t* other);
 
 /**
  * backend
  */
-c_backend_container_t* c_vector_create_backend(const c_containable_t* type_info);
+c_backend_container_t* c_vector_create_backend(c_containable_t* type_info);
 
 /**
  * helpers

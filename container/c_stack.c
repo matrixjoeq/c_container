@@ -10,7 +10,7 @@ struct __c_stack {
 /**
  * constructor/destructor
  */
-c_stack_t* c_stack_create(const c_containable_t* type_info, BackendContainerCreator creator)
+c_stack_t* c_stack_create(c_containable_t* type_info, BackendContainerCreator creator)
 {
     c_stack_t* stack = (c_stack_t*)malloc(sizeof(c_stack_t));
     if (!stack) return 0;
@@ -27,7 +27,7 @@ c_stack_t* c_stack_create(const c_containable_t* type_info, BackendContainerCrea
 void c_stack_destroy(c_stack_t* stack)
 {
     if (!stack) return;
-    stack->backend->destroy(stack->backend);
+    stack->backend->ops->destroy(stack->backend);
     __c_free(stack);
 }
 
@@ -37,7 +37,7 @@ void c_stack_destroy(c_stack_t* stack)
 c_ref_t c_stack_top(c_stack_t* stack)
 {
     if (!stack) return 0;
-    return stack->backend->back(stack->backend);
+    return stack->backend->ops->back(stack->backend);
 }
 
 /**
@@ -46,32 +46,32 @@ c_ref_t c_stack_top(c_stack_t* stack)
 bool c_stack_empty(c_stack_t* stack)
 {
     if (!stack) return true;
-    return stack->backend->empty(stack->backend);
+    return stack->backend->ops->empty(stack->backend);
 }
 
 size_t c_stack_max_size(c_stack_t* stack)
 {
     if (!stack) return 0;
-    return stack->backend->max_size();
+    return stack->backend->ops->max_size();
 }
 
 /**
  * modifiers
  */
-void c_stack_push(c_stack_t* stack, const c_ref_t data)
+void c_stack_push(c_stack_t* stack, c_ref_t data)
 {
     if (!stack || !data) return;
-    stack->backend->push_back(stack->backend, data);
+    stack->backend->ops->push_back(stack->backend, data);
 }
 
 void c_stack_pop(c_stack_t* stack)
 {
     if (!stack) return;
-    stack->backend->pop_back(stack->backend);
+    stack->backend->ops->pop_back(stack->backend);
 }
 
 void c_stack_swap(c_stack_t* stack, c_stack_t* other)
 {
     if (!stack || !other) return;
-    stack->backend->swap(stack->backend, other->backend);
+    stack->backend->ops->swap(stack->backend, other->backend);
 }

@@ -41,11 +41,11 @@ typedef void* c_ref_t;
 typedef void (*c_unary_func)(c_ref_t);
 
 // return true if data matches condition
-typedef bool (*c_unary_predicate)(const c_ref_t);
-typedef bool (*c_binary_predicate)(const c_ref_t, const c_ref_t);
+typedef bool (*c_unary_predicate)(c_ref_t);
+typedef bool (*c_binary_predicate)(c_ref_t, c_ref_t);
 
 // return true if compare(lhs, rhs)
-typedef bool (*c_compare)(const c_ref_t lhs, const c_ref_t rhs);
+typedef bool (*c_compare)(c_ref_t lhs, c_ref_t rhs);
 
 typedef struct __c_containable {
     // size information
@@ -53,15 +53,15 @@ typedef struct __c_containable {
     // default constructor
     void (*create)(c_ref_t obj);
     // copy constructor
-    void (*copy)(c_ref_t dst, const c_ref_t src);
+    void (*copy)(c_ref_t dst, c_ref_t src);
     // destructor
     void (*destroy)(c_ref_t obj);
     // operator=
-    c_ref_t (*assign)(c_ref_t dst, const c_ref_t src);
+    c_ref_t (*assign)(c_ref_t dst, c_ref_t src);
     // operator<
-    bool (*less)(const c_ref_t lhs, const c_ref_t rhs);
+    bool (*less)(c_ref_t lhs, c_ref_t rhs);
     // operator==
-    bool (*equal)(const c_ref_t lhs, const c_ref_t rhs);
+    bool (*equal)(c_ref_t lhs, c_ref_t rhs);
 } c_containable_t;
 
 struct __c_iterator;
@@ -117,30 +117,39 @@ typedef struct __c_iterator {
     c_containable_t* type_info;
 } c_iterator_t;
 
-typedef struct __c_backend_container {
+struct __c_backend_container;
+typedef struct __c_backend_operation {
     // destructor
     void (*destroy)(struct __c_backend_container* self);
+
     // element access
     c_ref_t (*front)(struct __c_backend_container* self);
     c_ref_t (*back)(struct __c_backend_container* self);
+
     // iterator
     // set begin of self to *iter and return *iter
     c_iterator_t* (*begin)(struct __c_backend_container* self, c_iterator_t** iter);
     // set end of self to *iter and return *iter
     c_iterator_t* (*end)(struct __c_backend_container* self, c_iterator_t** iter);
+
     // capacity
     bool (*empty)(struct __c_backend_container* self);
     size_t (*size)(struct __c_backend_container* self);
     size_t (*max_size)(void);
+
     // modifier
     void (*push_back)(struct __c_backend_container* self, const c_ref_t data);
     void (*pop_back)(struct __c_backend_container* self);
     void (*push_front)(struct __c_backend_container* self, const c_ref_t data);
     void (*pop_front)(struct __c_backend_container* self);
     void (*swap)(struct __c_backend_container* self, struct __c_backend_container* other);
+} c_backend_operation_t;
+
+typedef struct __c_backend_container {
+    c_backend_operation_t* ops;
 } c_backend_container_t;
 
-typedef c_backend_container_t* (*BackendContainerCreator)(const c_containable_t* type_info);
+typedef c_backend_container_t* (*BackendContainerCreator)(c_containable_t* type_info);
 
 c_containable_t* c_get_sint_type_info(void);
 c_containable_t* c_get_uint_type_info(void);

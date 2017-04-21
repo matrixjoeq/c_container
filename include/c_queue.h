@@ -17,7 +17,7 @@ typedef struct __c_queue c_queue_t;
 /**
  * constructor/destructor
  */
-c_queue_t* c_queue_create(const c_containable_t* type_info, BackendContainerCreator creator);
+c_queue_t* c_queue_create(c_containable_t* type_info, BackendContainerCreator creator);
 void c_queue_destroy(c_queue_t* queue);
 
 /**
@@ -35,7 +35,7 @@ size_t c_queue_size(c_queue_t* queue);
 /**
  * modifiers
  */
-void c_queue_push(c_queue_t* queue, const c_ref_t data);
+void c_queue_push(c_queue_t* queue, c_ref_t data);
 void c_queue_pop(c_queue_t* queue);
 void c_queue_swap(c_queue_t* queue, c_queue_t* other);
 

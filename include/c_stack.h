@@ -17,7 +17,7 @@ typedef struct __c_stack c_stack_t;
 /**
  * constructor/destructor
  */
-c_stack_t* c_stack_create(const c_containable_t* type_info, BackendContainerCreator creator);
+c_stack_t* c_stack_create(c_containable_t* type_info, BackendContainerCreator creator);
 void c_stack_destroy(c_stack_t* stack);
 
 /**
@@ -34,7 +34,7 @@ size_t c_stack_max_size(c_stack_t* stack);
 /**
  * modifiers
  */
-void c_stack_push(c_stack_t* stack, const c_ref_t data);
+void c_stack_push(c_stack_t* stack, c_ref_t data);
 void c_stack_pop(c_stack_t* stack);
 void c_stack_swap(c_stack_t* stack, c_stack_t* other);
 

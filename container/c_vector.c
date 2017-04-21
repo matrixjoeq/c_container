@@ -12,11 +12,11 @@ struct __c_vector {
     c_ref_t start;
     c_ref_t finish;
     c_ref_t end_of_storage;
-    c_containable_t type_info;
+    c_containable_t* type_info;
 };
 
 struct __c_backend_vector {
-    c_backend_container_t ops;
+    c_backend_container_t interface;
     c_vector_t* impl;
 };
 
@@ -26,7 +26,7 @@ __c_static bool is_valid_pos(c_vector_t* vector, c_ref_t pos)
 
     if (pos >= vector->start && pos <= vector->finish) {
         ptrdiff_t diff = pos - vector->start;
-        if (diff % vector->type_info.size() == 0)
+        if (diff % vector->type_info->size() == 0)
             return true;
     }
 
@@ -292,8 +292,8 @@ __c_static __c_inline c_ref_t eos(c_vector_t* vector)
 __c_static __c_inline size_t available(c_vector_t* vector)
 {
     assert(vector);
-    assert(vector->type_info.size);
-    return (vector->end_of_storage - vector->finish) / vector->type_info.size();
+    assert(vector->type_info->size);
+    return (vector->end_of_storage - vector->finish) / vector->type_info->size();
 }
 
 __c_static void backend_destroy(c_backend_container_t* c)
@@ -370,7 +370,7 @@ __c_static size_t backend_max_size(void)
     return (-1);
 }
 
-__c_static void backend_push_back(c_backend_container_t* c, const c_ref_t data)
+__c_static void backend_push_back(c_backend_container_t* c, c_ref_t data)
 {
     if (!c || !data) return;
 
@@ -392,32 +392,30 @@ __c_static void backend_swap(c_backend_container_t* c, c_backend_container_t* ot
 
     c_backend_vector_t* _c = (c_backend_vector_t*)c;
     c_backend_vector_t* _other = (c_backend_vector_t*)other;
-    c_backend_container_t tmp = _c->ops;
+    c_backend_container_t tmp = _c->interface;
     c_vector_swap(_c->impl, _other->impl);
-    _c->ops = _other->ops;
-    _other->ops = tmp;
+    _c->interface = _other->interface;
+    _other->interface = tmp;
 }
 
 __c_static void destroy(c_vector_iterator_t first, c_vector_iterator_t last)
 {
-    c_containable_t* type_info = first.base_iter.type_info;
     while (C_ITER_NE(&first, &last)) {
-        type_info->destroy(first.pos);
+        first.base_iter.type_info->destroy(first.pos);
         C_ITER_INC(&first);
     }
 }
 
-__c_static void fill(c_vector_iterator_t pos, size_t n, const c_ref_t data)
+__c_static void fill(c_vector_iterator_t pos, size_t n, c_ref_t data)
 {
-    c_containable_t* type_info = pos.base_iter.type_info;
     while (n--) {
         if (data) {
-            assert(type_info->copy);
-            type_info->copy(pos.pos, data);
+            assert(pos.base_iter.type_info->copy);
+            pos.base_iter.type_info->copy(pos.pos, data);
         }
         else {
-            assert(type_info->create);
-            type_info->create(pos.pos);
+            assert(pos.base_iter.type_info->create);
+            pos.base_iter.type_info->create(pos.pos);
         }
         C_ITER_INC(&pos);
     }
@@ -427,8 +425,7 @@ __c_static int reallocate_and_move(c_vector_t* vector, size_t n)
 {
     assert(vector);
 
-    c_containable_t* type_info = &vector->type_info;
-    size_t data_size = type_info->size();
+    size_t data_size = vector->type_info->size();
 
     // double the capacity or make it large enough
     size_t size = c_vector_size(vector);
@@ -449,7 +446,7 @@ __c_static int reallocate_and_move(c_vector_t* vector, size_t n)
 /**
  * constructor/destructor
  */
-c_vector_t* c_vector_create(const c_containable_t* type_info)
+c_vector_t* c_vector_create(c_containable_t* type_info)
 {
     if (!type_info) return 0;
 
@@ -459,9 +456,49 @@ c_vector_t* c_vector_create(const c_containable_t* type_info)
     vector->start = 0;
     vector->finish = 0;
     vector->end_of_storage = 0;
-    vector->type_info = *type_info;
+    vector->type_info = type_info;
 
     return vector;
+}
+
+c_vector_t* c_vector_create_from(c_containable_t* type_info, c_ref_t datas, size_t length)
+{
+    if (!type_info || !datas || length == 0) return 0;
+
+    c_vector_t* vector = c_vector_create(type_info);
+    if (!vector) return 0;
+
+    c_vector_reserve(vector, length);
+    memcpy(vector->start, datas, type_info->size() * length);
+
+    return vector;
+}
+
+c_vector_t* c_vector_copy(c_vector_t* other)
+{
+    if (!other) return 0;
+
+    c_vector_t* vector = c_vector_create(other->type_info);
+    if (!vector) return 0;
+
+    c_vector_reserve(vector, c_vector_capacity(other));
+    memcpy(vector->start, other->start, vector->type_info->size() * c_vector_size(other));
+
+    return vector;
+}
+
+c_vector_t* c_vector_assign(c_vector_t* self, c_vector_t* other)
+{
+    if (!self || !other) return self;
+
+    if (self != other) {
+        c_vector_clear(self);
+        self->type_info = other->type_info;
+        c_vector_reserve(self, c_vector_capacity(other));
+        memcpy(self->start, other->start, self->type_info->size() * c_vector_size(other));
+    }
+
+    return self;
 }
 
 void c_vector_destroy(c_vector_t* vector)
@@ -479,8 +516,7 @@ void c_vector_destroy(c_vector_t* vector)
 c_ref_t c_vector_at(c_vector_t* vector, size_t pos)
 {
     if (!vector) return 0;
-    c_containable_t* type_info = &vector->type_info;
-    return C_REF_T(begin(vector) + type_info->size() * pos);
+    return C_REF_T(begin(vector) + vector->type_info->size() * pos);
 }
 
 c_ref_t c_vector_front(c_vector_t* vector)
@@ -492,8 +528,7 @@ c_ref_t c_vector_back(c_vector_t* vector)
 {
     if (c_vector_empty(vector)) return 0;
 
-    c_containable_t* type_info = &vector->type_info;
-    return C_REF_T(end(vector) - type_info->size());
+    return C_REF_T(end(vector) - vector->type_info->size());
 }
 
 c_ref_t c_vector_data(c_vector_t* vector)
@@ -508,25 +543,25 @@ c_ref_t c_vector_data(c_vector_t* vector)
 c_vector_iterator_t c_vector_begin(c_vector_t* vector)
 {
     assert(vector);
-    return create_iterator(&vector->type_info, begin(vector));
+    return create_iterator(vector->type_info, begin(vector));
 }
 
 c_vector_iterator_t c_vector_rbegin(c_vector_t* vector)
 {
     assert(vector);
-    return create_reverse_iterator(&vector->type_info, end(vector));
+    return create_reverse_iterator(vector->type_info, end(vector));
 }
 
 c_vector_iterator_t c_vector_end(c_vector_t* vector)
 {
     assert(vector);
-    return create_iterator(&vector->type_info, end(vector));
+    return create_iterator(vector->type_info, end(vector));
 }
 
 c_vector_iterator_t c_vector_rend(c_vector_t* vector)
 {
     assert(vector);
-    return create_reverse_iterator(&vector->type_info, begin(vector));
+    return create_reverse_iterator(vector->type_info, begin(vector));
 }
 
 /**
@@ -541,8 +576,7 @@ size_t c_vector_size(c_vector_t* vector)
 {
     if (!vector) return 0;
 
-    c_containable_t* type_info = &vector->type_info;
-    return (end(vector) - begin(vector)) / type_info->size();
+    return (end(vector) - begin(vector)) / vector->type_info->size();
 }
 
 size_t c_vector_max_size(void)
@@ -560,8 +594,7 @@ size_t c_vector_capacity(c_vector_t* vector)
 {
     if (!vector) return 0;
 
-    c_containable_t* type_info = &vector->type_info;
-    return (eos(vector) - begin(vector)) / type_info->size();
+    return (eos(vector) - begin(vector)) / vector->type_info->size();
 }
 
 void c_vector_shrink_to_fit(c_vector_t* vector)
@@ -596,13 +629,13 @@ void c_vector_clear(c_vector_t* vector)
     vector->finish = vector->start;
 }
 
-c_vector_iterator_t c_vector_insert(c_vector_t* vector, c_vector_iterator_t pos, const c_ref_t data)
+c_vector_iterator_t c_vector_insert(c_vector_t* vector, c_vector_iterator_t pos, c_ref_t data)
 {
     return c_vector_insert_n(vector, pos, 1, data);
 }
 
 c_vector_iterator_t c_vector_insert_n(
-    c_vector_t* vector, c_vector_iterator_t pos, size_t count, const c_ref_t data)
+    c_vector_t* vector, c_vector_iterator_t pos, size_t count, c_ref_t data)
 {
     if (!vector || !data) return pos;
 
@@ -616,11 +649,9 @@ c_vector_iterator_t c_vector_insert_n(
         pos.pos = vector->start + diff;
     }
 
-    c_containable_t* type_info = &vector->type_info;
-
-    memmove(pos.pos + count * type_info->size(), pos.pos, vector->finish - pos.pos);
+    memmove(pos.pos + count * vector->type_info->size(), pos.pos, vector->finish - pos.pos);
     fill(pos, count, data);
-    vector->finish += count * type_info->size();
+    vector->finish += count * vector->type_info->size();
 
     return pos;
 }
@@ -651,12 +682,10 @@ c_vector_iterator_t c_vector_erase(c_vector_t* vector, c_vector_iterator_t pos)
     if (!is_valid_pos(vector, pos.pos) || pos.pos == vector->finish)
         return c_vector_end(vector);
 
-    c_containable_t* type_info = &vector->type_info;
-
-    type_info->destroy(pos.pos);
-    c_ref_t next_pos = pos.pos + type_info->size();
+    vector->type_info->destroy(pos.pos);
+    c_ref_t next_pos = pos.pos + vector->type_info->size();
     memmove(pos.pos, next_pos, vector->finish - next_pos);
-    vector->finish -= type_info->size();
+    vector->finish -= vector->type_info->size();
 
     return pos;
 }
@@ -681,7 +710,7 @@ c_vector_iterator_t c_vector_erase_range(
     return first;
 }
 
-void c_vector_push_back(c_vector_t* vector, const c_ref_t data)
+void c_vector_push_back(c_vector_t* vector, c_ref_t data)
 {
     if (!vector || !data) return;
 
@@ -690,17 +719,15 @@ void c_vector_push_back(c_vector_t* vector, const c_ref_t data)
             return;
     }
 
-    c_containable_t* type_info = &vector->type_info;
-    type_info->copy(vector->finish, data);
-    vector->finish += type_info->size();
+    vector->type_info->copy(vector->finish, data);
+    vector->finish += vector->type_info->size();
 }
 
 void c_vector_pop_back(c_vector_t* vector)
 {
     if (!c_vector_empty(vector)) {
-        c_containable_t* type_info = &vector->type_info;
-        type_info->destroy(c_vector_back(vector));
-        vector->finish -= type_info->size();
+        vector->type_info->destroy(c_vector_back(vector));
+        vector->finish -= vector->type_info->size();
     }
 }
 
@@ -709,12 +736,11 @@ void c_vector_resize(c_vector_t* vector, size_t count)
     c_vector_resize_with_value(vector, count, 0);
 }
 
-void c_vector_resize_with_value(c_vector_t* vector, size_t count, const c_ref_t data)
+void c_vector_resize_with_value(c_vector_t* vector, size_t count, c_ref_t data)
 {
     if (!vector) return;
 
-    c_containable_t* type_info = &vector->type_info;
-    size_t data_size = type_info->size();
+    size_t data_size = vector->type_info->size();
 
     if (count > c_vector_size(vector)) {
         count -= c_vector_size(vector);
@@ -727,7 +753,7 @@ void c_vector_resize_with_value(c_vector_t* vector, size_t count, const c_ref_t 
     }
     else {
         c_ref_t pos = vector->start + count * data_size;
-        destroy(create_iterator(type_info, pos), c_vector_end(vector));
+        destroy(create_iterator(vector->type_info, pos), c_vector_end(vector));
         vector->finish = pos;
     }
 }
@@ -744,9 +770,9 @@ void c_vector_swap(c_vector_t* vector, c_vector_t* other)
 /**
  * backend
  */
-c_backend_container_t* c_vector_create_backend(const c_containable_t* type_info)
+c_backend_container_t* c_vector_create_backend(c_containable_t* type_info)
 {
-    static const c_backend_container_t backend_vector_ops = {
+    static c_backend_operation_t backend_vector_ops = {
         .destroy = backend_destroy,
         .front = backend_front,
         .back = backend_back,
@@ -771,7 +797,7 @@ c_backend_container_t* c_vector_create_backend(const c_containable_t* type_info)
         return 0;
     }
 
-    backend->ops = backend_vector_ops;
+    backend->interface.ops = &backend_vector_ops;
 
     return (c_backend_container_t*)backend;
 }

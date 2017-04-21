@@ -17,27 +17,34 @@ void algo_for_each(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_inp
 void algo_for_each_n(c_iterator_t* __c_input_iterator first, size_t n, c_iterator_t** __c_input_iterator reach, c_unary_func func);
 size_t algo_count(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last, c_ref_t data);
 size_t algo_count_if(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last, c_unary_predicate pred);
-// TODO: algo_mismatch()
+bool algo_mismatch_by(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last,
+                      c_iterator_t* __c_input_iterator first2, c_iterator_t** __c_input_iterator mismatch1,
+                      c_iterator_t** __c_input_iterator mismatch2, c_binary_predicate pred);
 bool algo_equal_by(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last,
                    c_iterator_t* __c_input_iterator first2, c_binary_predicate pred);
 bool algo_find_by(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last,
-                  c_iterator_t** __c_input_iterator found, const c_ref_t value,
+                  c_iterator_t** __c_input_iterator found, c_ref_t value,
                   c_binary_predicate pred);
 bool algo_find_if(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last,
                   c_iterator_t** __c_input_iterator found, c_unary_predicate pred);
 bool algo_find_if_not(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last,
                       c_iterator_t** __c_input_iterator found, c_unary_predicate pred);
-// TODO: algo_find_end()
 bool algo_find_first_of_by(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last,
                            c_iterator_t* __c_forward_iterator s_first, c_iterator_t* __c_forward_iterator s_last,
                            c_iterator_t** __c_input_iterator found, c_binary_predicate pred);
+bool algo_find_last_of_by(c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last,
+                          c_iterator_t* __c_forward_iterator s_first, c_iterator_t* __c_forward_iterator s_last,
+                          c_iterator_t** __c_input_iterator found, c_binary_predicate pred);
 bool algo_adjacent_find_by(c_iterator_t* __c_forward_iterator first, c_iterator_t* __c_forward_iterator last,
                            c_iterator_t** __c_forward_iterator found, c_binary_predicate pred);
 bool algo_search_by(c_iterator_t* __c_forward_iterator first, c_iterator_t* __c_forward_iterator last,
                     c_iterator_t* __c_forward_iterator s_first, c_iterator_t* __c_forward_iterator s_last,
                     c_iterator_t** __c_forward_iterator found, c_binary_predicate pred);
+bool algo_search_last_by(c_iterator_t* __c_forward_iterator first, c_iterator_t* __c_forward_iterator last,
+                         c_iterator_t* __c_forward_iterator s_first, c_iterator_t* __c_forward_iterator s_last,
+                         c_iterator_t** __c_forward_iterator found, c_binary_predicate pred);
 bool algo_search_n_by(c_iterator_t* __c_forward_iterator first, c_iterator_t* __c_forward_iterator last,
-                      size_t n, const c_ref_t value, c_iterator_t** __c_forward_iterator found,
+                      size_t n, c_ref_t value, c_iterator_t** __c_forward_iterator found,
                       c_binary_predicate pred);
 
 // non-modifying helpers
@@ -48,23 +55,32 @@ bool algo_search_n_by(c_iterator_t* __c_forward_iterator first, c_iterator_t* __
 #define c_algo_for_each_n(x, n, r, f)       algo_for_each_n(C_ITER_T(x), (n), C_ITER_PTR(r), (f))
 #define c_algo_count(x, y, v)               algo_count(C_ITER_T(x), C_ITER_T(y), C_REF_T(v))
 #define c_algo_count_if(x, y, p)            algo_count_if(C_ITER_T(x), C_ITER_T(y), (p))
+#define c_algo_mismatch_by(x, y, z, mx, my, p) \
+    algo_mismatch_by(C_ITER_T(x), C_ITER_T(y), C_ITER_T(z), C_ITER_PTR(mx), C_ITER_PTR(my), (p))
 #define c_algo_equal_by(x, y, z, p)         algo_equal_by(C_ITER_T(x), C_ITER_T(y), C_ITER_T(z), (p))
-#define c_algo_find_by(x, y, v, p)          algo_find_by(C_ITER_T(x), C_ITER_T(y), C_REF_T(v), (p))
+#define c_algo_find_by(x, y, f, v, p)       algo_find_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(f), C_REF_T(v), (p))
 #define c_algo_find_if(x, y, f, p)          algo_find_if(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(f), (p))
 #define c_algo_find_if_not(x, y, f, p)      algo_find_if_not(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(f), (p))
 #define c_algo_find_first_of_by(x, y, sx, sy, f, p) \
     algo_find_first_of_by(C_ITER_T(x), C_ITER_T(y), C_ITER_T(sx), C_ITER_T(sy), C_ITER_PTR(f), (p))
+#define c_algo_find_last_of_by(x, y, sx, sy, f, p) \
+    algo_find_last_of_by(C_ITER_T(x), C_ITER_T(y), C_ITER_T(sx), C_ITER_T(sy), C_ITER_PTR(f), (p))
 #define c_algo_adjacent_find_by(x, y, f, p) algo_adjacent_find_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(f), (p))
 #define c_algo_search_by(x, y, sx, sy, f, p) \
     algo_search_by(C_ITER_T(x), C_ITER_T(y), C_ITER_T(sx), C_ITER_T(sy), C_ITER_PTR(f), (p))
+#define c_algo_search_last_by(x, y, sx, sy, f, p) \
+    algo_search_last_by(C_ITER_T(x), C_ITER_T(y), C_ITER_T(sx), C_ITER_T(sy), C_ITER_PTR(f), (p))
 #define c_algo_search_n_by(x, y, n, v, f, p) \
     algo_search_n_by(C_ITER_T(x), C_ITER_T(y), (n), C_REF_T(v), C_ITER_PTR(f), (p))
 
+#define c_algo_mismatch(x, y, z, mx, my)        c_algo_mismatch_by((x), (y), (z), (mx), (my), __c_get_equal(x))
 #define c_algo_equal(x, y, z)                   c_algo_equal_by((x), (y), (z), __c_get_equal(x))
-#define c_algo_find(x, y, v)                    c_algo_find_by((x), (y), (v), __c_get_equal(x))
+#define c_algo_find(x, y, f, v)                 c_algo_find_by((x), (y), (f), (v), __c_get_equal(x))
 #define c_algo_find_first_of(x, y, sx, sy, f)   c_algo_find_first_of_by((x), (y), (sx), (sy), (f), __c_get_equal(x))
+#define c_algo_find_last_of(x, y, sx, sy, f)    c_algo_find_last_of_by((x), (y), (sx), (sy), (f), __c_get_equal(x))
 #define c_algo_adjacent_find(x, y, f)           c_algo_adjacent_find_by((x), (y), (f), __c_get_equal(x))
 #define c_algo_search(x, y, sx, sy, f)          c_algo_search_by((x), (y), (sx), (sy), (f), __c_get_equal(x))
+#define c_algo_search_last(x, y, sx, sy, f)     c_algo_search_last_by((x), (y), (sx), (sy), (f), __c_get_equal(x))
 #define c_algo_search_n(x, y, n, v, f)          c_algo_search_n_by((x), (y), (n), (v), (f), __c_get_equal(x))
 
 // modifying sequence operations

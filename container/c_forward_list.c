@@ -14,7 +14,7 @@ typedef struct __c_slist_node c_slist_node_t;
 struct __c_slist {
     c_slist_node_t* ancient; // before_begin() of list
     c_slist_node_t* node; // end() of list
-    c_containable_t type_info;
+    c_containable_t* type_info;
 };
 
 __c_static __c_inline bool is_slist_iterator(c_iterator_t* iter)
@@ -106,8 +106,7 @@ __c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
     return n;
 }
 
-__c_static c_slist_iterator_t create_iterator(
-    c_containable_t* type_info, c_slist_node_t* node)
+__c_static c_slist_iterator_t create_iterator(c_containable_t* type_info, c_slist_node_t* node)
 {
     assert(type_info);
     assert(node);
@@ -164,18 +163,16 @@ __c_static c_slist_node_t* create_node(c_slist_t* list, c_ref_t data)
     if (!node) return 0;
 
     node->next = 0;
-
-    c_containable_t* type_info = &(list->type_info);
-    node->data = malloc(type_info->size());
+    node->data = malloc(list->type_info->size());
     if (!node->data) {
         __c_free(node);
         return 0;
     }
 
     if (data)
-        type_info->copy(node->data, data);
+        list->type_info->copy(node->data, data);
     else
-        type_info->create(node->data);
+        list->type_info->create(node->data);
 
     return node;
 }
@@ -191,10 +188,8 @@ __c_static c_slist_node_t* pop_node_after(c_slist_t* list, c_slist_node_t* node)
     if (!pos || pos == list->node || pos == list->ancient)
         return list->node;
 
-    c_containable_t* type_info = &list->type_info;
-
     node->next = pos->next;
-    type_info->destroy(pos->data);
+    list->type_info->destroy(pos->data);
     __c_free(pos->data);
     __c_free(pos);
 
@@ -218,7 +213,7 @@ __c_static void transfer(c_slist_node_t* pos, c_slist_node_t* first, c_slist_nod
 /**
  * constructor/destructor
  */
-c_slist_t* c_slist_create(const c_containable_t* type_info)
+c_slist_t* c_slist_create(c_containable_t* type_info)
 {
     if (!type_info) return 0;
 
@@ -238,13 +233,59 @@ c_slist_t* c_slist_create(const c_containable_t* type_info)
         return 0;
     }
 
-    list->type_info = *type_info;
+    list->type_info = type_info;
     list->ancient->next = list->node;
     list->ancient->data = 0;
     list->node->next = 0;
     list->node->data = 0;
 
     return list;
+}
+
+c_slist_t* c_slist_create_from(c_containable_t* type_info, c_ref_t datas, size_t length)
+{
+    if (!type_info || !datas || length == 0) return 0;
+
+    c_slist_t* list = c_slist_create(type_info);
+    if (!list) return 0;
+
+    c_slist_iterator_t iter = c_slist_before_begin(list);
+    c_ref_t data = datas;
+    for (size_t n = 0; n < length; ++n) {
+        iter = c_slist_insert_after(list, iter, data);
+        data += type_info->size();
+    }
+
+    return list;
+}
+
+c_slist_t* c_slist_copy(c_slist_t* other)
+{
+    if (!other) return 0;
+
+    c_slist_t* list = c_slist_create(other->type_info);
+    if (!list) return 0;
+
+    c_slist_iterator_t iter = c_slist_before_begin(list);
+    for (c_slist_node_t* node = begin(other); node != end(other); node = node->next)
+        iter = c_slist_insert_after(list, iter, node->data);
+
+    return list;
+}
+
+c_slist_t* c_slist_assign(c_slist_t* self, c_slist_t* other)
+{
+    if (!self || !other) return self;
+
+    if (self != other) {
+        c_slist_clear(self);
+        self->type_info = other->type_info;
+        c_slist_iterator_t iter = c_slist_before_begin(self);
+        for (c_slist_node_t* node = begin(other); node != end(other); node = node->next)
+            iter = c_slist_insert_after(self, iter, node->data);
+    }
+
+    return self;
 }
 
 void c_slist_destroy(c_slist_t* list)
@@ -271,19 +312,19 @@ c_ref_t c_slist_front(c_slist_t* list)
 c_slist_iterator_t c_slist_before_begin(c_slist_t* list)
 {
     assert(list);
-    return create_iterator(&(list->type_info), before_begin(list));
+    return create_iterator(list->type_info, before_begin(list));
 }
 
 c_slist_iterator_t c_slist_begin(c_slist_t* list)
 {
     assert(list);
-    return create_iterator(&(list->type_info), begin(list));
+    return create_iterator(list->type_info, begin(list));
 }
 
 c_slist_iterator_t c_slist_end(c_slist_t* list)
 {
     assert(list);
-    return create_iterator(&(list->type_info), end(list));
+    return create_iterator(list->type_info, end(list));
 }
 
 /**
@@ -314,7 +355,7 @@ void c_slist_clear(c_slist_t* list)
     }
 }
 
-c_slist_iterator_t c_slist_insert_after(c_slist_t* list, c_slist_iterator_t pos, const c_ref_t data)
+c_slist_iterator_t c_slist_insert_after(c_slist_t* list, c_slist_iterator_t pos, c_ref_t data)
 {
     assert(list);
     assert(data);
@@ -326,7 +367,7 @@ c_slist_iterator_t c_slist_insert_after(c_slist_t* list, c_slist_iterator_t pos,
     node->next = pos.node->next;
     pos.node->next = node;
 
-    return create_iterator(&(list->type_info), node);
+    return create_iterator(list->type_info, node);
 }
 
 c_slist_iterator_t c_slist_erase_after(c_slist_t* list, c_slist_iterator_t pos)
@@ -334,7 +375,7 @@ c_slist_iterator_t c_slist_erase_after(c_slist_t* list, c_slist_iterator_t pos)
     assert(list);
     assert(pos.base_iter.iterator_type == C_ITER_TYPE_FORWARD_LIST);
     c_slist_node_t* node = pop_node_after(list, pos.node);
-    return create_iterator(&(list->type_info), node);
+    return create_iterator(list->type_info, node);
 }
 
 c_slist_iterator_t c_slist_erase_after_range(c_slist_t* list, c_slist_iterator_t first, c_slist_iterator_t last)
@@ -348,7 +389,7 @@ c_slist_iterator_t c_slist_erase_after_range(c_slist_t* list, c_slist_iterator_t
     return last;
 }
 
-void c_slist_push_front(c_slist_t* list, const c_ref_t data)
+void c_slist_push_front(c_slist_t* list, c_ref_t data)
 {
     if (!list || !data)
         return;
@@ -371,7 +412,7 @@ void c_slist_resize(c_slist_t* list, size_t count)
     c_slist_resize_with_value(list, count, 0);
 }
 
-void c_slist_resize_with_value(c_slist_t* list, size_t count, const c_ref_t data)
+void c_slist_resize_with_value(c_slist_t* list, size_t count, c_ref_t data)
 {
     if (!list) return;
 
@@ -403,7 +444,7 @@ void c_slist_swap(c_slist_t* list, c_slist_t* other)
 {
     if (!list || !other) return;
 
-    c_slist_t* tmp = c_slist_create(&list->type_info);
+    c_slist_t* tmp = c_slist_create(list->type_info);
     if (!tmp) return;
 
     transfer(before_begin(tmp), before_begin(list), end(list));
@@ -421,13 +462,13 @@ void c_slist_swap(c_slist_t* list, c_slist_t* other)
 void c_slist_merge(c_slist_t* list, c_slist_t* other)
 {
     if (!list) return;
-    c_slist_merge_by(list, other, list->type_info.less);
+    c_slist_merge_by(list, other, list->type_info->less);
 }
 
 void c_slist_merge_by(c_slist_t* list, c_slist_t* other, c_compare comp)
 {
     if (!list || c_slist_empty(other) || !comp ||
-        !__c_is_same(&list->type_info, &other->type_info))
+        !__c_is_same(list->type_info, other->type_info))
         return;
 
     c_slist_node_t* node = before_begin(list);
@@ -447,7 +488,7 @@ void c_slist_merge_by(c_slist_t* list, c_slist_t* other, c_compare comp)
 
 void c_slist_splice_after(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* other)
 {
-    if (!list || c_slist_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
+    if (!list || c_slist_empty(other) || !__c_is_same(list->type_info, other->type_info))
         return;
 
     transfer(pos.node, before_begin(other), end(other));
@@ -455,7 +496,7 @@ void c_slist_splice_after(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* ot
 
 void c_slist_splice_after_from(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* other, c_slist_iterator_t from)
 {
-    if (!list || c_slist_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
+    if (!list || c_slist_empty(other) || !__c_is_same(list->type_info, other->type_info))
         return;
 
     transfer(pos.node, from.node, end(other));
@@ -463,13 +504,13 @@ void c_slist_splice_after_from(c_slist_t* list, c_slist_iterator_t pos, c_slist_
 
 void c_slist_splice_after_range(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* other, c_slist_iterator_t first, c_slist_iterator_t last)
 {
-    if (!list || c_slist_empty(other) || !__c_is_same(&list->type_info, &other->type_info))
+    if (!list || c_slist_empty(other) || !__c_is_same(list->type_info, other->type_info))
         return;
 
     transfer(pos.node, first.node, last.node);
 }
 
-void c_slist_remove(c_slist_t* list, const c_ref_t data)
+void c_slist_remove(c_slist_t* list, c_ref_t data)
 {
     if (c_slist_empty(list) || !data)
         return;
@@ -477,9 +518,8 @@ void c_slist_remove(c_slist_t* list, const c_ref_t data)
     c_slist_node_t* prev = before_begin(list);
     c_slist_node_t* node = prev->next;
     c_slist_node_t* last = end(list);
-    c_containable_t* type_info = &list->type_info;
     while (node != last && prev != last) {
-        if (type_info->equal(node->data, data))
+        if (list->type_info->equal(node->data, data))
             node = pop_node_after(list, prev);
         else {
             prev = prev->next;
@@ -509,19 +549,19 @@ void c_slist_remove_if(c_slist_t* list, c_unary_predicate pred)
 void c_slist_sort(c_slist_t* list)
 {
     if (!list) return;
-    c_slist_sort_by(list, list->type_info.less);
+    c_slist_sort_by(list, list->type_info->less);
 }
 
 void c_slist_sort_by(c_slist_t* list, c_compare comp)
 {
     if (c_slist_empty(list) || begin(list)->next == end(list) || !comp) return;
 
-    c_slist_t* carry = c_slist_create(&list->type_info);
+    c_slist_t* carry = c_slist_create(list->type_info);
     if (!carry) return;
 
     c_slist_t* counter[64] = { 0 };
     __array_foreach(counter, i) {
-        counter[i] = c_slist_create(&list->type_info);
+        counter[i] = c_slist_create(list->type_info);
         if (!counter[i]) goto out;
     }
 
@@ -567,7 +607,7 @@ void c_slist_reverse(c_slist_t* list)
 void c_slist_unique(c_slist_t* list)
 {
     if (!list) return;
-    c_slist_unique_if(list, list->type_info.equal);
+    c_slist_unique_if(list, list->type_info->equal);
 }
 
 void c_slist_unique_if(c_slist_t* list, c_binary_predicate pred)
