@@ -9,6 +9,10 @@
 extern "C" {
 #endif // __cplusplus
 
+#define __c_in
+#define __c_out
+#define __c_in_out
+
 typedef enum __c_iterator_category {
     C_ITER_CATE_OUTPUT,
     C_ITER_CATE_INPUT,
@@ -38,30 +42,31 @@ typedef enum __c_iterator_type {
 } c_iterator_type_t;
 
 typedef void* c_ref_t;
-typedef void (*c_unary_func)(c_ref_t);
+typedef void (*c_unary_func)(c_ref_t __c_in_out);
+//typedef void (*c_binary_func)(c_ref_t, c_ref_t);
 
 // return true if data matches condition
-typedef bool (*c_unary_predicate)(c_ref_t);
-typedef bool (*c_binary_predicate)(c_ref_t, c_ref_t);
+typedef bool (*c_unary_predicate)(c_ref_t __c_in);
+typedef bool (*c_binary_predicate)(c_ref_t __c_in, c_ref_t __c_in);
 
 // return true if compare(lhs, rhs)
-typedef bool (*c_compare)(c_ref_t lhs, c_ref_t rhs);
+typedef bool (*c_compare)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
 
 typedef struct __c_containable {
     // size information
     size_t (*size)(void);
     // default constructor
-    void (*create)(c_ref_t obj);
+    void (*create)(c_ref_t __c_out obj);
     // copy constructor
-    void (*copy)(c_ref_t dst, c_ref_t src);
+    void (*copy)(c_ref_t __c_out dst, c_ref_t __c_in src);
     // destructor
-    void (*destroy)(c_ref_t obj);
+    void (*destroy)(c_ref_t __c_in_out obj);
     // operator=
-    c_ref_t (*assign)(c_ref_t dst, c_ref_t src);
+    c_ref_t (*assign)(c_ref_t __c_out dst, c_ref_t __c_in src);
     // operator<
-    bool (*less)(c_ref_t lhs, c_ref_t rhs);
+    bool (*less)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
     // operator==
-    bool (*equal)(c_ref_t lhs, c_ref_t rhs);
+    bool (*equal)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
 } c_containable_t;
 
 struct __c_iterator;
@@ -71,43 +76,51 @@ typedef struct __c_iterator_operation {
     // algorithms need to make a copy first
     // however, it does not need a destructor, because iterators are "smart pointers"
     // refer to a position in a container, they don't occupy any resources actually
-    void (*alloc_and_copy)(struct __c_iterator** dst, struct __c_iterator* src);
+    void (*alloc_and_copy)(struct __c_iterator** __c_out dst,
+                           struct __c_iterator* __c_in src);
 
     // assign
-    struct __c_iterator* (*assign)(struct __c_iterator* dst, struct __c_iterator* src);
+    struct __c_iterator* (*assign)(struct __c_iterator* __c_in_out self,
+                                   struct __c_iterator* __c_in other);
 
     // operator++
     // return self
-    struct __c_iterator* (*increment)(struct __c_iterator* self);
+    struct __c_iterator* (*increment)(struct __c_iterator* __c_in_out self);
 
     // operator-- (bidirection and random only)
     // return self
-    struct __c_iterator* (*decrement)(struct __c_iterator* self);
+    struct __c_iterator* (*decrement)(struct __c_iterator* __c_in_out self);
 
     // operator++(int)
     // tmp stores the iterator before increment
     // return tmp
-    struct __c_iterator* (*post_increment)(struct __c_iterator* self, struct __c_iterator* tmp);
+    struct __c_iterator* (*post_increment)(struct __c_iterator* __c_in_out self,
+                                           struct __c_iterator* __c_out tmp);
 
     // operator--(int)
     // tmp stores the iterator before decrement
     // return tmp
-    struct __c_iterator* (*post_decrement)(struct __c_iterator* self, struct __c_iterator* tmp);
+    struct __c_iterator* (*post_decrement)(struct __c_iterator* __c_in_out self,
+                                           struct __c_iterator* __c_out tmp);
 
     // operator*
-    c_ref_t (*dereference)(struct __c_iterator* self);
+    c_ref_t (*dereference)(struct __c_iterator* __c_in self);
 
     // operator==
-    bool (*equal)(struct __c_iterator* self, struct __c_iterator* other);
+    bool (*equal)(struct __c_iterator* __c_in self,
+                  struct __c_iterator* __c_in other);
 
     // operator!=
-    bool (*not_equal)(struct __c_iterator* self, struct __c_iterator* other);
+    bool (*not_equal)(struct __c_iterator* __c_in self,
+                      struct __c_iterator* __c_in other);
 
     // advance
-    void (*advance)(struct __c_iterator* self, ptrdiff_t n);
+    void (*advance)(struct __c_iterator* __c_in_out self,
+                    ptrdiff_t __c_in n);
 
     // distance
-    ptrdiff_t (*distance)(struct __c_iterator* first, struct __c_iterator* last);
+    ptrdiff_t (*distance)(struct __c_iterator* __c_in first,
+                          struct __c_iterator* __c_in last);
 } c_iterator_operation_t;
 
 typedef struct __c_iterator {
@@ -120,29 +133,29 @@ typedef struct __c_iterator {
 struct __c_backend_container;
 typedef struct __c_backend_operation {
     // destructor
-    void (*destroy)(struct __c_backend_container* self);
+    void (*destroy)(struct __c_backend_container* __c_in_out self);
 
     // element access
-    c_ref_t (*front)(struct __c_backend_container* self);
-    c_ref_t (*back)(struct __c_backend_container* self);
+    c_ref_t (*front)(struct __c_backend_container* __c_in self);
+    c_ref_t (*back)(struct __c_backend_container* __c_in self);
 
     // iterator
     // set begin of self to *iter and return *iter
-    c_iterator_t* (*begin)(struct __c_backend_container* self, c_iterator_t** iter);
+    c_iterator_t* (*begin)(struct __c_backend_container* __c_in self, c_iterator_t** __c_out iter);
     // set end of self to *iter and return *iter
-    c_iterator_t* (*end)(struct __c_backend_container* self, c_iterator_t** iter);
+    c_iterator_t* (*end)(struct __c_backend_container* __c_in self, c_iterator_t** __c_out iter);
 
     // capacity
-    bool (*empty)(struct __c_backend_container* self);
-    size_t (*size)(struct __c_backend_container* self);
+    bool (*empty)(struct __c_backend_container* __c_in self);
+    size_t (*size)(struct __c_backend_container* __c_in self);
     size_t (*max_size)(void);
 
     // modifier
-    void (*push_back)(struct __c_backend_container* self, const c_ref_t data);
-    void (*pop_back)(struct __c_backend_container* self);
-    void (*push_front)(struct __c_backend_container* self, const c_ref_t data);
-    void (*pop_front)(struct __c_backend_container* self);
-    void (*swap)(struct __c_backend_container* self, struct __c_backend_container* other);
+    void (*push_back)(struct __c_backend_container* __c_in_out self, c_ref_t __c_in data);
+    void (*pop_back)(struct __c_backend_container* __c_in_out self);
+    void (*push_front)(struct __c_backend_container* __c_in_out self, c_ref_t __c_in data);
+    void (*pop_front)(struct __c_backend_container* __c_in_out self);
+    void (*swap)(struct __c_backend_container* __c_in_out self, struct __c_backend_container* __c_in_out other);
 } c_backend_operation_t;
 
 typedef struct __c_backend_container {

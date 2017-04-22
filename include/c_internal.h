@@ -34,20 +34,78 @@ extern "C" {
 #define __c_max(x, y) (((x) < (y)) ? (y) : (x))
 
 // algorithm macro
-#define __C_ALGO_BEGIN \
-    assert(first); \
-    assert(last); \
-    c_iterator_t* __first = 0; \
-    c_iterator_t* __last = 0; \
-    C_ITER_COPY(&__first, first); \
-    if (!__first) goto __out; \
-    C_ITER_COPY(&__last, last); \
-    if (!__last) goto __out;
+#define __c_iter_get_shadow(x) \
+    c_iterator_t* __##x = 0; \
+    C_ITER_COPY(&__##x, x); \
 
-#define __C_ALGO_END \
-__out: \
-    __c_free(__first); \
-    __c_free(__last);
+#define __c_iter_put_shadow(x) \
+    __c_free(__##x); \
+
+#define __C_ALGO_BEGIN_1(x) \
+    __c_iter_get_shadow(x)
+
+#define __C_ALGO_END_1(x) \
+    __c_iter_put_shadow(x)
+
+#define __C_ALGO_BEGIN_2(x, y) \
+    __c_iter_get_shadow(x) \
+    __c_iter_get_shadow(y) \
+
+#define __C_ALGO_END_2(x, y) \
+    __c_iter_put_shadow(x) \
+    __c_iter_put_shadow(y) \
+
+#define __C_ALGO_BEGIN_3(x, y, z) \
+    __c_iter_get_shadow(x) \
+    __c_iter_get_shadow(y) \
+    __c_iter_get_shadow(z) \
+
+#define __C_ALGO_END_3(x, y, z) \
+    __c_iter_put_shadow(x) \
+    __c_iter_put_shadow(y) \
+    __c_iter_put_shadow(z) \
+
+#define __C_ALGO_BEGIN_4(x, y, z, u) \
+    __c_iter_get_shadow(x) \
+    __c_iter_get_shadow(y) \
+    __c_iter_get_shadow(z) \
+    __c_iter_get_shadow(u) \
+
+#define __C_ALGO_END_4(x, y, z, u) \
+    __c_iter_put_shadow(x) \
+    __c_iter_put_shadow(y) \
+    __c_iter_put_shadow(z) \
+    __c_iter_put_shadow(u) \
+
+#define __C_ALGO_BEGIN_5(x, y, z, u, v) \
+    __c_iter_get_shadow(x) \
+    __c_iter_get_shadow(y) \
+    __c_iter_get_shadow(z) \
+    __c_iter_get_shadow(u) \
+    __c_iter_get_shadow(v) \
+
+#define __C_ALGO_END_5(x, y, z, u, v) \
+    __c_iter_put_shadow(x) \
+    __c_iter_put_shadow(y) \
+    __c_iter_put_shadow(z) \
+    __c_iter_put_shadow(u) \
+    __c_iter_put_shadow(v) \
+
+#define __C_ALGO_BEGIN_6(x, y, z, u, v, w) \
+    __c_iter_get_shadow(x) \
+    __c_iter_get_shadow(y) \
+    __c_iter_get_shadow(z) \
+    __c_iter_get_shadow(u) \
+    __c_iter_get_shadow(v) \
+    __c_iter_get_shadow(w) \
+
+#define __C_ALGO_END_6(x, y, z, u, v, w) \
+    __c_iter_put_shadow(x) \
+    __c_iter_put_shadow(y) \
+    __c_iter_put_shadow(z) \
+    __c_iter_put_shadow(u) \
+    __c_iter_put_shadow(v) \
+    __c_iter_put_shadow(w) \
 
 #ifdef __cplusplus
 }

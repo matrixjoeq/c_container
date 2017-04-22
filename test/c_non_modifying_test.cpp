@@ -360,18 +360,20 @@ TEST_F(CNonModifyingTest, FindLastOf)
 
     EXPECT_TRUE(c_algo_find_last_of(&l_first, &l_last, &s_first, &s_last, &l_found));
     EXPECT_EQ(6, C_DEREF_INT(C_ITER_DEREF(l_found)));
+    C_ITER_INC(l_found);
+    EXPECT_FALSE(c_algo_find_last_of(l_found, &l_last, &s_first, &s_last, &l_found));
+    EXPECT_TRUE(C_ITER_EQ(&l_last, l_found));
+
     EXPECT_TRUE(c_algo_find_last_of(&fl_first, &fl_last, &s_first, &s_last, &fl_found));
     EXPECT_EQ(3, C_DEREF_INT(C_ITER_DEREF(fl_found)));
+    C_ITER_INC(fl_found);
+    EXPECT_FALSE(c_algo_find_last_of(fl_found, &fl_last, &s_first, &s_last, &fl_found));
+    EXPECT_TRUE(C_ITER_EQ(&fl_last, fl_found));
+
     EXPECT_TRUE(c_algo_find_last_of(&v_first, &v_last, &s_first, &s_last, &v_found));
     EXPECT_EQ(6, C_DEREF_INT(C_ITER_DEREF(v_found)));
-
-    C_ITER_ASSIGN(&s_last, &s_first);
-    C_ITER_INC(&s_last);
-    EXPECT_FALSE(c_algo_find_last_of(&l_first, &l_last, &s_first, &s_last, &l_found));
-    EXPECT_TRUE(C_ITER_EQ(&l_last, l_found));
-    EXPECT_FALSE(c_algo_find_last_of(&fl_first, &fl_last, &s_first, &s_last, &fl_found));
-    EXPECT_TRUE(C_ITER_EQ(&fl_last, fl_found));
-    EXPECT_FALSE(c_algo_find_last_of(&v_first, &v_last, &s_first, &s_last, &v_found));
+    C_ITER_INC(v_found);
+    EXPECT_FALSE(c_algo_find_last_of(v_found, &v_last, &s_first, &s_last, &v_found));
     EXPECT_TRUE(C_ITER_EQ(&v_last, v_found));
 
     EXPECT_FALSE(c_algo_find_last_of(&l_first, &l_first, &s_first, &s_last, &l_found));
@@ -439,26 +441,45 @@ TEST_F(CNonModifyingTest, SearchLast)
 
     EXPECT_TRUE(c_algo_search_last(&l_first, &l_last, &s_first, &s_last, &l_found));
     EXPECT_EQ(3, C_DEREF_INT(C_ITER_DEREF(l_found)));
+    C_ITER_INC(l_found);
+    EXPECT_FALSE(c_algo_search_last(l_found, &l_last, &s_first, &s_last, &l_found));
+    EXPECT_TRUE(C_ITER_EQ(&l_last, l_found));
+
     EXPECT_FALSE(c_algo_search_last(&fl_first, &fl_last, &s_first, &s_last, &fl_found));
     EXPECT_TRUE(C_ITER_EQ(&fl_last, fl_found));
+
     EXPECT_TRUE(c_algo_search_last(&v_first, &v_last, &s_first, &s_last, &v_found));
     EXPECT_EQ(3, C_DEREF_INT(C_ITER_DEREF(v_found)));
+    C_ITER_INC(v_found);
+    EXPECT_FALSE(c_algo_search_last(v_found, &v_last, &s_first, &s_last, &v_found));
+    EXPECT_TRUE(C_ITER_EQ(&v_last, v_found));
 
     c_list_destroy(seq);
 }
 
 TEST_F(CNonModifyingTest, SearchN)
 {
-    int numbers[] = { 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4 };
+    int numbers[] = { 1, 2, 2, 3, 3, 3, 4, 4, 4, 4 };
     SetupAll(numbers, __array_length(numbers));
 
     for (int i : { 1, 2, 3, 4 } ) {
         EXPECT_TRUE(c_algo_search_n(&l_first, &l_last, (size_t)i, &i, &l_found));
         EXPECT_EQ(i, C_DEREF_INT(C_ITER_DEREF(l_found)));
+        C_ITER_INC(l_found);
+        EXPECT_FALSE(c_algo_search_n(l_found, &l_last, (size_t)i, &i, &l_found));
+        EXPECT_TRUE(C_ITER_EQ(&l_last, l_found));
+
         EXPECT_TRUE(c_algo_search_n(&fl_first, &fl_last, (size_t)i, &i, &fl_found));
         EXPECT_EQ(i, C_DEREF_INT(C_ITER_DEREF(fl_found)));
+        C_ITER_INC(fl_found);
+        EXPECT_FALSE(c_algo_search_n(fl_found, &fl_last, (size_t)i, &i, &fl_found));
+        EXPECT_TRUE(C_ITER_EQ(&fl_last, fl_found));
+
         EXPECT_TRUE(c_algo_search_n(&v_first, &v_last, (size_t)i, &i, &v_found));
         EXPECT_EQ(i, C_DEREF_INT(C_ITER_DEREF(v_found)));
+        C_ITER_INC(v_found);
+        EXPECT_FALSE(c_algo_search_n(v_found, &v_last, (size_t)i, &i, &v_found));
+        EXPECT_TRUE(C_ITER_EQ(&v_last, v_found));
 
         EXPECT_FALSE(c_algo_search_n(&l_first, &l_last, 0, &i, &l_found));
         EXPECT_TRUE(C_ITER_EQ(&l_last, l_found));
@@ -489,6 +510,62 @@ TEST_F(CNonModifyingTest, SearchN)
     EXPECT_FALSE(c_algo_search_n(&fl_first, &fl_last, 10, &exist, &fl_found));
     EXPECT_TRUE(C_ITER_EQ(&fl_last, fl_found));
     EXPECT_FALSE(c_algo_search_n(&v_first, &v_last, 10, &exist, &v_found));
+    EXPECT_TRUE(C_ITER_EQ(&v_last, v_found));
+}
+
+TEST_F(CNonModifyingTest, SearchLastN)
+{
+    int numbers[] = { 1, 2, 2, 3, 3, 3, 4, 4, 4, 4 };
+    SetupAll(numbers, __array_length(numbers));
+
+    for (int i : { 1, 2, 3, 4 } ) {
+        EXPECT_TRUE(c_algo_search_n(&l_first, &l_last, (size_t)i, &i, &l_found));
+        EXPECT_EQ(i, C_DEREF_INT(C_ITER_DEREF(l_found)));
+        C_ITER_INC(l_found);
+        EXPECT_FALSE(c_algo_search_n(l_found, &l_last, (size_t)i, &i, &l_found));
+        EXPECT_TRUE(C_ITER_EQ(&l_last, l_found));
+
+        EXPECT_TRUE(c_algo_search_n(&fl_first, &fl_last, (size_t)i, &i, &fl_found));
+        EXPECT_EQ(i, C_DEREF_INT(C_ITER_DEREF(fl_found)));
+        C_ITER_INC(fl_found);
+        EXPECT_FALSE(c_algo_search_n(fl_found, &fl_last, (size_t)i, &i, &fl_found));
+        EXPECT_TRUE(C_ITER_EQ(&fl_last, fl_found));
+
+        EXPECT_TRUE(c_algo_search_n(&v_first, &v_last, (size_t)i, &i, &v_found));
+        EXPECT_EQ(i, C_DEREF_INT(C_ITER_DEREF(v_found)));
+        C_ITER_INC(v_found);
+        EXPECT_FALSE(c_algo_search_n(v_found, &v_last, (size_t)i, &i, &v_found));
+        EXPECT_TRUE(C_ITER_EQ(&v_last, v_found));
+
+        EXPECT_FALSE(c_algo_search_last_n(&l_first, &l_last, 0, &i, &l_found));
+        EXPECT_TRUE(C_ITER_EQ(&l_last, l_found));
+        EXPECT_FALSE(c_algo_search_last_n(&fl_first, &fl_last, 0, &i, &fl_found));
+        EXPECT_TRUE(C_ITER_EQ(&fl_last, fl_found));
+        EXPECT_FALSE(c_algo_search_last_n(&v_first, &v_last, 0, &i, &v_found));
+        EXPECT_TRUE(C_ITER_EQ(&v_last, v_found));
+
+        EXPECT_FALSE(c_algo_search_last_n(&l_first, &l_first, (size_t)i, &i, &l_found));
+        EXPECT_TRUE(C_ITER_EQ(&l_first, l_found));
+        EXPECT_FALSE(c_algo_search_last_n(&fl_first, &fl_first, (size_t)i, &i, &fl_found));
+        EXPECT_TRUE(C_ITER_EQ(&fl_first, fl_found));
+        EXPECT_FALSE(c_algo_search_last_n(&v_first, &v_first, (size_t)i, &i, &v_found));
+        EXPECT_TRUE(C_ITER_EQ(&v_first, v_found));
+    }
+
+    int not_exist = 5;
+    EXPECT_FALSE(c_algo_search_last_n(&l_first, &l_last, 0, &not_exist, &l_found));
+    EXPECT_TRUE(C_ITER_EQ(&l_last, l_found));
+    EXPECT_FALSE(c_algo_search_last_n(&fl_first, &fl_last, 0, &not_exist, &fl_found));
+    EXPECT_TRUE(C_ITER_EQ(&fl_last, fl_found));
+    EXPECT_FALSE(c_algo_search_last_n(&v_first, &v_last, 0, &not_exist, &v_found));
+    EXPECT_TRUE(C_ITER_EQ(&v_last, v_found));
+
+    int exist = 1;
+    EXPECT_FALSE(c_algo_search_last_n(&l_first, &l_last, 10, &exist, &l_found));
+    EXPECT_TRUE(C_ITER_EQ(&l_last, l_found));
+    EXPECT_FALSE(c_algo_search_last_n(&fl_first, &fl_last, 10, &exist, &fl_found));
+    EXPECT_TRUE(C_ITER_EQ(&fl_last, fl_found));
+    EXPECT_FALSE(c_algo_search_last_n(&v_first, &v_last, 10, &exist, &v_found));
     EXPECT_TRUE(C_ITER_EQ(&v_last, v_found));
 }
 
