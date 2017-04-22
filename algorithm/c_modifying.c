@@ -106,6 +106,149 @@ size_t algo_transform(c_iterator_t* __c_forward_iterator first,
     return transformed;
 }
 
+size_t algo_remove(c_iterator_t* __c_forward_iterator first,
+                   c_iterator_t* __c_forward_iterator last,
+                   c_ref_t value,
+                   c_iterator_t** __c_forward_iterator new_last)
+{
+    if (!first || !last || !value || !new_last) return 0;
+
+    size_t removed = 0;
+
+    __C_ALGO_BEGIN_2(first, last)
+
+    c_algo_find(__first, __last, &__first, value);
+    if (C_ITER_NE(__first, __last)) {
+        ++removed;
+        c_iterator_t* __i = 0;
+        C_ITER_COPY(&__i, __first);
+        C_ITER_INC(__i);
+        while (C_ITER_NE(__i, __last)) {
+            if (!__i->type_info->equal(C_ITER_DEREF(__i), value)) {
+                // TODO: replace assign with move
+                __first->type_info->assign(C_ITER_DEREF(__first), C_ITER_DEREF(__i));
+                C_ITER_INC(__first);
+            }
+            else
+                ++removed;
+
+            C_ITER_INC(__i);
+        }
+        __c_free(__i);
+    }
+
+    if (*new_last == 0)
+        C_ITER_COPY(new_last, __first);
+    else
+        C_ITER_ASSIGN(*new_last, __first);
+
+    __C_ALGO_END_2(first, last)
+
+    return removed;
+}
+
+size_t algo_remove_if(c_iterator_t* __c_forward_iterator first,
+                      c_iterator_t* __c_forward_iterator last,
+                      c_iterator_t** __c_forward_iterator new_last,
+                      c_unary_predicate pred)
+{
+    if (!first || !last || !pred || !new_last) return 0;
+
+    size_t removed = 0;
+
+    __C_ALGO_BEGIN_2(first, last)
+
+    c_algo_find_if(__first, __last, &__first, pred);
+    if (C_ITER_NE(__first, __last)) {
+        ++removed;
+        c_iterator_t* __i = 0;
+        C_ITER_COPY(&__i, __first);
+        C_ITER_INC(__i);
+        while (C_ITER_NE(__i, __last)) {
+            if (!pred(C_ITER_DEREF(__i))) {
+                // TODO: replace assign with move
+                __first->type_info->assign(C_ITER_DEREF(__first), C_ITER_DEREF(__i));
+                C_ITER_INC(__first);
+            }
+            else
+                ++removed;
+            C_ITER_INC(__i);
+        }
+        __c_free(__i);
+    }
+
+    if (*new_last == 0)
+        C_ITER_COPY(new_last, __first);
+    else
+        C_ITER_ASSIGN(*new_last, __first);
+
+    __C_ALGO_END_2(first, last)
+
+    return removed;
+}
+
+size_t algo_remove_copy(c_iterator_t* __c_forward_iterator first,
+                        c_iterator_t* __c_forward_iterator last,
+                        c_iterator_t* __c_forward_iterator d_first,
+                        c_ref_t value,
+                        c_iterator_t** __c_forward_iterator d_last_copied)
+{
+    if (!first || !last || !d_first || !value || !d_last_copied) return 0;
+
+    size_t copied = 0;
+
+    __C_ALGO_BEGIN_3(first, last, d_first)
+
+    while (C_ITER_NE(__first, __last)) {
+        if (!__first->type_info->equal(C_ITER_DEREF(__first), value)) {
+            __d_first->type_info->assign(C_ITER_DEREF(__d_first), C_ITER_DEREF(__first));
+            ++copied;
+        }
+        C_ITER_INC(__first);
+        C_ITER_INC(__d_first);
+    }
+
+    if (*d_last_copied == 0)
+        C_ITER_COPY(d_last_copied, __d_first);
+    else
+        C_ITER_ASSIGN(*d_last_copied, __d_first);
+
+    __C_ALGO_END_3(first, last, d_first)
+
+    return copied;
+}
+
+size_t algo_remove_copy_if(c_iterator_t* __c_forward_iterator first,
+                           c_iterator_t* __c_forward_iterator last,
+                           c_iterator_t* __c_forward_iterator d_first,
+                           c_iterator_t** __c_forward_iterator d_last_copied,
+                           c_unary_predicate pred)
+{
+    if (!first || !last || !d_first || !pred || !d_last_copied) return 0;
+
+    size_t copied = 0;
+
+    __C_ALGO_BEGIN_3(first, last, d_first)
+
+    while (C_ITER_NE(__first, __last)) {
+        if (!pred(C_ITER_DEREF(__first))) {
+            __d_first->type_info->assign(C_ITER_DEREF(__d_first), C_ITER_DEREF(__first));
+            ++copied;
+        }
+        C_ITER_INC(__first);
+        C_ITER_INC(__d_first);
+    }
+
+    if (*d_last_copied == 0)
+        C_ITER_COPY(d_last_copied, __d_first);
+    else
+        C_ITER_ASSIGN(*d_last_copied, __d_first);
+
+    __C_ALGO_END_3(first, last, d_first)
+
+    return copied;
+}
+
 void algo_swap(c_containable_t* type_info,
                c_ref_t x,
                c_ref_t y)

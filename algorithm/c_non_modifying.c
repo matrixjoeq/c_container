@@ -67,22 +67,27 @@ bool algo_none_of(c_iterator_t* __c_input_iterator first,
     return ret;
 }
 
-void algo_for_each(c_iterator_t* __c_input_iterator first,
-                   c_iterator_t* __c_input_iterator last,
-                   c_unary_func op)
+size_t algo_for_each(c_iterator_t* __c_input_iterator first,
+                     c_iterator_t* __c_input_iterator last,
+                     c_unary_func op)
 {
-    if (!first || !last || !op) return;
+    if (!first || !last || !op) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_INPUT));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_INPUT));
+
+    size_t oped = 0;
 
     __C_ALGO_BEGIN_2(first, last)
 
     while (C_ITER_NE(__first, __last)) {
         op(C_ITER_DEREF(__first));
         C_ITER_INC(__first);
+        ++oped;
     }
 
     __C_ALGO_END_2(first, last)
+
+    return oped;
 }
 
 void algo_for_each_n(c_iterator_t* __c_input_iterator first,

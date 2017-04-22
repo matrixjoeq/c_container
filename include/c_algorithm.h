@@ -23,11 +23,12 @@ bool algo_none_of(c_iterator_t* __c_input_iterator first,
                   c_iterator_t* __c_input_iterator last,
                   c_unary_predicate pred);
 // Applies the given function to the result of dereferencing every iterator in the range [first, last), in order.
-void algo_for_each(c_iterator_t* __c_input_iterator first,
-                   c_iterator_t* __c_input_iterator last,
-                   c_unary_func op);
+// Returns the number of elements in range [first, last).
+size_t algo_for_each(c_iterator_t* __c_input_iterator first,
+                     c_iterator_t* __c_input_iterator last,
+                     c_unary_func op);
 // Applies the given function to the result of dereferencing every iterator in the range [first, first + n), in order.
-// Set reached to first + n.
+// Sets reached to first + n.
 void algo_for_each_n(c_iterator_t* __c_input_iterator first,
                      size_t n,
                      c_iterator_t** __c_input_iterator reached,
@@ -43,8 +44,8 @@ size_t algo_count_if(c_iterator_t* __c_input_iterator first,
 // Returns if there's mismatching pair of elements from two ranges: one defined by [first, last)
 // and another defined by [first2, first2 + (last - first)).
 // Elements are considered to be mismatching if predicate returns false.
-// Set mismatch1 to the first mismatching positin in [first, last).
-// Set mismatch2 to the first mismatching position in [first2, first2 + (last - first)).
+// Sets mismatch1 to the first mismatching positin in [first, last).
+// Sets mismatch2 to the first mismatching position in [first2, first2 + (last - first)).
 // If no mismatching, mismatch1 is set to last, mismatch2 is set to first2 + (last - first).
 bool algo_mismatch_by(c_iterator_t* __c_input_iterator first,
                       c_iterator_t* __c_input_iterator last,
@@ -59,28 +60,28 @@ bool algo_equal_by(c_iterator_t* __c_input_iterator first,
                    c_iterator_t* __c_input_iterator first2,
                    c_binary_predicate pred);
 // Returns true if there's an element makes predicate return true in the range [first, last).
-// Set found to the first element that satisfies specific criteria.
+// Sets found to the first element that satisfies specific criteria.
 bool algo_find_by(c_iterator_t* __c_input_iterator first,
                   c_iterator_t* __c_input_iterator last,
                   c_iterator_t** __c_input_iterator found,
                   c_ref_t value,
                   c_binary_predicate pred);
 // Returns true if there's an element makes predicate return true in the range [first, last).
-// Set found to the first element that satisfies specific criteria.
+// Sets found to the first element that satisfies specific criteria.
 bool algo_find_if(c_iterator_t* __c_input_iterator first,
                   c_iterator_t* __c_input_iterator last,
                   c_iterator_t** __c_input_iterator found,
                   c_unary_predicate pred);
 // Returns true if there's an element makes predicate return false in the range [first, last).
-// Set found to the first element that doesn't satisfies specific criteria.
+// Sets found to the first element that doesn't satisfies specific criteria.
 bool algo_find_if_not(c_iterator_t* __c_input_iterator first,
                       c_iterator_t* __c_input_iterator last,
                       c_iterator_t** __c_input_iterator found,
                       c_unary_predicate pred);
 // Searches the range [first, last) for any of the elements in the range [s_first, s_last).
 // Elements are compared using the given binary predicate.
-// Return true if any element is found.
-// Set found to the first element satisfies specific criteria.
+// Returns true if any element is found.
+// Sets found to the first element satisfies specific criteria.
 bool algo_find_first_of_by(c_iterator_t* __c_input_iterator first,
                            c_iterator_t* __c_input_iterator last,
                            c_iterator_t* __c_forward_iterator s_first,
@@ -89,8 +90,8 @@ bool algo_find_first_of_by(c_iterator_t* __c_input_iterator first,
                            c_binary_predicate pred);
 // Searches the range [first, last) for any of the elements in the range [s_first, s_last).
 // Elements are compared using the given binary predicate.
-// Return true if any element is found.
-// Set found to the last element satisfies specific criteria.
+// Returns true if any element is found.
+// Sets found to the last element satisfies specific criteria.
 bool algo_find_last_of_by(c_iterator_t* __c_input_iterator first,
                           c_iterator_t* __c_input_iterator last,
                           c_iterator_t* __c_forward_iterator s_first,
@@ -98,16 +99,16 @@ bool algo_find_last_of_by(c_iterator_t* __c_input_iterator first,
                           c_iterator_t** __c_input_iterator found,
                           c_binary_predicate pred);
 // Searches the range [first, last) for two consecutive identical elements.
-// Return true if there are such kind of elements.
-// Set found to the first element satisfies specific criteria.
+// Returns true if there are such kind of elements.
+// Sets found to the first element satisfies specific criteria.
 bool algo_adjacent_find_by(c_iterator_t* __c_forward_iterator first,
                            c_iterator_t* __c_forward_iterator last,
                            c_iterator_t** __c_forward_iterator found,
                            c_binary_predicate pred);
 // Searches for the first occurrence of the subsequence of elements [s_first, s_last)
 // in the range [first, last).
-// Return true if subsequence is found.
-// Set found to the first element satisfies specific criteria.
+// Returns true if subsequence is found.
+// Sets found to the first element satisfies specific criteria.
 bool algo_search_by(c_iterator_t* __c_forward_iterator first,
                     c_iterator_t* __c_forward_iterator last,
                     c_iterator_t* __c_forward_iterator s_first,
@@ -116,8 +117,8 @@ bool algo_search_by(c_iterator_t* __c_forward_iterator first,
                     c_binary_predicate pred);
 // Searches for the first occurrence of the subsequence of elements [s_first, s_last)
 // in the range [first, last).
-// Return true if subsequence is found.
-// Set found to the last element satisfies specific criteria.
+// Returns true if subsequence is found.
+// Sets found to the last element satisfies specific criteria.
 bool algo_search_last_by(c_iterator_t* __c_forward_iterator first,
                          c_iterator_t* __c_forward_iterator last,
                          c_iterator_t* __c_forward_iterator s_first,
@@ -126,8 +127,8 @@ bool algo_search_last_by(c_iterator_t* __c_forward_iterator first,
                          c_binary_predicate pred);
 // Searches the range [first, last) for the first sequence of count identical elements,
 // each satisfies specific criteria.
-// Return true if subsequence is found.
-// Set found to the first element satisfies specific criteria.
+// Returns true if subsequence is found.
+// Sets found to the first element satisfies specific criteria.
 bool algo_search_n_by(c_iterator_t* __c_forward_iterator first,
                       c_iterator_t* __c_forward_iterator last,
                       size_t n,
@@ -136,8 +137,8 @@ bool algo_search_n_by(c_iterator_t* __c_forward_iterator first,
                       c_binary_predicate pred);
 // Searches the range [first, last) for the first sequence of count identical elements,
 // each satisfies specific criteria.
-// Return true if subsequence is found.
-// Set found to the last element satisfies specific criteria.
+// Returns true if subsequence is found.
+// Sets found to the last element satisfies specific criteria.
 bool algo_search_last_n_by(c_iterator_t* __c_forward_iterator first,
                            c_iterator_t* __c_forward_iterator last,
                            size_t n,
@@ -190,8 +191,8 @@ bool algo_search_last_n_by(c_iterator_t* __c_forward_iterator first,
 // The elements are copied in reverse order (the last element is copied first), but their relative order is preserved.
 // The behavior is undefined if d_last is within (first, last].
 // algo_copy must be used instead of algo_copy_backward in that case.
-// Return number of elements copied.
-// Set d_last_copied to the last element copied.
+// Returns number of elements copied.
+// Sets d_last_copied to the last element copied.
 size_t algo_copy_backward(c_iterator_t* __c_bidirection_iterator first,
                           c_iterator_t* __c_bidirection_iterator last,
                           c_iterator_t* __c_bidirection_iterator d_last,
@@ -206,23 +207,55 @@ size_t algo_copy_backward(c_iterator_t* __c_bidirection_iterator first,
 //                          c_iterator_t* __c_bidirection_iterator d_last,
 //                          c_iterator_t** __c_bidirection_iterator d_last_moved);
 // Assigns the given value to the elements in the range [first, last).
-// Return number of elements filled.
+// Returns number of elements filled.
 size_t algo_fill(c_iterator_t* __c_forward_iterator first,
                  c_iterator_t* __c_forward_iterator last,
                  c_ref_t value);
 // Assigns the given value to the first count elements in the range beginning at first if n > 0.
 // Does nothing otherwise.
-// Set last_filled to one past the last element assigned if n > 0, first otherwise.
+// Sets last_filled to one past the last element assigned if n > 0, first otherwise.
 void algo_fill_n(c_iterator_t* __c_forward_iterator first,
                  size_t n,
                  c_ref_t value,
                  c_iterator_t** __c_forward_iterator last_filled);
-// Apply the given function to a range and stores the result in another range, beginning at d_first.
-// Return the number of elements transformed.
+// Applies the given function to a range and stores the result in another range, beginning at d_first.
+// Returns the number of elements transformed.
 size_t algo_transform(c_iterator_t* __c_forward_iterator first,
                       c_iterator_t* __c_forward_iterator last,
                       c_iterator_t* __c_forward_iterator d_first,
                       c_unary_func op);
+// Removes all elements equal to value from the range [first, last).
+// Returns the number of elements removed.
+// Sets new_last to a past-the-end iterator for the new end of the range.
+size_t algo_remove(c_iterator_t* __c_forward_iterator first,
+                   c_iterator_t* __c_forward_iterator last,
+                   c_ref_t value,
+                   c_iterator_t** __c_forward_iterator new_last);
+// Remove all elements satisfying specific criteria from range [first, last).
+// Returns the number of elements removed.
+// Sets new_last to a past-the-end iterator for the new end of the range.
+size_t algo_remove_if(c_iterator_t* __c_forward_iterator first,
+                      c_iterator_t* __c_forward_iterator last,
+                      c_iterator_t** __c_forward_iterator new_last,
+                      c_unary_predicate pred);
+// Copies elements from the range [first, last), to another range beginning at d_first,
+// omitting the elements equal to value. Source and destination ranges cannot overlap.
+// Returns the number of elements copied.
+// Sets d_last_copied to iterator to the element past the last element copied.
+size_t algo_remove_copy(c_iterator_t* __c_forward_iterator first,
+                        c_iterator_t* __c_forward_iterator last,
+                        c_iterator_t* __c_forward_iterator d_first,
+                        c_ref_t value,
+                        c_iterator_t** __c_forward_iterator d_last_copied);
+// Copies elements from the range [first, last), to another range beginning at d_first,
+// omitting the elements which satify specific criteria. Source and destination ranges cannot overlap.
+// Returns the number of elements copied.
+// Sets d_last_copied to iterator to the element past the last element copied.
+size_t algo_remove_copy_if(c_iterator_t* __c_forward_iterator first,
+                           c_iterator_t* __c_forward_iterator last,
+                           c_iterator_t* __c_forward_iterator d_first,
+                           c_iterator_t** __c_forward_iterator d_last_copied,
+                           c_unary_predicate pred);
 // Exchanges the given values.
 void algo_swap(c_containable_t* type_info,
                c_ref_t x,
@@ -232,12 +265,16 @@ void algo_iter_swap(c_iterator_t* __c_forward_iterator x,
                     c_iterator_t* __c_forward_iterator y);
 
 // modifying helpers
-#define c_algo_copy_backward(x, y, d, c)    algo_copy_backward(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c))
-#define c_algo_fill(x, y, v)                algo_fill(C_ITER_T(x), C_ITER_T(y), C_REF_T(v))
-#define c_algo_fill_n(x, n, v, f)           algo_fill_n(C_ITER_T(x), (n), C_REF_T(v), C_ITER_PTR(f))
-#define c_algo_transform(x, y, d, f)        algo_transform(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), (f))
-#define c_algo_swap(t, x, y)                algo_swap((t), C_REF_T(x), C_REF_T(y))
-#define c_algo_iter_swap(x, y)              algo_iter_swap(C_ITER_T(x), C_ITER_T(y))
+#define c_algo_copy_backward(x, y, d, c)        algo_copy_backward(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c))
+#define c_algo_fill(x, y, v)                    algo_fill(C_ITER_T(x), C_ITER_T(y), C_REF_T(v))
+#define c_algo_fill_n(x, n, v, f)               algo_fill_n(C_ITER_T(x), (n), C_REF_T(v), C_ITER_PTR(f))
+#define c_algo_transform(x, y, d, f)            algo_transform(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), (f))
+#define c_algo_remove(x, y, v, n)               algo_remove(C_ITER_T(x), C_ITER_T(y), C_REF_T(v), C_ITER_PTR(n))
+#define c_algo_remove_if(x, y, n, p)            algo_remove_if(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(n), (p))
+#define c_algo_remove_copy(x, y, d, v, c)       algo_remove_copy(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_REF_T(v), C_ITER_PTR(c))
+#define c_algo_remove_copy_if(x, y, d, c, p)    algo_remove_copy_if(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c), (p))
+#define c_algo_swap(t, x, y)                    algo_swap((t), C_REF_T(x), C_REF_T(y))
+#define c_algo_iter_swap(x, y)                  algo_iter_swap(C_ITER_T(x), C_ITER_T(y))
 
 // partition operations
 // sorting operations

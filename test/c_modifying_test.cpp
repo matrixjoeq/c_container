@@ -18,6 +18,21 @@ void plus_one(c_ref_t value)
     ++(*((int*)value));
 }
 
+bool greater_than_two(c_ref_t value)
+{
+    return (*((int*)value) > 2);
+}
+
+void print_value(c_ref_t data)
+{
+    printf("%d ", C_DEREF_INT(data));
+}
+
+inline void print_newline(void)
+{
+    printf("\n");
+}
+
 #pragma GCC diagnostic ignored "-Weffc++"
 class CModifyingTest : public ::testing::Test
 {
@@ -172,6 +187,72 @@ TEST_F(CModifyingTest, FillN)
     EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &filled_first));
 
     c_list_destroy(filled);
+}
+
+TEST_F(CModifyingTest, Remove)
+{
+    int numbers[] = { 0, 1, 1, 2, 1, 3, 4, 1, 1, 1, 5 };
+    SetupAll(numbers, __array_length(numbers));
+
+    int to_be_removed = 1;
+    int removed[] = { 0, 2, 3, 4, 5, 3, 4, 1, 1, 1, 5 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), C_REF_T(removed), __array_length(removed));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(6, c_algo_remove(&l_first, &l_last, &to_be_removed, &l_output));
+    EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, RemoveIf)
+{
+    int numbers[] = { 0, 1, 1, 2, 1, 3, 4, 1, 1, 1, 5 };
+    SetupAll(numbers, __array_length(numbers));
+
+    int removed[] = { 0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 5 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), C_REF_T(removed), __array_length(removed));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(3, c_algo_remove_if(&l_first, &l_last, &l_output, greater_than_two));
+    EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, RemoveCopy)
+{
+    int numbers[] = { 0, 1, 1, 2, 1, 3, 4, 1, 1, 1, 5 };
+    SetupAll(numbers, __array_length(numbers));
+
+    int to_be_removed = 1;
+    int copied[] = { 0, 2, 3, 4, 5, 3, 4, 1, 1, 1, 5 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), C_REF_T(copied), __array_length(copied));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(5, c_algo_remove_copy(&l_first, &l_last, &fl_first, &to_be_removed, &fl_output));
+    c_algo_for_each(&fl_first, &fl_last, print_value);
+    print_newline();
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, RemoveCopyIf)
+{
+    int numbers[] = { 0, 1, 1, 2, 1, 3, 4, 1, 1, 1, 5 };
+    SetupAll(numbers, __array_length(numbers));
+
+    int removed[] = { 0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 5 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), C_REF_T(removed), __array_length(removed));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(8, c_algo_remove_copy_if(&l_first, &l_last, &fl_first, &fl_output, greater_than_two));
+    c_algo_for_each(&fl_first, &fl_last, print_value);
+    print_newline();
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+
+    c_list_destroy(expected);
 }
 
 TEST_F(CModifyingTest, Swap)

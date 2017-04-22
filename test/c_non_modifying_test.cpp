@@ -13,22 +13,22 @@ namespace {
 const int default_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 const int default_length = __array_length(default_data);
 
-bool greater_than_two(const c_ref_t data)
+bool greater_than_two(c_ref_t data)
 {
     return C_DEREF_INT(data) > 2;
 }
 
-bool no_less_than_zero(const c_ref_t data)
+bool no_less_than_zero(c_ref_t data)
 {
     return C_DEREF_INT(data) >= 0;
 }
 
-bool greater_than_ten(const c_ref_t data)
+bool greater_than_ten(c_ref_t data)
 {
     return C_DEREF_INT(data) > 10;
 }
 
-void print_value(const c_ref_t data)
+void print_value(c_ref_t data)
 {
     printf("%d ", C_DEREF_INT(data));
 }
@@ -165,11 +165,11 @@ TEST_F(CNonModifyingTest, ForEach)
 {
     SetupAll(default_data, default_length);
 
-    c_algo_for_each(&l_first, &l_last, print_value);
+    EXPECT_EQ(default_length, c_algo_for_each(&l_first, &l_last, print_value));
     print_newline();
-    c_algo_for_each(&fl_first, &fl_last, print_value);
+    EXPECT_EQ(default_length, c_algo_for_each(&fl_first, &fl_last, print_value));
     print_newline();
-    c_algo_for_each(&v_first, &v_last, print_value);
+    EXPECT_EQ(default_length, c_algo_for_each(&v_first, &v_last, print_value));
     print_newline();
 
     c_iterator_t* __l_first = C_ITER_T(&l_first);
