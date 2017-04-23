@@ -6,6 +6,7 @@
 #include <string.h>
 #include <math.h>
 #include "c_internal.h"
+#include "c_algorithm.h"
 #include "c_vector.h"
 
 struct __c_vector {
@@ -429,7 +430,7 @@ __c_static int reallocate_and_move(c_vector_t* vector, size_t n)
 
     // double the capacity or make it large enough
     size_t size = c_vector_size(vector);
-    size_t cap = __c_max(c_vector_capacity(vector) * 2, n + size);
+    size_t cap = c_algo_max(c_vector_capacity(vector) * 2, n + size);
     c_ref_t start = malloc(cap * data_size);
     if (!start) return -1;
 

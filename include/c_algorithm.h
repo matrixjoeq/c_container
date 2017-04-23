@@ -186,7 +186,25 @@ bool algo_search_last_n_by(c_iterator_t* __c_forward_iterator first,
 #define c_algo_search_last_n(x, y, n, v, f)     c_algo_search_last_n_by((x), (y), (n), (v), (f), __c_get_equal(x))
 
 // modifying sequence operations
-// TODO: copy, copy_if
+// Copies the elements in the range, defined by [first, last), to another range beginning at d_first.
+// The behavior is undefined if d_first is within the range [first, last).
+// In this case, algo_copy_backward may be used instead.
+// Returns the number of elements copied.
+// Sets d_last to the element in the destination range, one past the last element copied.
+size_t algo_copy(c_iterator_t* __c_bidirection_iterator first,
+                 c_iterator_t* __c_bidirection_iterator last,
+                 c_iterator_t* __c_bidirection_iterator d_first,
+                 c_iterator_t** __c_bidirection_iterator d_last);
+// Only copies the elements for which the predicate returns true.
+// The order of the elements that are not removed is preserved.
+// The behavior is undefined if the source and the destination ranges overlap.
+// Returns the number of elements copied.
+// Sets d_last to the element in the destination range, one past the last element copied.
+size_t algo_copy_if(c_iterator_t* __c_bidirection_iterator first,
+                    c_iterator_t* __c_bidirection_iterator last,
+                    c_iterator_t* __c_bidirection_iterator d_first,
+                    c_iterator_t** __c_bidirection_iterator d_last,
+                    c_unary_predicate pred);
 // Copies the elements from the range, defined by [first, last), to another range ending at d_last.
 // The elements are copied in reverse order (the last element is copied first), but their relative order is preserved.
 // The behavior is undefined if d_last is within (first, last].
@@ -213,11 +231,11 @@ size_t algo_fill(c_iterator_t* __c_forward_iterator first,
                  c_ref_t value);
 // Assigns the given value to the first count elements in the range beginning at first if n > 0.
 // Does nothing otherwise.
-// Sets last_filled to one past the last element assigned if n > 0, first otherwise.
+// Sets last to one past the last element assigned if n > 0, first otherwise.
 void algo_fill_n(c_iterator_t* __c_forward_iterator first,
                  size_t n,
                  c_ref_t value,
-                 c_iterator_t** __c_forward_iterator last_filled);
+                 c_iterator_t** __c_forward_iterator last);
 // Applies the given function to a range and stores the result in another range, beginning at d_first.
 // Returns the number of elements transformed.
 size_t algo_transform(c_iterator_t* __c_forward_iterator first,
@@ -241,30 +259,123 @@ size_t algo_remove_if(c_iterator_t* __c_forward_iterator first,
 // Copies elements from the range [first, last), to another range beginning at d_first,
 // omitting the elements equal to value. Source and destination ranges cannot overlap.
 // Returns the number of elements copied.
-// Sets d_last_copied to iterator to the element past the last element copied.
+// Sets d_last to iterator to the element past the last element copied.
 size_t algo_remove_copy(c_iterator_t* __c_forward_iterator first,
                         c_iterator_t* __c_forward_iterator last,
                         c_iterator_t* __c_forward_iterator d_first,
                         c_ref_t value,
-                        c_iterator_t** __c_forward_iterator d_last_copied);
+                        c_iterator_t** __c_forward_iterator d_last);
 // Copies elements from the range [first, last), to another range beginning at d_first,
 // omitting the elements which satify specific criteria. Source and destination ranges cannot overlap.
 // Returns the number of elements copied.
-// Sets d_last_copied to iterator to the element past the last element copied.
+// Sets d_last to the element past the last element copied.
 size_t algo_remove_copy_if(c_iterator_t* __c_forward_iterator first,
                            c_iterator_t* __c_forward_iterator last,
                            c_iterator_t* __c_forward_iterator d_first,
-                           c_iterator_t** __c_forward_iterator d_last_copied,
+                           c_iterator_t** __c_forward_iterator d_last,
                            c_unary_predicate pred);
+// Replaces all elements that are equal to old_value with new_value in the range [first, last).
+// Returns the number of elements replaced.
+size_t algo_replace(c_iterator_t* __c_forward_iterator first,
+                    c_iterator_t* __c_forward_iterator last,
+                    c_ref_t old_value,
+                    c_ref_t new_value);
+// Replaces all elements for which predicate returns true with new_value in the range [first, last).
+// Returns the number of elements replaced.
+size_t algo_replace_if(c_iterator_t* __c_forward_iterator first,
+                       c_iterator_t* __c_forward_iterator last,
+                       c_unary_predicate pred,
+                       c_ref_t new_value);
+// Copies the all elements from the range [first, last) to another range beginning at d_first
+// replacing all elements that are equal to old_value with new_value.
+// The source and destination ranges cannot overlap.
+// Returns the number of elements copied.
+// Sets d_last to the element past the last element copied.
+size_t algo_replace_copy(c_iterator_t* __c_forward_iterator first,
+                         c_iterator_t* __c_forward_iterator last,
+                         c_iterator_t* __c_forward_iterator d_first,
+                         c_ref_t old_value,
+                         c_ref_t new_value,
+                         c_iterator_t** __c_forward_iterator d_last);
+// Copies the all elements from the range [first, last) to another range beginning at d_first
+// replacing all elements for which predicate returns true with new_value.
+// The source and destination ranges cannot overlap.
+// Returns the number of elements copied.
+// Sets d_last to the element past the last element copied.
+size_t algo_replace_copy_if(c_iterator_t* __c_forward_iterator first,
+                            c_iterator_t* __c_forward_iterator last,
+                            c_iterator_t* __c_forward_iterator d_first,
+                            c_unary_predicate pred,
+                            c_ref_t new_value,
+                            c_iterator_t** __c_forward_iterator d_last);
 // Exchanges the given values.
 void algo_swap(c_containable_t* type_info,
                c_ref_t x,
                c_ref_t y);
+// Exchanges elements between range [first, last) and another range starting at first2.
+// Returns the number of elements swapped.
+size_t algo_swap_range(c_iterator_t* __c_forward_iterator first,
+                       c_iterator_t* __c_forward_iterator last,
+                       c_iterator_t* __c_forward_iterator first2);
 // Swaps the values of the elements the given iterators are pointing to.
 void algo_iter_swap(c_iterator_t* __c_forward_iterator x,
                     c_iterator_t* __c_forward_iterator y);
+// Reverses the order of the elements in the range [first, last)
+// Behaves as if applying algo_iter_swap to every pair of iterators
+// first+i, (last-i) - 1 for each non-negative i < (last-first)/2.
+// Returns the number of elements reversed.
+size_t algo_reverse(c_iterator_t* __c_bidirection_iterator first,
+                    c_iterator_t* __c_bidirection_iterator last);
+// Copies the elements from the range [first, last) to another range
+// beginning at d_first in such a way that the elements in the new range are in reverse order.
+// Behaves as if by executing the assignment *(d_first + (last - first) - 1 - i) = *(first + i)
+// once for each non-negative i < (last - first).
+// If the source and destination ranges (that is, [first, last) and [d_first, d_first+(last-first)) respectively)
+// overlap, the behavior is undefined.
+// Returns the number of elements copied.
+// Sets d_last to the element past the last element copied.
+size_t algo_reverse_copy(c_iterator_t* __c_bidirection_iterator first,
+                         c_iterator_t* __c_bidirection_iterator last,
+                         c_iterator_t* __c_forward_iterator d_first,
+                         c_iterator_t** __c_forward_iterator d_last);
+// Performs a left rotation on a range of elements.
+// Specifically, algo_rotate swaps the elements in the range [first, last)
+// in such a way that the element n_first becomes the first element of the new range and n_first - 1 becomes the last element.
+// A precondition of this function is that [first, n_first) and [n_first, last) are valid ranges.
+// Returns the iterator equal to first + (last - n_first)
+void algo_rotate(c_iterator_t* __c_forward_iterator first,
+                 c_iterator_t* __c_forward_iterator n_first,
+                 c_iterator_t* __c_forward_iterator last,
+                 c_iterator_t** __c_forward_iterator rotated);
+// Eliminates all but the first element from every consecutive group of equivalent elements
+// from the range [first, last).
+// Removing is done by shifting the elements in the range in such a way that
+// elements to be erased are overwritten. Relative order of the elements that remain is preserved
+// and the physical size of the container is unchanged.
+// Iterators pointing to an element between the new logical end and the physical end of the range
+// are still dereferenceable, the elements themselves still have original values.
+// A call to unique is typically followed by a call to a container's erase method,
+// which erases the values from the new logical end and reduces the physical size of the container to match its new logical size.
+// Returns the number of elements after elimination.
+// Sets new_last to a past-the-end iterator for the new logical end of the range.
+size_t algo_unique_by(c_iterator_t* __c_forward_iterator first,
+                      c_iterator_t* __c_forward_iterator last,
+                      c_iterator_t** __c_forward_iterator new_last,
+                      c_binary_predicate pred);
+// Copies the elements from the range [first, last), to another range
+// beginning at d_first in such a way that there are no consecutive equal elements.
+// Only the first element of each group of equal elements is copied.
+// Returns the number of elements copied.
+// Sets d_last to the element past the last written element.
+size_t algo_unique_copy_by(c_iterator_t* __c_forward_iterator first,
+                           c_iterator_t* __c_forward_iterator last,
+                           c_iterator_t* __c_forward_iterator d_first,
+                           c_iterator_t** __c_forward_iterator d_last,
+                           c_binary_predicate pred);
 
 // modifying helpers
+#define c_algo_copy(x, y, d, c)                 algo_copy(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c))
+#define c_algo_copy_if(x, y, d, c, p)           algo_copy_if(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c), (p))
 #define c_algo_copy_backward(x, y, d, c)        algo_copy_backward(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c))
 #define c_algo_fill(x, y, v)                    algo_fill(C_ITER_T(x), C_ITER_T(y), C_REF_T(v))
 #define c_algo_fill_n(x, n, v, f)               algo_fill_n(C_ITER_T(x), (n), C_REF_T(v), C_ITER_PTR(f))
@@ -273,8 +384,22 @@ void algo_iter_swap(c_iterator_t* __c_forward_iterator x,
 #define c_algo_remove_if(x, y, n, p)            algo_remove_if(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(n), (p))
 #define c_algo_remove_copy(x, y, d, v, c)       algo_remove_copy(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_REF_T(v), C_ITER_PTR(c))
 #define c_algo_remove_copy_if(x, y, d, c, p)    algo_remove_copy_if(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c), (p))
+#define c_algo_replace(x, y, o, n)              algo_replace(C_ITER_T(x), C_ITER_T(y), C_REF_T(o), C_REF_T(n))
+#define c_algo_replace_if(x, y, p, n)           algo_replace_if(C_ITER_T(x), C_ITER_T(y), (p), C_REF_T(n))
+#define c_algo_replace_copy(x, y, d, o, n, c)   algo_replace_copy(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_REF_T(o), C_REF_T(n), C_ITER_PTR(c))
+#define c_algo_replace_copy_if(x, y, d, p, n, c)algo_replace_copy_if(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), (p), C_REF_T(n), C_ITER_PTR(c))
 #define c_algo_swap(t, x, y)                    algo_swap((t), C_REF_T(x), C_REF_T(y))
+#define c_algo_swap_range(x, y, z)              algo_swap_range(C_ITER_T(x), C_ITER_T(y), C_ITER_T(z))
 #define c_algo_iter_swap(x, y)                  algo_iter_swap(C_ITER_T(x), C_ITER_T(y))
+#define c_algo_reverse(x, y)                    algo_reverse(C_ITER_T(x), C_ITER_T(y))
+#define c_algo_reverse_copy(x, y, d, c)         algo_reverse_copy(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c))
+#define c_algo_rotate(x, n, y, r)               algo_rotate(C_ITER_T(x), C_ITER_T(n), C_ITER_T(y), C_ITER_PTR(r))
+#define c_algo_unique_by(x, y, n, p)            algo_unique_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(n), (p))
+#define c_algo_unique_copy_by(x, y, d, c, p)    algo_unique_copy_by(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c), (p))
+
+#define c_algo_unique(x, y, n)                  c_algo_unique_by((x), (y), (n), __c_get_equal(x))
+#define c_algo_unique_copy(x, y, d, c)          c_algo_unique_copy_by((x), (y), (d), (c), __c_get_equal(x))
+
 
 // partition operations
 // sorting operations
@@ -317,6 +442,41 @@ void algo_sort_heap_by(c_iterator_t* __c_random_iterator first,
 #define c_algo_sort_heap(x, y)                  c_algo_sort_heap_by((x), (y), __c_get_less(x))
 
 // minimum/maximum operations
+// Finds the greatest element in the range [first, last).
+// Elements are compared using the given binary comparison function.
+// Sets max to the maximum element.
+void algo_max_element_by(c_iterator_t* __c_forward_iterator first,
+                         c_iterator_t* __c_forward_iterator last,
+                         c_iterator_t** __c_forward_iterator max,
+                         c_compare comp);
+// Finds the smallest element in the range [first, last).
+// Elements are compared using the given binary comparison function.
+// Sets min to the minimum element.
+void algo_min_element_by(c_iterator_t* __c_forward_iterator first,
+                         c_iterator_t* __c_forward_iterator last,
+                         c_iterator_t** __c_forward_iterator mix,
+                         c_compare comp);
+// Finds the greatest and smallest element in the range [first, last).
+// Elements are compared using the given binary comparison function.
+// Sets min to the minimum element.
+// Sets max to the maximum element.
+void algo_minmax_element_by(c_iterator_t* __c_forward_iterator first,
+                            c_iterator_t* __c_forward_iterator last,
+                            c_iterator_t** __c_forward_iterator min,
+                            c_iterator_t** __c_forward_iterator max,
+                            c_compare comp);
+
+// min/max helpers
+#define c_algo_max_element_by(x, y, m, c)       algo_max_element_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(m), (c))
+#define c_algo_min_element_by(x, y, m, c)       algo_min_element_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(m), (c))
+#define c_algo_minmax_element_by(x, y, s, g, c) algo_minmax_element_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(s), C_ITER_PTR(g), (c))
+
+#define c_algo_max(x, y) (((x) < (y)) ? (y) : (x))
+#define c_algo_min(x, y) (((x) < (y)) ? (x) : (y))
+#define c_algo_max_element(x, y, m)             c_algo_max_element_by((x), (y), (m), __c_get_less(x))
+#define c_algo_min_element(x, y, m)             c_algo_min_element_by((x), (y), (m), __c_get_less(x))
+#define c_algo_minmax_element(x, y, s, g)       c_algo_minmax_element_by((x), (y), (s), (g), __c_get_less(x))
+
 // numeric operations
 // operations on uninitialized memory
 

@@ -128,6 +128,60 @@ protected:
 };
 #pragma GCC diagnostic warning "-Weffc++"
 
+TEST_F(CModifyingTest, Copy)
+{
+    SetupAll(default_data, default_length);
+
+    int numbers[] = { 10, 11, 12, 13, 14, 15 };
+    c_list_t* from = c_list_create_from(c_get_int_type_info(), (c_ref_t)numbers, __array_length(numbers));
+    c_list_iterator_t from_first = c_list_begin(from);
+    c_list_iterator_t from_last = c_list_end(from);
+
+    EXPECT_EQ(__array_length(numbers), c_algo_copy(&from_first, &from_last, &l_first, &l_output));
+    EXPECT_TRUE(c_algo_equal(&from_first, &from_last, &l_first));
+    EXPECT_EQ(__array_length(numbers), C_ITER_DISTANCE(&l_first, l_output));
+
+    EXPECT_EQ(__array_length(numbers), c_algo_copy(&from_first, &from_last, &fl_first, &fl_output));
+    EXPECT_TRUE(c_algo_equal(&from_first, &from_last, &fl_first));
+    EXPECT_EQ(__array_length(numbers), C_ITER_DISTANCE(&fl_first, fl_output));
+
+    EXPECT_EQ(__array_length(numbers), c_algo_copy(&from_first, &from_last, &v_first, &v_output));
+    EXPECT_TRUE(c_algo_equal(&from_first, &from_last, &v_first));
+    EXPECT_EQ(__array_length(numbers), C_ITER_DISTANCE(&v_first, v_output));
+
+    c_list_destroy(from);
+}
+
+TEST_F(CModifyingTest, CopyIf)
+{
+    SetupAll(default_data, default_length);
+
+    int numbers[] = { 0, 1, 2, 3, 4, 5 };
+    c_list_t* from = c_list_create_from(c_get_int_type_info(), (c_ref_t)numbers, __array_length(numbers));
+    c_list_iterator_t from_first = c_list_begin(from);
+    c_list_iterator_t from_last = c_list_end(from);
+
+    int expect_numbers[] = { 3, 4, 5 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), (c_ref_t)expect_numbers, __array_length(expect_numbers));
+    c_list_iterator_t e_first = c_list_begin(expected);
+    c_list_iterator_t e_last = c_list_end(expected);
+
+    EXPECT_EQ(__array_length(expect_numbers), c_algo_copy_if(&from_first, &from_last, &l_first, &l_output, greater_than_two));
+    EXPECT_TRUE(c_algo_equal(&e_first, &e_last, &l_first));
+    EXPECT_EQ(__array_length(expect_numbers), C_ITER_DISTANCE(&l_first, l_output));
+
+    EXPECT_EQ(__array_length(expect_numbers), c_algo_copy_if(&from_first, &from_last, &fl_first, &fl_output, greater_than_two));
+    EXPECT_TRUE(c_algo_equal(&e_first, &e_last, &fl_first));
+    EXPECT_EQ(__array_length(expect_numbers), C_ITER_DISTANCE(&fl_first, fl_output));
+
+    EXPECT_EQ(__array_length(expect_numbers), c_algo_copy_if(&from_first, &from_last, &v_first, &v_output, greater_than_two));
+    EXPECT_TRUE(c_algo_equal(&e_first, &e_last, &v_first));
+    EXPECT_EQ(__array_length(expect_numbers), C_ITER_DISTANCE(&v_first, v_output));
+
+    c_list_destroy(from);
+    c_list_destroy(expected);
+}
+
 TEST_F(CModifyingTest, CopyBackward)
 {
     SetupAll(default_data, default_length);
@@ -189,6 +243,26 @@ TEST_F(CModifyingTest, FillN)
     c_list_destroy(filled);
 }
 
+TEST_F(CModifyingTest, Transform)
+{
+    SetupAll(default_data, default_length);
+
+    int numbers[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), (c_ref_t)numbers, __array_length(numbers));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(default_length, c_algo_transform(&l_first, &l_last, &l_first, plus_one));
+    EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+
+    EXPECT_EQ(default_length, c_algo_transform(&fl_first, &fl_last, &fl_first, plus_one));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+
+    EXPECT_EQ(default_length, c_algo_transform(&v_first, &v_last, &v_first, plus_one));
+    EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
+
+    c_list_destroy(expected);
+}
+
 TEST_F(CModifyingTest, Remove)
 {
     int numbers[] = { 0, 1, 1, 2, 1, 3, 4, 1, 1, 1, 5 };
@@ -201,6 +275,12 @@ TEST_F(CModifyingTest, Remove)
 
     EXPECT_EQ(6, c_algo_remove(&l_first, &l_last, &to_be_removed, &l_output));
     EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+
+    EXPECT_EQ(6, c_algo_remove(&fl_first, &fl_last, &to_be_removed, &fl_output));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+
+    EXPECT_EQ(6, c_algo_remove(&v_first, &v_last, &to_be_removed, &v_output));
+    EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
 
     c_list_destroy(expected);
 }
@@ -217,6 +297,12 @@ TEST_F(CModifyingTest, RemoveIf)
     EXPECT_EQ(3, c_algo_remove_if(&l_first, &l_last, &l_output, greater_than_two));
     EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
 
+    EXPECT_EQ(3, c_algo_remove_if(&fl_first, &fl_last, &fl_output, greater_than_two));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+
+    EXPECT_EQ(3, c_algo_remove_if(&v_first, &v_last, &v_output, greater_than_two));
+    EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
+
     c_list_destroy(expected);
 }
 
@@ -231,9 +317,8 @@ TEST_F(CModifyingTest, RemoveCopy)
     c_list_iterator_t e_first = c_list_begin(expected);
 
     EXPECT_EQ(5, c_algo_remove_copy(&l_first, &l_last, &fl_first, &to_be_removed, &fl_output));
-    c_algo_for_each(&fl_first, &fl_last, print_value);
-    print_newline();
     EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+    EXPECT_EQ(5, C_ITER_DISTANCE(&fl_first, fl_output));
 
     c_list_destroy(expected);
 }
@@ -248,9 +333,88 @@ TEST_F(CModifyingTest, RemoveCopyIf)
     c_list_iterator_t e_first = c_list_begin(expected);
 
     EXPECT_EQ(8, c_algo_remove_copy_if(&l_first, &l_last, &fl_first, &fl_output, greater_than_two));
-    c_algo_for_each(&fl_first, &fl_last, print_value);
-    print_newline();
     EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+    EXPECT_EQ(8, C_ITER_DISTANCE(&fl_first, fl_output));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, Replace)
+{
+    int numbers[] = { 0, 1, 1, 2, 1, 3, 4, 1, 1, 5, 1 };
+    SetupAll(numbers, __array_length(numbers));
+
+    int old_value = 1;
+    int new_value = 10;
+    int replaced[] = { 0, 10, 10, 2, 10, 3, 4, 10, 10, 5, 10 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), replaced, __array_length(replaced));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(6, c_algo_replace(&l_first, &l_last, &old_value, &new_value));
+    EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+
+    EXPECT_EQ(6, c_algo_replace(&fl_first, &fl_last, &old_value, &new_value));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+
+    EXPECT_EQ(6, c_algo_replace(&v_first, &v_last, &old_value, &new_value));
+    EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, ReplaceIf)
+{
+    int numbers[] = { 0, 1, 1, 2, 1, 3, 4, 1, 1, 5, 6 };
+    SetupAll(numbers, __array_length(numbers));
+
+    int new_value = 10;
+    int replaced[] = { 0, 1, 1, 2, 1, 10, 10, 1, 1, 10, 10 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), replaced, __array_length(replaced));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(4, c_algo_replace_if(&l_first, &l_last, greater_than_two, &new_value));
+    EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+
+    EXPECT_EQ(4, c_algo_replace_if(&fl_first, &fl_last, greater_than_two, &new_value));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+
+    EXPECT_EQ(4, c_algo_replace_if(&v_first, &v_last, greater_than_two, &new_value));
+    EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, ReplaceCopy)
+{
+    int numbers[] = { 0, 1, 1, 2, 1, 3, 4, 1, 1, 5, 1 };
+    SetupAll(numbers, __array_length(numbers));
+
+    int old_value = 1;
+    int new_value = 10;
+    int replaced[] = { 0, 10, 10, 2, 10, 3, 4, 10, 10, 5, 10 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), replaced, __array_length(replaced));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(11, c_algo_replace_copy(&l_first, &l_last, &fl_first, &old_value, &new_value, &fl_output));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+    EXPECT_EQ(11, C_ITER_DISTANCE(&fl_first, fl_output));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, ReplaceCopyIf)
+{
+    int numbers[] = { 0, 1, 1, 2, 1, 3, 4, 1, 1, 5, 6 };
+    SetupAll(numbers, __array_length(numbers));
+
+    int new_value = 10;
+    int replaced[] = { 0, 1, 1, 2, 1, 10, 10, 1, 1, 10, 10 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), replaced, __array_length(replaced));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(11, c_algo_replace_copy_if(&l_first, &l_last, &fl_first, greater_than_two, &new_value, &fl_output));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+    EXPECT_EQ(11, C_ITER_DISTANCE(&fl_first, fl_output));
 
     c_list_destroy(expected);
 }
@@ -261,6 +425,39 @@ TEST_F(CModifyingTest, Swap)
     c_algo_swap(c_get_int_type_info(), &x, &y);
     EXPECT_EQ(100, y);
     EXPECT_EQ(200, x);
+}
+
+TEST_F(CModifyingTest, SwapRange)
+{
+    SetupAll(default_data, default_length);
+
+    int numbers[] = { 5, 6, 7, 8, 9, 0, 1, 2, 3, 4 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), numbers, __array_length(numbers));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    c_list_iterator_t* l_first2 = 0;
+    C_ITER_COPY(&l_first2, &l_first);
+    C_ITER_ADVANCE(l_first2, default_length / 2);
+    EXPECT_EQ(5, C_DEREF_INT(C_ITER_DEREF(l_first2)));
+    EXPECT_EQ(default_length / 2, c_algo_swap_range(&l_first, l_first2, l_first2));
+    EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+    __c_free(l_first2);
+
+    c_list_iterator_t* fl_first2 = 0;
+    C_ITER_COPY(&fl_first2, &fl_first);
+    C_ITER_ADVANCE(fl_first2, default_length / 2);
+    EXPECT_EQ(default_length / 2, c_algo_swap_range(&fl_first, fl_first2, fl_first2));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+    __c_free(fl_first2);
+
+    c_list_iterator_t* v_first2 = 0;
+    C_ITER_COPY(&v_first2, &v_first);
+    C_ITER_ADVANCE(v_first2, default_length / 2);
+    EXPECT_EQ(default_length / 2, c_algo_swap_range(&v_first, v_first2, v_first2));
+    EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
+    __c_free(v_first2);
+
+    c_list_destroy(expected);
 }
 
 TEST_F(CModifyingTest, IterSwap)
@@ -298,23 +495,96 @@ TEST_F(CModifyingTest, IterSwap)
     __c_free(v_next);
 }
 
-TEST_F(CModifyingTest, Transform)
+TEST_F(CModifyingTest, Reverse)
 {
     SetupAll(default_data, default_length);
 
-    int numbers[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    c_list_t* expected = c_list_create_from(c_get_int_type_info(), (c_ref_t)numbers, __array_length(numbers));
+    int numbers[] = { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), numbers, __array_length(numbers));
     c_list_iterator_t e_first = c_list_begin(expected);
 
-    EXPECT_EQ(default_length, c_algo_transform(&l_first, &l_last, &l_first, plus_one));
+    EXPECT_EQ(default_length, c_algo_reverse(&l_first, &l_last));
     EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
 
-    EXPECT_EQ(default_length, c_algo_transform(&fl_first, &fl_last, &fl_first, plus_one));
-    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
-
-    EXPECT_EQ(default_length, c_algo_transform(&v_first, &v_last, &v_first, plus_one));
+    EXPECT_EQ(default_length, c_algo_reverse(&v_first, &v_last));
     EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
 
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, ReverseCopy)
+{
+    SetupAll(default_data, default_length);
+
+    int numbers[] = { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), numbers, __array_length(numbers));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(default_length, c_algo_reverse_copy(&l_first, &l_last, &fl_first, &fl_output));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+    EXPECT_TRUE(C_ITER_EQ(fl_output, &fl_last));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, Rotate)
+{
+}
+
+TEST_F(CModifyingTest, RotateCopy)
+{
+}
+
+TEST_F(CModifyingTest, Unique)
+{
+    int numbers[] = { 0, 1, 1, 2, 1, 3, 4, 1, 1, 5, 1 };
+    SetupAll(numbers, __array_length(numbers));
+
+    int uniqued[] = { 0, 1, 2, 1, 3, 4, 1, 5, 1, 5, 1 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), uniqued, __array_length(uniqued));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(9, c_algo_unique(&l_first, &l_last, &l_output));
+    EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+    EXPECT_EQ(9, C_ITER_DISTANCE(&l_first, l_output));
+
+    EXPECT_EQ(9, c_algo_unique(&fl_first, &fl_last, &fl_output));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+    EXPECT_EQ(9, C_ITER_DISTANCE(&fl_first, fl_output));
+
+    EXPECT_EQ(9, c_algo_unique(&v_first, &v_last, &v_output));
+    EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
+    EXPECT_EQ(9, C_ITER_DISTANCE(&v_first, v_output));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, UniqueCopy)
+{
+    SetupAll(default_data, default_length);
+
+    int numbers[] = { 0, 1, 1, 2, 1, 1, 1, 5, 1 };
+    c_list_t* from = c_list_create_from(c_get_int_type_info(), numbers, __array_length(numbers));
+    c_list_iterator_t from_first = c_list_begin(from);
+    c_list_iterator_t from_last = c_list_end(from);
+
+    int uniqued[] = { 0, 1, 2, 1, 5, 1, 6, 7, 8, 9 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), uniqued, __array_length(uniqued));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    EXPECT_EQ(6, c_algo_unique_copy(&from_first, &from_last, &l_first, &l_output));
+    EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+    EXPECT_EQ(6, C_ITER_DISTANCE(&l_first, l_output));
+
+    EXPECT_EQ(6, c_algo_unique_copy(&from_first, &from_last, &fl_first, &fl_output));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+    EXPECT_EQ(6, C_ITER_DISTANCE(&fl_first, fl_output));
+
+    EXPECT_EQ(6, c_algo_unique_copy(&from_first, &from_last, &v_first, &v_output));
+    EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
+    EXPECT_EQ(6, C_ITER_DISTANCE(&v_first, v_output));
+
+    c_list_destroy(from);
     c_list_destroy(expected);
 }
 

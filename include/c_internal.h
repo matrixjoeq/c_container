@@ -27,11 +27,11 @@ extern "C" {
         } \
     } while (0)
 
-#define __c_assert(cond, msg) assert((cond) && (msg))
 #define __c_unuse(x) (void)(x)
+#define __c_assert(cond, msg) assert((cond) && (msg))
+#define __c_static_assert(cond) { char static_assertion[(cond) ? 1 : -1]; (void)static_assertion; }
 #define __array_length(__array) sizeof(__array) / sizeof(__array[0])
 #define __array_foreach(__array, __index) for (unsigned int __index = 0; __index < __array_length(__array); ++__index)
-#define __c_max(x, y) (((x) < (y)) ? (y) : (x))
 
 // algorithm macro
 #define __c_iter_get_shadow(x) \

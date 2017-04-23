@@ -153,6 +153,9 @@ void algo_pop_heap_by(c_iterator_t* __c_random_iterator first,
                       c_iterator_t* __c_random_iterator last,
                       c_compare comp)
 {
+    if (!first || !last || !comp) return;
+    assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
+    assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
     adjust_heap(first, last, comp);
 }
 

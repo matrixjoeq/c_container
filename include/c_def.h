@@ -208,9 +208,22 @@ c_containable_t* c_get_double_type_info(void);
 #define C_ITER_DEREF(x)         C_ITER_T(x)->iterator_ops->dereference(C_ITER_T(x))
 #define C_ITER_EQ(x, y)         C_ITER_T(x)->iterator_ops->equal(C_ITER_T(x), C_ITER_T(y))
 #define C_ITER_NE(x, y)         C_ITER_T(x)->iterator_ops->not_equal(C_ITER_T(x), C_ITER_T(y))
+#define C_ITER_ADVANCE(x, n)    C_ITER_T(x)->iterator_ops->advance(C_ITER_T(x), (n))
 #define C_ITER_DISTANCE(x, y)   C_ITER_T(x)->iterator_ops->distance(C_ITER_T(x), C_ITER_T(y))
+
 #define C_ITER_AT_LEAST(x, c)   (C_ITER_T(x)->iterator_category >= (c_iterator_category_t)(c))
 #define C_ITER_EXACT(x, c)      (C_ITER_T(x)->iterator_category == (c_iterator_category_t)(c))
+
+#define C_ITER_V_ASSIGN_DEREF(v, x) C_ITER_T(x)->type_info->assign(C_REF_T(v), C_ITER_DEREF(C_ITER_T(x)))
+#define C_ITER_DEREF_ASSIGN_V(x, v) C_ITER_T(x)->type_info->assign(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))
+#define C_ITER_DEREF_ASSIGN(x, y)   C_ITER_T(x)->type_info->assign(C_ITER_DEREF(C_ITER_T(x)), C_ITER_DEREF(C_ITER_T(y)))
+
+#define C_ITER_DEREF_EQUAL_V(x, v)  C_ITER_T(x)->type_info->equal(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))
+#define C_ITER_DEREF_EQUAL(x, y)    C_ITER_T(x)->type_info->equal(C_ITER_DEREF(C_ITER_T(x)), C_ITER_DEREF(C_ITER_T(y)))
+
+#define C_ITER_V_LESS_DEREF(v, x)   C_ITER_T(x)->type_info->less(C_REF_T(v), C_ITER_DEREF(C_ITER_T(x)))
+#define C_ITER_DEREF_LESS_V(x, v)   C_ITER_T(x)->type_info->less(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))
+#define C_ITER_DEREF_LESS(x, y)     C_ITER_T(x)->type_info->less(C_ITER_DEREF(C_ITER_T(x)), C_ITER_DEREF(C_ITER_T(y)))
 
 #define __c_output_iterator
 #define __c_input_iterator
