@@ -45,6 +45,9 @@ typedef void* c_ref_t;
 typedef void (*c_unary_func)(c_ref_t __c_in_out);
 //typedef void (*c_binary_func)(c_ref_t, c_ref_t);
 
+// generate any type in the input address
+typedef void (*c_generator_emplace)(c_ref_t __c_in_out);
+
 // return true if data matches condition
 typedef bool (*c_unary_predicate)(c_ref_t __c_in);
 typedef bool (*c_binary_predicate)(c_ref_t __c_in, c_ref_t __c_in);

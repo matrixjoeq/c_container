@@ -12,6 +12,7 @@ namespace {
 
 const int default_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 const int default_length = __array_length(default_data);
+int generate_seed;
 
 void plus_one(c_ref_t value)
 {
@@ -26,6 +27,12 @@ bool greater_than_two(c_ref_t value)
 void print_value(c_ref_t data)
 {
     printf("%d ", C_DEREF_INT(data));
+}
+
+void generate_number(c_ref_t address)
+{
+    if (!address) return;
+    *(int*)address = generate_seed++;
 }
 
 inline void print_newline(void)
@@ -259,6 +266,55 @@ TEST_F(CModifyingTest, Transform)
 
     EXPECT_EQ(default_length, c_algo_transform(&v_first, &v_last, &v_first, plus_one));
     EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, Generate)
+{
+    SetupAll(default_data, default_length);
+
+    int numbers[] = { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), (c_ref_t)numbers, __array_length(numbers));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    generate_seed = 100;
+    EXPECT_EQ(default_length, c_algo_generate(&l_first, &l_last, generate_number));
+    EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+
+    generate_seed = 100;
+    EXPECT_EQ(default_length, c_algo_generate(&fl_first, &fl_last, generate_number));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+
+    generate_seed = 100;
+    EXPECT_EQ(default_length, c_algo_generate(&v_first, &v_last, generate_number));
+    EXPECT_TRUE(c_algo_equal(&v_first, &v_last, &e_first));
+
+    c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, GenerateN)
+{
+    SetupAll(default_data, default_length);
+
+    int numbers[] = { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), (c_ref_t)numbers, __array_length(numbers));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    generate_seed = 100;
+    c_algo_generate_n(&l_first, default_length, generate_number, &l_output);
+    EXPECT_TRUE(C_ITER_EQ(l_output, &l_last));
+    EXPECT_TRUE(c_algo_equal(&l_first, l_output, &e_first));
+
+    generate_seed = 100;
+    c_algo_generate_n(&fl_first, default_length, generate_number, &fl_output);
+    EXPECT_TRUE(C_ITER_EQ(fl_output, &fl_last));
+    EXPECT_TRUE(c_algo_equal(&fl_first, fl_output, &e_first));
+
+    generate_seed = 100;
+    c_algo_generate_n(&v_first, default_length, generate_number, &v_output);
+    EXPECT_TRUE(C_ITER_EQ(v_output, &v_last));
+    EXPECT_TRUE(c_algo_equal(&v_first, v_output, &e_first));
 
     c_list_destroy(expected);
 }

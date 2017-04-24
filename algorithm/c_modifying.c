@@ -1,6 +1,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include "c_internal.h"
 #include "c_algorithm.h"
 
@@ -186,6 +187,76 @@ size_t algo_transform(c_iterator_t* __c_forward_iterator first,
     __C_ALGO_END_3(first, last, d_first);
 
     return transformed;
+}
+
+size_t algo_generate(c_iterator_t* __c_forward_iterator first,
+                     c_iterator_t* __c_forward_iterator last,
+                     c_generator_emplace gen)
+{
+    if (!first || !last || !gen) return 0;
+    assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+
+    size_t gened = 0;
+
+    size_t __size = first->type_info->size();
+    c_ref_t __value = malloc(__size);
+    if (!__value) goto out;
+
+    __C_ALGO_BEGIN_2(first, last)
+
+    while (C_ITER_NE(__first, __last)) {
+        memset(__value, 0, __size);
+        gen(__value);
+        C_ITER_DEREF_ASSIGN_V(__first, __value);
+        C_ITER_INC(__first);
+        ++gened;
+    }
+
+    __C_ALGO_END_2(first, last)
+
+    __c_free(__value);
+out:
+    return gened;
+}
+
+void algo_generate_n(c_iterator_t* __c_forward_iterator first,
+                     size_t n,
+                     c_generator_emplace gen,
+                     c_iterator_t** __c_forward_iterator last)
+{
+    if (!first || !gen || !last) return;
+    assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
+
+    size_t gened = 0;
+
+    __C_ALGO_BEGIN_1(first)
+
+    if (n == 0) goto out;
+
+    size_t __size = __first->type_info->size();
+    c_ref_t __value = malloc(__size);
+    if (!__value) goto out;
+
+    while (n--) {
+        memset(__value, 0, __size);
+        gen(__value);
+        C_ITER_DEREF_ASSIGN_V(__first, __value);
+        C_ITER_INC(__first);
+        ++gened;
+    }
+
+    __c_free(__value);
+
+out:
+    if (*last == 0)
+        C_ITER_COPY(last, gened ? __first : first);
+    else {
+        assert(C_ITER_AT_LEAST(*last, C_ITER_CATE_FORWARD));
+        C_ITER_ASSIGN(*last, gened ? __first : first);
+    }
+
+    __C_ALGO_END_1(first)
 }
 
 size_t algo_remove(c_iterator_t* __c_forward_iterator first,
@@ -620,6 +691,37 @@ void algo_rotate(c_iterator_t* __c_forward_iterator first,
 
 
     __C_ALGO_END_3(first, n_first, last)
+}
+
+size_t algo_rotate_copy(c_iterator_t* __c_forward_iterator first,
+                        c_iterator_t* __c_forward_iterator n_first,
+                        c_iterator_t* __c_forward_iterator last,
+                        c_iterator_t* __c_forward_iterator d_first,
+                        c_iterator_t** __c_forward_iterator d_last)
+{
+    if (!first || !n_first || !last || !d_first || !d_last) return 0;
+    assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_AT_LEAST(n_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
+
+    size_t copied = 0;
+
+    __C_ALGO_BEGIN_4(first, n_first, last, d_first)
+
+    copied += algo_copy(__n_first, __last, __d_first, &__d_first);
+    copied += algo_copy(__first, __n_first, __d_first, &__d_first);
+
+    if (*d_last)
+        C_ITER_COPY(d_last, __d_first);
+    else {
+        assert(C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
+        C_ITER_ASSIGN(*d_last, __d_first);
+    }
+
+    __C_ALGO_END_4(first, n_first, last, d_first)
+
+    return copied;
 }
 
 size_t algo_unique_by(c_iterator_t* __c_forward_iterator first,
