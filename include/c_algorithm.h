@@ -402,6 +402,49 @@ size_t algo_unique_copy_by(c_iterator_t* __c_forward_iterator first,
 
 
 // partition operations
+// Returns true if all elements in the range [first, last) that satisfy the predicate
+// appear before all elements that don't. Also returns true if [first, last) is empty.
+bool algo_is_partitioned(c_iterator_t* __c_forward_iterator first,
+                         c_iterator_t* __c_forward_iterator last,
+                         c_unary_predicate pred);
+// Reorders the elements in the range [first, last) in such a way that all elements for which
+// the predicate returns true precede the elements for which predicate returns false.
+// Relative order of the elements is not preserved.
+// Sets second_first to the first element of the second group.
+void algo_partition(c_iterator_t* __c_forward_iterator first,
+                    c_iterator_t* __c_forward_iterator last,
+                    c_iterator_t** __c_forward_iterator second_first,
+                    c_unary_predicate pred);
+// Copies the elements from the range [first, last) to two different ranges
+// depending on the value returned by the predicate. The elements, that satisfy the predicate,
+// are copied to the range beginning at d_first_true. The rest of the elements are copied to the range beginning at d_first_false.
+// The behavior is undefined if the input range overlaps either of the output ranges.
+// Returns the number of total elements copied to both two ranges.
+// Sets d_last_true to the end of the d_first_true range.
+// Sets d_last_false to the end of the d_first_false range.
+size_t algo_partition_copy(c_iterator_t* __c_forward_iterator first,
+                           c_iterator_t* __c_forward_iterator last,
+                           c_iterator_t* __c_forward_iterator d_first_true,
+                           c_iterator_t* __c_forward_iterator d_first_false,
+                           c_iterator_t** __c_forward_iterator d_last_true,
+                           c_iterator_t** __c_forward_iterator d_last_false,
+                           c_unary_predicate pred);
+// Examines the partitioned (as if by algo_partition) range [first, last)
+// and locates the end of the first partition, that is, the first element that
+// does not satisfy the given predicate or last if all elements satisfy predicate.
+// Sets first_last to past the end of the first partition within [first, last) or last if all elements satisfy predicate.
+void algo_partition_point(c_iterator_t* __c_forward_iterator first,
+                          c_iterator_t* __c_forward_iterator last,
+                          c_iterator_t** __c_forward_iterator first_last,
+                          c_unary_predicate pred);
+
+// partition helpers
+#define c_algo_is_partitioned(x, y, p)          algo_is_partitioned(C_ITER_T(x), C_ITER_T(y), (p))
+#define c_algo_partition(x, y, s, p)            algo_partition(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(s), (p))
+#define c_algo_partition_copy(x, y, ft, ff, lt, lf, p) \
+    algo_partition_copy(C_ITER_T(x), C_ITER_T(y), C_ITER_T(ft), C_ITER_T(ff), C_ITER_PTR(lt), C_ITER_PTR(lf), (p)
+#define c_algo_partition_point(x, y, l, p)      algo_partition_point(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(l), (p))
+
 // sorting operations
 // binary search operations (on sorted ranges)
 // set operations (on sorted ranges)
