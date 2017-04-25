@@ -4,23 +4,6 @@
 #include "c_internal.h"
 #include "c_algorithm.h"
 
-__c_static c_iterator_t* random_add(c_iterator_t** dst, c_iterator_t* src, ptrdiff_t n)
-{
-    if (!dst) return 0;
-
-    c_iterator_operation_t* iter_ops = src->iterator_ops;
-
-    if (*dst) {
-        iter_ops->assign(*dst, src);
-    }
-    else {
-        iter_ops->alloc_and_copy(dst, src);
-    }
-    iter_ops->advance(*dst, n);
-
-    return *dst;
-}
-
 __c_static void push_heap(c_iterator_t* first, c_iterator_t* last,
                           ptrdiff_t top_index, ptrdiff_t hole_index, c_compare comp)
 {
@@ -34,8 +17,8 @@ __c_static void push_heap(c_iterator_t* first, c_iterator_t* last,
     c_iterator_t* __tmp_parent = 0;
     c_iterator_t* __tmp_hole = 0;
     while (hole_index > top_index) {
-        random_add(&__tmp_parent, __first, parent_index);
-        random_add(&__tmp_hole, __first, hole_index);
+        __random_iter_add(&__tmp_parent, __first, parent_index);
+        __random_iter_add(&__tmp_hole, __first, hole_index);
         if (comp(C_ITER_DEREF(__tmp_parent), __value)) {
             type_info->assign(C_ITER_DEREF(__tmp_hole), C_ITER_DEREF(__tmp_parent));
             hole_index = parent_index;
@@ -44,7 +27,7 @@ __c_static void push_heap(c_iterator_t* first, c_iterator_t* last,
         else
             break;
     }
-    random_add(&__tmp_hole, __first, hole_index);
+    __random_iter_add(&__tmp_hole, __first, hole_index);
     type_info->assign(C_ITER_DEREF(__tmp_hole), __value);
     __c_free(__tmp_hole);
     __c_free(__tmp_parent);
@@ -104,15 +87,15 @@ void algo_is_heap_until_by(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __left = 0;
     c_iterator_t* __right = 0;
     while (__left_index < __distance) {
-        random_add(&__parent, __first, __parent_index);
+        __random_iter_add(&__parent, __first, __parent_index);
 
-        random_add(&__left, __first, __left_index);
+        __random_iter_add(&__left, __first, __left_index);
         if (comp(C_ITER_DEREF(__parent), C_ITER_DEREF(__left))) {
             is_heap = false;
             break;
         }
 
-        random_add(&__right, __first, __right_index);
+        __random_iter_add(&__right, __first, __right_index);
         if ((__right_index < __distance) &&
             (comp(C_ITER_DEREF(__parent), C_ITER_DEREF(__right)))) {
             is_heap = false;

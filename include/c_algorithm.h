@@ -398,11 +398,11 @@ size_t algo_reverse_copy(c_iterator_t* __c_bidirection_iterator first,
 // Specifically, algo_rotate swaps the elements in the range [first, last)
 // in such a way that the element n_first becomes the first element of the new range and n_first - 1 becomes the last element.
 // A precondition of this function is that [first, n_first) and [n_first, last) are valid ranges.
-// Returns the iterator equal to first + (last - n_first)
+// Sets rotate_point to the iterator equal to first + (last - n_first)
 void algo_rotate(c_iterator_t* __c_forward_iterator first,
                  c_iterator_t* __c_forward_iterator n_first,
                  c_iterator_t* __c_forward_iterator last,
-                 c_iterator_t** __c_forward_iterator rotated);
+                 c_iterator_t** __c_forward_iterator rotate_point);
 
 // Copies the elements from the range [first, last), to another range
 // beginning at d_first in such a way, that the element n_first becomes the first element
@@ -414,6 +414,14 @@ size_t algo_rotate_copy(c_iterator_t* __c_forward_iterator first,
                         c_iterator_t* __c_forward_iterator last,
                         c_iterator_t* __c_forward_iterator d_first,
                         c_iterator_t** __c_forward_iterator d_last);
+
+// Reorders the elements in the given range [first, last) such that
+// each possible permutation of those elements has equal probability of appearance.
+void algo_random_shuffle(c_iterator_t* __c_random_iterator first,
+                         c_iterator_t* __c_random_iterator last);
+void algo_random_shuffle_by(c_iterator_t* __c_random_iterator first,
+                            c_iterator_t* __c_random_iterator last,
+                            c_random_func r);
 
 // Eliminates all but the first element from every consecutive group of equivalent elements
 // from the range [first, last).
@@ -466,6 +474,8 @@ size_t algo_unique_copy_by(c_iterator_t* __c_forward_iterator first,
 #define c_algo_reverse_copy(x, y, d, c)         algo_reverse_copy(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c))
 #define c_algo_rotate(x, n, y, r)               algo_rotate(C_ITER_T(x), C_ITER_T(n), C_ITER_T(y), C_ITER_PTR(r))
 #define c_algo_rotate_copy(x, n, y, d, c)       algo_rotate_copy(C_ITER_T(x), C_ITER_T(n), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c))
+#define c_algo_random_shuffle(x, y)             algo_random_shuffle(C_ITER_T(x), C_ITER_T(y))
+#define c_algo_random_shuffle_by(x, y, r)       algo_random_shuffle_by(C_ITER_T(x), C_ITER_T(y), (r))
 #define c_algo_unique_by(x, y, n, p)            algo_unique_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(n), (p))
 #define c_algo_unique_copy_by(x, y, d, c, p)    algo_unique_copy_by(C_ITER_T(x), C_ITER_T(y), C_ITER_T(d), C_ITER_PTR(c), (p))
 
@@ -550,6 +560,34 @@ void algo_is_sorted_until_by(c_iterator_t* __c_forward_iterator first,
 /***********************************************/
 /* binary search operations (on sorted ranges) */
 /***********************************************/
+// Sets bound to an iterator pointing to the first element in the range [first, last)
+// that is not less than (i.e. greater or equal to) value.
+// The range [first, last) must be at least partially ordered, i.e. partitioned with respect
+// to the expression comp(element, value).
+// A fully-sorted range meets this criterion, as does a range resulting from a call to algo_partition.
+void algo_lower_bound_by(c_iterator_t* __c_forward_iterator first,
+                         c_iterator_t* __c_forward_iterator last,
+                         c_ref_t value,
+                         c_iterator_t** __c_forward_iterator bound,
+                         c_compare comp);
+
+// Sets bound to an iterator pointing to the first element in the range [first, last)
+// that is greater than value.
+// The range [first, last) must be at least partially ordered, i.e. partitioned with respect
+// to the expression !comp(value, element).
+// A fully-sorted range meets this criterion, as does a range resulting from a call to algo_partition.
+void algo_upper_bound_by(c_iterator_t* __c_forward_iterator first,
+                         c_iterator_t* __c_forward_iterator last,
+                         c_ref_t value,
+                         c_iterator_t** __c_forward_iterator bound,
+                         c_compare comp);
+
+// binary helpers
+#define c_algo_lower_bound_by(x, y, v, b, c)    algo_lower_bound_by(C_ITER_T(x), C_ITER_T(y), C_REF_T(v), C_ITER_PTR(b), (c))
+#define c_algo_upper_bound_by(x, y, v, b, c)    algo_upper_bound_by(C_ITER_T(x), C_ITER_T(y), C_REF_T(v), C_ITER_PTR(b), (c))
+
+#define c_algo_lower_bound(x, y, v, b)          c_algo_lower_bound_by((x), (y), (v), (b), __c_get_less(x))
+#define c_algo_upper_bound(x, y, v, b)          c_algo_upper_bound_by((x), (y), (v), (b), __c_get_less(x))
 
 /*************************************/
 /* set operations (on sorted ranges) */

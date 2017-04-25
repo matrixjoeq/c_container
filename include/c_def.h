@@ -48,6 +48,10 @@ typedef void (*c_unary_func)(c_ref_t __c_in_out);
 // generate any type in the input address
 typedef void (*c_generator_emplace)(c_ref_t __c_in_out);
 
+// generate random value in the interval [0, n)
+typedef unsigned long long c_random_int_t;
+typedef c_random_int_t (*c_random_func)(c_random_int_t n);
+
 // return true if data matches condition
 typedef bool (*c_unary_predicate)(c_ref_t __c_in);
 typedef bool (*c_binary_predicate)(c_ref_t __c_in, c_ref_t __c_in);

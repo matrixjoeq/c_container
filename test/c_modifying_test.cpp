@@ -585,6 +585,35 @@ TEST_F(CModifyingTest, ReverseCopy)
 
 TEST_F(CModifyingTest, Rotate)
 {
+    int rotate[][10] = {
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 },
+        { 2, 3, 4, 5, 6, 7, 8, 9, 0, 1 },
+        { 3, 4, 5, 6, 7, 8, 9, 0, 1, 2 },
+        { 4, 5, 6, 7, 8, 9, 0, 1, 2, 3 },
+        { 5, 6, 7, 8, 9, 0, 1, 2, 3, 4 },
+        { 6, 7, 8, 9, 0, 1, 2, 3, 4, 5 },
+        { 7, 8, 9, 0, 1, 2, 3, 4, 5, 6 },
+        { 8, 9, 0, 1, 2, 3, 4, 5, 6, 7 },
+        { 9, 0, 1, 2, 3, 4, 5, 6, 7, 8 },
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+    };
+
+    __array_foreach(rotate, i) {
+        SetupList(default_data, default_length);
+        c_list_iterator_t n_first = c_list_begin(__l);
+        C_ITER_ADVANCE(&n_first, i);
+
+        c_list_t* expected = c_list_create_from(c_get_int_type_info(), rotate[i], __array_length(rotate[i]));
+        c_list_iterator_t e_first = c_list_begin(expected);
+
+        c_algo_rotate(&l_first, &n_first, &l_last, &l_output);
+        EXPECT_TRUE(c_algo_equal(&l_first, &l_last, &e_first));
+        EXPECT_EQ(C_ITER_DISTANCE(&l_first, l_output), C_ITER_DISTANCE(&n_first, &l_last));
+
+        c_list_destroy(expected);
+        c_list_clear(__l);
+    }
 }
 
 TEST_F(CModifyingTest, RotateCopy)
@@ -603,6 +632,18 @@ TEST_F(CModifyingTest, RotateCopy)
     EXPECT_EQ(default_length, C_ITER_DISTANCE(&fl_first, fl_output));
 
     c_list_destroy(expected);
+}
+
+TEST_F(CModifyingTest, RandomShuffle)
+{
+    // TODO: expect uniformly distributed
+    for (int i = 0; i < 10; ++i) {
+        SetupVector(default_data, default_length);
+        c_algo_random_shuffle(&v_first, &v_last);
+        c_algo_for_each(&v_first, &v_last, print_value);
+        print_newline();
+        c_vector_clear(__v);
+    }
 }
 
 TEST_F(CModifyingTest, Unique)

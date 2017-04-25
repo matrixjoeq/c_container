@@ -5,6 +5,32 @@
 #include "c_internal.h"
 #include "c_algorithm.h"
 
+static c_random_int_t __uniform(c_random_int_t min, c_random_int_t max, long int seed)
+{
+    double t = 0;
+    seed = 2045 * (seed) + 1;
+    seed = seed - (seed / 1048576) * 1048576;
+    t = (seed) / 1048576.0;
+    t = min + (max - min) * t;
+    return (c_random_int_t)t;
+}
+
+static c_random_int_t uniform(c_random_int_t min, c_random_int_t max)
+{
+    long int s = 0;
+    c_random_int_t r = 0;
+
+    s = rand();
+    r = __uniform(min, max, s);
+
+    return r;
+}
+
+static c_random_int_t algo_uniform(c_random_int_t n)
+{
+    return uniform(0, n);
+}
+
 size_t algo_copy(c_iterator_t* __c_forward_iterator first,
                  c_iterator_t* __c_forward_iterator last,
                  c_iterator_t* __c_forward_iterator d_first,
@@ -659,34 +685,62 @@ size_t algo_reverse_copy(c_iterator_t* __c_bidirection_iterator first,
 void algo_rotate(c_iterator_t* __c_forward_iterator first,
                  c_iterator_t* __c_forward_iterator n_first,
                  c_iterator_t* __c_forward_iterator last,
-                 c_iterator_t** __c_forward_iterator rotated)
+                 c_iterator_t** __c_forward_iterator rotate_point)
 {
-    if (!first || !n_first || !last || !rotated) return;
+    if (!first || !n_first || !last || !rotate_point) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(n_first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
 
     if (C_ITER_EQ(first, n_first)) {
-        if (*rotated == 0)
-            C_ITER_COPY(rotated, last);
+        if (*rotate_point == 0)
+            C_ITER_COPY(rotate_point, last);
         else {
-            assert(C_ITER_AT_LEAST(*rotated, C_ITER_CATE_FORWARD));
-            C_ITER_ASSIGN(*rotated, last);
+            assert(C_ITER_AT_LEAST(*rotate_point, C_ITER_CATE_FORWARD));
+            C_ITER_ASSIGN(*rotate_point, last);
         }
         return;
     }
 
     if (C_ITER_EQ(n_first, last)) {
-        if (*rotated == 0)
-            C_ITER_COPY(rotated, first);
+        if (*rotate_point == 0)
+            C_ITER_COPY(rotate_point, first);
         else {
-            assert(C_ITER_AT_LEAST(*rotated, C_ITER_CATE_FORWARD));
-            C_ITER_ASSIGN(*rotated, first);
+            assert(C_ITER_AT_LEAST(*rotate_point, C_ITER_CATE_FORWARD));
+            C_ITER_ASSIGN(*rotate_point, first);
         }
         return;
     }
 
     __C_ALGO_BEGIN_3(first, n_first, last)
+
+    c_iterator_t* __next = 0;
+    C_ITER_COPY(&__next, __n_first);
+
+    do {
+        algo_iter_swap(__first, __next);
+        C_ITER_INC(__first);
+        C_ITER_INC(__next);
+        if (C_ITER_EQ(__first, __n_first)) C_ITER_ASSIGN(__n_first, __next);
+    } while (C_ITER_NE(__next, __last));
+
+    if (*rotate_point == 0)
+        C_ITER_COPY(rotate_point, __first);
+    else {
+        assert(C_ITER_AT_LEAST(*rotate_point, C_ITER_CATE_FORWARD));
+        C_ITER_ASSIGN(*rotate_point, __first);
+    }
+
+    C_ITER_ASSIGN(__next, __n_first);
+    while (C_ITER_NE(__next, __last)) {
+        algo_iter_swap(__first, __next);
+        C_ITER_INC(__first);
+        C_ITER_INC(__next);
+        if (C_ITER_EQ(__first, __n_first)) C_ITER_ASSIGN(__n_first, __next);
+        if (C_ITER_EQ(__next, __last)) C_ITER_ASSIGN(__next, __n_first);
+    }
+
+    __c_free(__next);
 
     __C_ALGO_END_3(first, n_first, last)
 }
@@ -720,6 +774,38 @@ size_t algo_rotate_copy(c_iterator_t* __c_forward_iterator first,
     __C_ALGO_END_4(first, n_first, last, d_first)
 
     return copied;
+}
+
+void algo_random_shuffle(c_iterator_t* __c_random_iterator first,
+                         c_iterator_t* __c_random_iterator last)
+{
+    algo_random_shuffle_by(first, last, algo_uniform);
+}
+
+void algo_random_shuffle_by(c_iterator_t* __c_random_iterator first,
+                            c_iterator_t* __c_random_iterator last,
+                            c_random_func r)
+{
+    if (!first || !last || !r) return;
+    assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
+    assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
+
+    __C_ALGO_BEGIN_2(first, last)
+
+    ptrdiff_t n = C_ITER_DISTANCE(__first, __last);
+    c_iterator_t* __x = 0;
+    c_iterator_t* __y = 0;
+
+    for (ptrdiff_t i = n - 1; i > 0; --i) {
+        __random_iter_add(&__x, __first, i);
+        __random_iter_add(&__y, __first, (ptrdiff_t)(r(i + 1)));
+        algo_iter_swap(__x, __y);
+    }
+
+    __c_free(__x);
+    __c_free(__y);
+
+    __C_ALGO_END_2(first, last)
 }
 
 size_t algo_unique_by(c_iterator_t* __c_forward_iterator first,

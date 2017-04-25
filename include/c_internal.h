@@ -6,17 +6,31 @@
 extern "C" {
 #endif // __cplusplus
 
-#ifndef GTEST_UNIT_TEST
+#include "c_def.h"
+
 #define __c_static static
 #ifdef __GNUC__
 #define __c_inline __attribute__((always_inline)) inline
 #else
 #define __c_inline inline
 #endif
-#else
-#define __c_static
-#define __c_inline
-#endif
+
+__c_inline c_iterator_t* __random_iter_add(c_iterator_t** dst, c_iterator_t* src, ptrdiff_t n)
+{
+    if (!dst) return 0;
+
+    c_iterator_operation_t* iter_ops = src->iterator_ops;
+
+    if (*dst) {
+        iter_ops->assign(*dst, src);
+    }
+    else {
+        iter_ops->alloc_and_copy(dst, src);
+    }
+    iter_ops->advance(*dst, n);
+
+    return *dst;
+}
 
 // general macro
 #define __c_free(x) \
