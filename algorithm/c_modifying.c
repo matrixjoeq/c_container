@@ -688,8 +688,6 @@ void algo_rotate(c_iterator_t* __c_forward_iterator first,
 
     __C_ALGO_BEGIN_3(first, n_first, last)
 
-
-
     __C_ALGO_END_3(first, n_first, last)
 }
 
@@ -712,7 +710,7 @@ size_t algo_rotate_copy(c_iterator_t* __c_forward_iterator first,
     copied += algo_copy(__n_first, __last, __d_first, &__d_first);
     copied += algo_copy(__first, __n_first, __d_first, &__d_first);
 
-    if (*d_last)
+    if (*d_last == 0)
         C_ITER_COPY(d_last, __d_first);
     else {
         assert(C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));

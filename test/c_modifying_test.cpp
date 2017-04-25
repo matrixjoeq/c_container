@@ -589,6 +589,20 @@ TEST_F(CModifyingTest, Rotate)
 
 TEST_F(CModifyingTest, RotateCopy)
 {
+    SetupAll(default_data, default_length);
+
+    int numbers[] = { 5, 6, 7, 8, 9, 0, 1, 2, 3, 4 };
+    c_list_t* expected = c_list_create_from(c_get_int_type_info(), numbers, __array_length(numbers));
+    c_list_iterator_t e_first = c_list_begin(expected);
+
+    c_list_iterator_t n_first = c_list_begin(__l);
+    C_ITER_ADVANCE(&n_first, default_length / 2);
+
+    EXPECT_EQ(default_length, c_algo_rotate_copy(&l_first, &n_first, &l_last, &fl_first, &fl_output));
+    EXPECT_TRUE(c_algo_equal(&fl_first, &fl_last, &e_first));
+    EXPECT_EQ(default_length, C_ITER_DISTANCE(&fl_first, fl_output));
+
+    c_list_destroy(expected);
 }
 
 TEST_F(CModifyingTest, Unique)
