@@ -582,12 +582,47 @@ void algo_upper_bound_by(c_iterator_t* __c_forward_iterator first,
                          c_iterator_t** __c_forward_iterator bound,
                          c_compare comp);
 
+// Checks if an element equivalent to value appears within the range [first, last).
+// For algo_binary_search to succeed, the range [first, last) must be at least partially ordered,
+// i.e. it must satisfy all of the following requirements:
+// (1) partitioned with respect to element < value or comp(element, value)
+// (2) partitioned with respect to !(value < element) or !comp(value, element)
+// (3) for all elements, if element < value or comp(element, value) is true
+//     then !(value < element) or !comp(value, element) is also true
+// A fully-sorted range meets these criteria, as does a range resulting from a call to algo_partition.
+bool algo_binary_search_by(c_iterator_t* __c_forward_iterator first,
+                           c_iterator_t* __c_forward_iterator last,
+                           c_ref_t value,
+                           c_compare comp);
+
+// Returns a range containing all elements equivalent to value in the range [first, last).
+// The range [first, last) must be partitioned with respect to comparison with value,
+// i.e. it must satisfy all of the following requirements:
+// (1) partitioned with respect to element < value or comp(element, value)
+// (2) partitioned with respect to !(value < element) or !comp(value, element)
+// (3) for all elements, if element < value or comp(element, value) is true
+//     then !(value < element) or !comp(value, element) is also true
+// A fully-sorted range meets these criteria, as does a range resulting from a call to algo_partition.
+// The returned range is defined by two iterators, one pointing to the first element
+// that is not less than value and another pointing to the first element greater than value.
+// The first iterator may be alternatively obtained with algo_lower_bound(), the second - with algo_upper_bound().
+void algo_equal_range_by(c_iterator_t* __c_forward_iterator first,
+                         c_iterator_t* __c_forward_iterator last,
+                         c_ref_t value,
+                         c_iterator_t** __c_forward_iterator lower_bound,
+                         c_iterator_t** __c_forward_iterator upper_bound,
+                         c_compare comp);
+
 // binary helpers
 #define c_algo_lower_bound_by(x, y, v, b, c)    algo_lower_bound_by(C_ITER_T(x), C_ITER_T(y), C_REF_T(v), C_ITER_PTR(b), (c))
 #define c_algo_upper_bound_by(x, y, v, b, c)    algo_upper_bound_by(C_ITER_T(x), C_ITER_T(y), C_REF_T(v), C_ITER_PTR(b), (c))
+#define c_algo_binary_search_by(x, y, v, c)     algo_binary_search_by(C_ITER_T(x), C_ITER_T(y), C_REF_T(v), (c))
+#define c_algo_equal_range_by(x, y, v, l, u, c) algo_equal_range_by(C_ITER_T(x), C_ITER_T(y), C_REF_T(v), C_ITER_PTR(l), C_ITER_PTR(u), (c))
 
 #define c_algo_lower_bound(x, y, v, b)          c_algo_lower_bound_by((x), (y), (v), (b), __c_get_less(x))
 #define c_algo_upper_bound(x, y, v, b)          c_algo_upper_bound_by((x), (y), (v), (b), __c_get_less(x))
+#define c_algo_binary_search(x, y, v)           c_algo_binary_search_by((x), (y), (v), __c_get_less(x))
+#define c_algo_equal_range(x, y, v, l, u)       c_algo_equal_range_by((x), (y), (v), (l), (u), __c_get_less(x))
 
 /*************************************/
 /* set operations (on sorted ranges) */
