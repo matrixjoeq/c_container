@@ -82,6 +82,8 @@ TEST_F(CHeapTest, IsHeap)
 
 TEST_F(CHeapTest, PushHeap)
 {
+    EXPECT_TRUE(c_algo_is_heap(&__first, &__last));
+
     for (int i : default_data) {
         c_vector_push_back(__v, C_REF_T(&i));
         __first = c_vector_begin(__v);
@@ -93,6 +95,16 @@ TEST_F(CHeapTest, PushHeap)
 
 TEST_F(CHeapTest, PopHeap)
 {
+    SetupVector(default_data, default_length);
+    c_algo_make_heap(&__first, &__last);
+    EXPECT_TRUE(c_algo_is_heap(&__first, &__last));
+
+    while (!c_vector_empty(__v)) {
+        c_algo_pop_heap(&__first, &__last);
+        c_vector_pop_back(__v);
+        __last = c_vector_end(__v);
+        EXPECT_TRUE(c_algo_is_heap(&__first, &__last));
+    }
 }
 
 TEST_F(CHeapTest, MakeHeap)
@@ -104,6 +116,12 @@ TEST_F(CHeapTest, MakeHeap)
 
 TEST_F(CHeapTest, SortHeap)
 {
+    SetupVector(default_data, default_length);
+    c_algo_make_heap(&__first, &__last);
+    EXPECT_TRUE(c_algo_is_heap(&__first, &__last));
+
+    c_algo_sort_heap(&__first, &__last);
+    EXPECT_TRUE(c_algo_is_sorted(&__first, &__last));
 }
 
 } // namespace

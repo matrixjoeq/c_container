@@ -70,13 +70,6 @@ __c_static void push_heap(c_iterator_t* first, ptrdiff_t top_index, ptrdiff_t ho
     __C_ALGO_END_1(first);
 }
 
-__c_static void adjust_heap(c_iterator_t* first, c_iterator_t* last, c_compare comp)
-{
-    __c_unuse(first);
-    __c_unuse(last);
-    __c_unuse(comp);
-}
-
 bool algo_is_heap_by(c_iterator_t* __c_random_iterator first,
                      c_iterator_t* __c_random_iterator last,
                      c_compare comp)
@@ -163,10 +156,10 @@ void algo_push_heap_by(c_iterator_t* __c_random_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    ptrdiff_t top_index = 0;
-    ptrdiff_t hole_index = C_ITER_DISTANCE(__first, __last) - 1;
+    ptrdiff_t __top_index = 0;
+    ptrdiff_t __hole_index = C_ITER_DISTANCE(__first, __last) - 1;
     C_ITER_DEC(__last);
-    push_heap(__first, top_index, hole_index, C_ITER_DEREF(__last), comp);
+    push_heap(__first, __top_index, __hole_index, C_ITER_DEREF(__last), comp);
 
     __C_ALGO_END_2(first, last)
 }
@@ -178,7 +171,64 @@ void algo_pop_heap_by(c_iterator_t* __c_random_iterator first,
     if (!first || !last || !comp) return;
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
-    adjust_heap(first, last, comp);
+
+    if (C_ITER_DISTANCE(first, last) < 2) return;
+
+    __C_ALGO_BEGIN_2(first, last)
+
+    C_ITER_DEC(__last);
+    algo_iter_swap(__first, __last);
+
+    ptrdiff_t __last_index = C_ITER_DISTANCE(__first, __last);
+    ptrdiff_t __hole_index = 0;
+    ptrdiff_t __left_index = left(__hole_index);
+    ptrdiff_t __right_index = right(__hole_index);
+
+    c_iterator_t* __hole = 0;
+    c_iterator_t* __left = 0;
+    c_iterator_t* __right = 0;
+    C_ITER_COPY(&__hole, __first);
+
+    while (__left_index < __last_index) {
+        __c_iter_move_copy(&__left, __hole, __left_index);
+
+        if (__right_index < __last_index) {
+            __c_iter_move_copy(&__right, __hole, __right_index);
+            if (comp(C_ITER_DEREF(__left), C_ITER_DEREF(__right))) {
+                if (comp(C_ITER_DEREF(__hole), C_ITER_DEREF(__right))) {
+                    algo_iter_swap(__hole, __right);
+                    __hole_index = __right_index;
+                }
+                else
+                    break;
+            }
+            else {
+                if (comp(C_ITER_DEREF(__hole), C_ITER_DEREF(__left))) {
+                    algo_iter_swap(__hole, __right);
+                    __hole_index = __left_index;
+                }
+                else
+                    break;
+            }
+        }
+        else {
+            if (comp(C_ITER_DEREF(__hole), C_ITER_DEREF(__left))) {
+                algo_iter_swap(__hole, __left);
+                __hole_index = __left_index;
+            }
+            else
+                break;
+        }
+
+        __left_index = left(__hole_index);
+        __right_index = right(__hole_index);
+    }
+
+    __c_free(__right);
+    __c_free(__left);
+    __c_free(__hole);
+
+    __C_ALGO_END_2(first, last)
 }
 
 void algo_make_heap_by(c_iterator_t* __c_random_iterator first,
