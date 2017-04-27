@@ -439,10 +439,10 @@ __c_static c_iterator_t* backend_begin(c_backend_container_t* c, c_iterator_t** 
 
     c_backend_list_t* _c = (c_backend_list_t*)c;
     c_list_iterator_t first = c_list_begin(_c->impl);
-    *iter = (c_iterator_t*)malloc(sizeof(c_list_iterator_t));
-    if (*iter) {
+    if (*iter == 0)
         C_ITER_COPY(iter, &first);
-    }
+    else
+        C_ITER_ASSIGN(*iter, &first);
 
     return *iter;
 }
@@ -453,10 +453,10 @@ __c_static c_iterator_t* backend_end(c_backend_container_t* c, c_iterator_t** it
 
     c_backend_list_t* _c = (c_backend_list_t*)c;
     c_list_iterator_t last = c_list_end(_c->impl);
-    *iter = (c_iterator_t*)malloc(sizeof(c_list_iterator_t));
-    if (*iter) {
+    if (*iter == 0)
         C_ITER_COPY(iter, &last);
-    }
+    else
+        C_ITER_ASSIGN(*iter, &last);
 
     return *iter;
 }

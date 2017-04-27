@@ -350,10 +350,10 @@ __c_static c_iterator_t* backend_begin(c_backend_container_t* c, c_iterator_t** 
 
     c_backend_vector_t* _c = (c_backend_vector_t*)c;
     c_vector_iterator_t first = c_vector_begin(_c->impl);
-    *iter = (c_iterator_t*)malloc(sizeof(c_vector_iterator_t));
-    if (*iter) {
+    if (*iter == 0)
         C_ITER_COPY(iter, &first);
-    }
+    else
+        C_ITER_ASSIGN(*iter, &first);
 
     return *iter;
 }
@@ -364,10 +364,10 @@ __c_static c_iterator_t* backend_end(c_backend_container_t* c, c_iterator_t** it
 
     c_backend_vector_t* _c = (c_backend_vector_t*)c;
     c_vector_iterator_t last = c_vector_end(_c->impl);
-    *iter = (c_iterator_t*)malloc(sizeof(c_vector_iterator_t));
-    if (*iter) {
+    if (*iter == 0)
         C_ITER_COPY(iter, &last);
-    }
+    else
+        C_ITER_ASSIGN(*iter, &last);
 
     return *iter;
 }

@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "c_def.h"
+#include "c_vector.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,20 +64,24 @@ void c_priority_queue_swap(c_priority_queue_t* queue, c_priority_queue_t* other)
 /**
  * helpers
  */
-#define C_PRIORITY_QUEUE_INT c_priority_queue_create(c_get_int_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_SINT c_priority_queue_create(c_get_sint_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_UINT c_priority_queue_create(c_get_uint_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_SHORT c_priority_queue_create(c_get_short_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_SSHORT c_priority_queue_create(c_get_sshort_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_USHORT c_priority_queue_create(c_get_ushort_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_LONG c_priority_queue_create(c_get_long_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_SLONG c_priority_queue_create(c_get_slong_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_ULONG c_priority_queue_create(c_get_ulong_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_CHAR c_priority_queue_create(c_get_char_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_SCHAR c_priority_queue_create(c_get_schar_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_UCHAR c_priority_queue_create(c_get_uchar_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_FLOAT c_priority_queue_create(c_get_float_type_info(), c_vector_create_backend)
-#define C_PRIORITY_QUEUE_DOUBLE c_priority_queue_create(c_get_double_type_info(), c_vector_create_backend)
+#define C_PRIORITY_QUEUE_BASE(t, b, c)  c_priority_queue_create((t), (b), (c))
+#define C_PRIORITY_QUEUE(t, b)          C_PRIORITY_QUEUE_BASE((t), (b), (t)->less)
+#define C_PRIORITY_QUEUE_DEFAULT(t)     C_PRIORITY_QUEUE((t), c_vector_create_backend)
+
+#define C_PRIORITY_QUEUE_INT    C_PRIORITY_QUEUE_DEFAULT(c_get_int_type_info())
+#define C_PRIORITY_QUEUE_SINT   C_PRIORITY_QUEUE_DEFAULT(c_get_sint_type_info())
+#define C_PRIORITY_QUEUE_UINT   C_PRIORITY_QUEUE_DEFAULT(c_get_uint_type_info())
+#define C_PRIORITY_QUEUE_SHORT  C_PRIORITY_QUEUE_DEFAULT(c_get_short_type_info())
+#define C_PRIORITY_QUEUE_SSHORT C_PRIORITY_QUEUE_DEFAULT(c_get_sshort_type_info())
+#define C_PRIORITY_QUEUE_USHORT C_PRIORITY_QUEUE_DEFAULT(c_get_ushort_type_info())
+#define C_PRIORITY_QUEUE_LONG   C_PRIORITY_QUEUE_DEFAULT(c_get_long_type_info())
+#define C_PRIORITY_QUEUE_SLONG  C_PRIORITY_QUEUE_DEFAULT(c_get_slong_type_info())
+#define C_PRIORITY_QUEUE_ULONG  C_PRIORITY_QUEUE_DEFAULT(c_get_ulong_type_info())
+#define C_PRIORITY_QUEUE_CHAR   C_PRIORITY_QUEUE_DEFAULT(c_get_char_type_info())
+#define C_PRIORITY_QUEUE_SCHAR  C_PRIORITY_QUEUE_DEFAULT(c_get_schar_type_info())
+#define C_PRIORITY_QUEUE_UCHAR  C_PRIORITY_QUEUE_DEFAULT(c_get_uchar_type_info())
+#define C_PRIORITY_QUEUE_FLOAT  C_PRIORITY_QUEUE_DEFAULT(c_get_float_type_info())
+#define C_PRIORITY_QUEUE_DOUBLE C_PRIORITY_QUEUE_DEFAULT(c_get_double_type_info())
 
 #ifdef __cplusplus
 }

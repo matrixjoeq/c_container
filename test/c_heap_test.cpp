@@ -34,6 +34,11 @@ namespace {
 const int default_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 const int default_length = __array_length(default_data);
 
+void print_value(c_ref_t data)
+{
+    printf("%d ", C_DEREF_INT(data));
+}
+
 #pragma GCC diagnostic ignored "-Weffc++"
 class CHeapTest : public ::testing::Test
 {
@@ -89,6 +94,8 @@ TEST_F(CHeapTest, PushHeap)
         __first = c_vector_begin(__v);
         __last = c_vector_end(__v);
         c_algo_push_heap(&__first, &__last);
+        c_algo_for_each(&__first, &__last, print_value);
+        printf("\n");
         EXPECT_TRUE(c_algo_is_heap(&__first, &__last));
     }
 }
@@ -98,9 +105,13 @@ TEST_F(CHeapTest, PopHeap)
     SetupVector(default_data, default_length);
     c_algo_make_heap(&__first, &__last);
     EXPECT_TRUE(c_algo_is_heap(&__first, &__last));
+    c_algo_for_each(&__first, &__last, print_value);
+    printf("\n");
 
     while (!c_vector_empty(__v)) {
         c_algo_pop_heap(&__first, &__last);
+        c_algo_for_each(&__first, &__last, print_value);
+        printf("\n");
         c_vector_pop_back(__v);
         __last = c_vector_end(__v);
         EXPECT_TRUE(c_algo_is_heap(&__first, &__last));
@@ -119,8 +130,12 @@ TEST_F(CHeapTest, SortHeap)
     SetupVector(default_data, default_length);
     c_algo_make_heap(&__first, &__last);
     EXPECT_TRUE(c_algo_is_heap(&__first, &__last));
+    c_algo_for_each(&__first, &__last, print_value);
+    printf("\n");
 
     c_algo_sort_heap(&__first, &__last);
+    c_algo_for_each(&__first, &__last, print_value);
+    printf("\n");
     EXPECT_TRUE(c_algo_is_sorted(&__first, &__last));
 }
 

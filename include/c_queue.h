@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "c_def.h"
+#include "c_list.h"
 
 #ifdef __cplusplus
 extern "C" {

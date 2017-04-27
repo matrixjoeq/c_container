@@ -24,9 +24,10 @@
 
 #include <gtest/gtest.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "c_internal.h"
-#include "c_list.h"
 #include "c_queue.h"
+#include "c_priority_queue.h"
 
 namespace c_container {
 namespace {
@@ -41,7 +42,7 @@ public:
     CQueueTest() : queue(0) {}
     ~CQueueTest() { c_queue_destroy(queue); }
 
-    void SetupStack(const int *datas, int length)
+    void SetupQueue(const int *datas, int length)
     {
         for (int i = 0; i < length; ++i)
             c_queue_push(queue, C_REF_T(&datas[i]));
@@ -75,11 +76,52 @@ public:
 protected:
     c_queue_t* queue;
 };
+
+class CPriorityQueueTest : public ::testing::Test
+{
+public:
+    CPriorityQueueTest() : queue(0) {}
+    ~CPriorityQueueTest() { c_priority_queue_destroy(queue); }
+
+    void SetupQueue(const int *datas, int length)
+    {
+        for (int i = 0; i < length; ++i)
+            c_priority_queue_push(queue, C_REF_T(&datas[i]));
+
+        ExpectNotEmpty();
+    }
+
+    void ExpectEmpty()
+    {
+        EXPECT_TRUE(c_priority_queue_empty(queue));
+    }
+
+    void ExpectNotEmpty()
+    {
+        EXPECT_FALSE(c_priority_queue_empty(queue));
+    }
+
+    void SetUp()
+    {
+        queue = C_PRIORITY_QUEUE_INT;
+        ExpectEmpty();
+    }
+
+    void TearDown()
+    {
+        c_priority_queue_destroy(queue);
+        queue = 0;
+        ExpectEmpty();
+    }
+
+protected:
+    c_priority_queue_t* queue;
+};
 #pragma GCC diagnostic warning "-Weffc++"
 
 TEST_F(CQueueTest, FrontBack)
 {
-    SetupStack(default_data, default_length);
+    SetupQueue(default_data, default_length);
 
     c_ref_t front = 0, back = 0;
     int index = 0;
@@ -96,7 +138,7 @@ TEST_F(CQueueTest, FrontBack)
 
 TEST_F(CQueueTest, Swap)
 {
-    SetupStack(default_data, default_length);
+    SetupQueue(default_data, default_length);
 
     c_queue_t* other = C_QUEUE_INT;
 
@@ -116,6 +158,18 @@ TEST_F(CQueueTest, Swap)
     ExpectEmpty();
 
     c_queue_destroy(other);
+}
+
+TEST_F(CPriorityQueueTest, PushPopTop)
+{
+    int max = INT32_MAX;
+    SetupQueue(default_data, default_length);
+    while (!c_priority_queue_empty(queue)) {
+        c_ref_t value = c_priority_queue_top(queue);
+        EXPECT_TRUE(C_DEREF_INT(value) < max);
+        max = C_DEREF_INT(value);
+        c_priority_queue_pop(queue);
+    }
 }
 
 } // namespace
