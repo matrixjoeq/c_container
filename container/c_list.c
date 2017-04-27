@@ -242,7 +242,7 @@ __c_static ptrdiff_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* la
 
     c_list_node_t* _first = ((c_list_iterator_t*)first)->node;
     c_list_node_t* _last = ((c_list_iterator_t*)last)->node;
-    size_t n = 0;
+    ptrdiff_t n = 0;
     while (_first != _last) {
         _first = _first->prev;
         ++n;

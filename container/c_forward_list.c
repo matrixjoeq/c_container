@@ -97,7 +97,7 @@ __c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
 
     c_slist_node_t* _first = ((c_slist_iterator_t*)first)->node;
     c_slist_node_t* _last = ((c_slist_iterator_t*)last)->node;
-    size_t n = 0;
+    ptrdiff_t n = 0;
     while (_first != _last) {
         _first = _first->next;
         ++n;

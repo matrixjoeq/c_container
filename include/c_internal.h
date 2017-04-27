@@ -6,6 +6,7 @@
 extern "C" {
 #endif // __cplusplus
 
+#include <assert.h>
 #include "c_def.h"
 
 #define __c_static static
@@ -15,19 +16,21 @@ extern "C" {
 #define __c_inline inline
 #endif
 
-__c_inline c_iterator_t* __random_iter_add(c_iterator_t** dst, c_iterator_t* src, ptrdiff_t n)
+__c_inline c_iterator_t* __c_iter_move_copy(c_iterator_t** __c_random_iterator dst,
+                                            c_iterator_t* __c_random_iterator src,
+                                            ptrdiff_t n)
 {
-    if (!dst) return 0;
+    if (!dst || !src) return 0;
+    assert(C_ITER_EXACT(src, C_ITER_CATE_RANDOM));
 
-    c_iterator_operation_t* iter_ops = src->iterator_ops;
-
-    if (*dst) {
-        iter_ops->assign(*dst, src);
-    }
+    if (*dst == 0)
+        C_ITER_COPY(dst, src);
     else {
-        iter_ops->alloc_and_copy(dst, src);
+        assert(C_ITER_EXACT(*dst, C_ITER_CATE_RANDOM));
+        C_ITER_ASSIGN(*dst, src);
     }
-    iter_ops->advance(*dst, n);
+
+    C_ITER_ADVANCE(*dst, n);
 
     return *dst;
 }

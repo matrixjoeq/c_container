@@ -631,22 +631,44 @@ void algo_equal_range_by(c_iterator_t* __c_forward_iterator first,
 /*******************/
 /* heap operations */
 /*******************/
+// Checks if the elements in range [first, last) are a max heap.
+// Elements are compared using comp.
 bool algo_is_heap_by(c_iterator_t* __c_random_iterator first,
                      c_iterator_t* __c_random_iterator last,
                      c_compare comp);
+
+// Examines the range [first, last) and finds the largest range beginning at first which is a max heap.
+// Elements are compared using comp.
+// Sets until to the upper bound of the largest range beginning at first which is a max heap.
+// That is, the last iterator it for which range [first, it) is a max heap.
 void algo_is_heap_until_by(c_iterator_t* __c_random_iterator first,
                            c_iterator_t* __c_random_iterator last,
                            c_iterator_t** __c_random_iterator until,
                            c_compare comp);
+
+// Constructs a max heap in the range [first, last).
+// Elements are compared using comp.
 void algo_make_heap_by(c_iterator_t* __c_random_iterator first,
                        c_iterator_t* __c_random_iterator last,
                        c_compare comp);
+
+// Inserts the element at the position last-1 into the max heap defined by the range [first, last-1).
+// Elements are compared using comp.
 void algo_push_heap_by(c_iterator_t* __c_random_iterator first,
                        c_iterator_t* __c_random_iterator last,
                        c_compare comp);
+
+// Swaps the value in the position first and the value in the position last-1 and
+// makes the subrange [first, last-1) into a max heap.
+// This has the effect of removing the first (largest) element from the heap defined by the range [first, last).
+// Elements are compared using comp.
 void algo_pop_heap_by(c_iterator_t* __c_random_iterator first,
                       c_iterator_t* __c_random_iterator last,
                       c_compare comp);
+
+// Converts the max heap [first, last) into a sorted range in ascending order.
+// The resulting range no longer has the heap property.
+// Elements are compared using comp.
 void algo_sort_heap_by(c_iterator_t* __c_random_iterator first,
                        c_iterator_t* __c_random_iterator last,
                        c_compare comp);
@@ -669,6 +691,22 @@ void algo_sort_heap_by(c_iterator_t* __c_random_iterator first,
 /******************************/
 /* minimum/maximum operations */
 /******************************/
+// Returns the greater of the given values.
+// The return value is a copy of the greater one which allocated on the heap.
+// It must be deallocated after use.
+c_ref_t algo_max_by(c_containable_t* type_info,
+                    c_ref_t x,
+                    c_ref_t y,
+                    c_compare comp);
+
+// Returns the smaller of the given values.
+// The return value is a copy of the smaller one which allocated on the heap.
+// It must be deallocated after use.
+c_ref_t algo_min_by(c_containable_t* type_info,
+                    c_ref_t x,
+                    c_ref_t y,
+                    c_compare comp);
+
 // Finds the greatest element in the range [first, last).
 // Elements are compared using the given binary comparison function.
 // Sets max to the maximum element.
@@ -695,16 +733,31 @@ void algo_minmax_element_by(c_iterator_t* __c_forward_iterator first,
                             c_iterator_t** __c_forward_iterator max,
                             c_compare comp);
 
+// If v compares less than hi, returns the larger of v and lo,
+// otherwise returns the smaller of v and hi. Uses comp to compare the values.
+// The behavior is undefined if the value of lo is greater than hi.
+// The return value is a copy of the chosen one which allocated on the heap.
+// It must be deallocated after use.
+c_ref_t algo_clamp_by(c_containable_t* type_info,
+                      c_ref_t v,
+                      c_ref_t lo,
+                      c_ref_t hi,
+                      c_compare comp);
+
 // min/max helpers
+#define c_algo_max_by(t, x, y, c)               algo_max_by((t), C_REF_T(x), C_REF_T(y), (c))
+#define c_algo_min_by(t, x, y, c)               algo_min_by((t), C_REF_T(x), C_REF_T(y), (c))
 #define c_algo_max_element_by(x, y, m, c)       algo_max_element_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(m), (c))
 #define c_algo_min_element_by(x, y, m, c)       algo_min_element_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(m), (c))
 #define c_algo_minmax_element_by(x, y, s, g, c) algo_minmax_element_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(s), C_ITER_PTR(g), (c))
+#define c_algo_clamp_by(t, v, l, h, c)          algo_clamp_by((t), C_REF_T(v), C_REF_T(l), C_REF_T(h), (c))
 
-#define c_algo_max(x, y) (((x) < (y)) ? (y) : (x))
-#define c_algo_min(x, y) (((x) < (y)) ? (x) : (y))
+#define c_algo_max(t, x, y)                     c_algo_max_by((t), (x), (y), (t)->less)
+#define c_algo_min(t, x, y)                     c_algo_min_by((t), (x), (y), (t)->less)
 #define c_algo_max_element(x, y, m)             c_algo_max_element_by((x), (y), (m), __c_get_less(x))
 #define c_algo_min_element(x, y, m)             c_algo_min_element_by((x), (y), (m), __c_get_less(x))
 #define c_algo_minmax_element(x, y, s, g)       c_algo_minmax_element_by((x), (y), (s), (g), __c_get_less(x))
+#define c_algo_clamp(t, v, l, h)                c_algo_clamp_by((t), (v), (l), (h), (t)->less)
 
 /**********************/
 /* numeric operations */

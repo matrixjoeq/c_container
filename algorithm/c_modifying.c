@@ -797,8 +797,8 @@ void algo_random_shuffle_by(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __y = 0;
 
     for (ptrdiff_t i = n - 1; i > 0; --i) {
-        __random_iter_add(&__x, __first, i);
-        __random_iter_add(&__y, __first, (ptrdiff_t)(r(i + 1)));
+        __c_iter_move_copy(&__x, __first, i);
+        __c_iter_move_copy(&__y, __first, (ptrdiff_t)(r(i + 1)));
         algo_iter_swap(__x, __y);
     }
 

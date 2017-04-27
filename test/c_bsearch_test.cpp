@@ -172,6 +172,9 @@ TEST_F(CBinarySearchTest, EqualRange)
     c_algo_equal_range(&first, &last, &value, &lower, &upper);
     EXPECT_TRUE(C_ITER_EQ(lower, &last));
     EXPECT_TRUE(C_ITER_EQ(upper, &last));
+
+    __c_free(lower);
+    __c_free(upper);
 }
 
 } // namespace

@@ -430,7 +430,8 @@ __c_static int reallocate_and_move(c_vector_t* vector, size_t n)
 
     // double the capacity or make it large enough
     size_t size = c_vector_size(vector);
-    size_t cap = c_algo_max(c_vector_capacity(vector) * 2, n + size);
+    size_t cap = c_vector_capacity(vector);
+    cap = ((cap * 2) < (n + size) ? (n + size) : (cap * 2));
     c_ref_t start = malloc(cap * data_size);
     if (!start) return -1;
 
