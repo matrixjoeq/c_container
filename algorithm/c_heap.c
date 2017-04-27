@@ -4,36 +4,47 @@
 #include "c_internal.h"
 #include "c_algorithm.h"
 
-__c_static void push_heap(c_iterator_t* first, c_iterator_t* last,
-                          ptrdiff_t top_index, ptrdiff_t hole_index, c_compare comp)
+__c_static __c_inline ptrdiff_t parent(ptrdiff_t index)
 {
-    __C_ALGO_BEGIN_2(first, last)
+    return (index - 1) / 2;
+}
 
-    C_ITER_DEC(__last);
-    c_containable_t* type_info = __first->type_info;
-    c_ref_t __value = malloc(type_info->size());
-    type_info->copy(__value, C_ITER_DEREF(__last));
-    ptrdiff_t parent_index = (hole_index - 1) / 2;
-    c_iterator_t* __tmp_parent = 0;
-    c_iterator_t* __tmp_hole = 0;
+__c_static __c_inline ptrdiff_t left(ptrdiff_t index)
+{
+    return (index + 1) * 2 - 1;
+}
+
+__c_static __c_inline ptrdiff_t right(ptrdiff_t index)
+{
+    return (index + 1) * 2;
+}
+
+__c_static void push_heap(c_iterator_t* first, ptrdiff_t top_index, ptrdiff_t hole_index, c_ref_t value, c_compare comp)
+{
+    __C_ALGO_BEGIN_1(first)
+
+    ptrdiff_t parent_index = parent(hole_index);
+    c_iterator_t* __parent = 0;
+    c_iterator_t* __hole = 0;
+
     while (hole_index > top_index) {
-        __random_iter_add(&__tmp_parent, __first, parent_index);
-        __random_iter_add(&__tmp_hole, __first, hole_index);
-        if (comp(C_ITER_DEREF(__tmp_parent), __value)) {
-            type_info->assign(C_ITER_DEREF(__tmp_hole), C_ITER_DEREF(__tmp_parent));
+        __c_iter_move_copy(&__parent, __first, parent_index);
+        __c_iter_move_copy(&__hole, __first, hole_index);
+        if (comp(C_ITER_DEREF(__parent), value)) {
+            C_ITER_DEREF_ASSIGN(__hole, __parent);
             hole_index = parent_index;
-            parent_index = (hole_index - 1) / 2;
+            parent_index = parent(hole_index);
         }
         else
             break;
     }
-    __random_iter_add(&__tmp_hole, __first, hole_index);
-    type_info->assign(C_ITER_DEREF(__tmp_hole), __value);
-    __c_free(__tmp_hole);
-    __c_free(__tmp_parent);
-    __c_free(__value);
+    __c_iter_move_copy(&__hole, __first, hole_index);
+    C_ITER_DEREF_ASSIGN_V(__hole, value);
 
-    __C_ALGO_END_2(first, last);
+    __c_free(__hole);
+    __c_free(__parent);
+
+    __C_ALGO_END_1(first);
 }
 
 __c_static void adjust_heap(c_iterator_t* first, c_iterator_t* last, c_compare comp)
@@ -74,40 +85,42 @@ void algo_is_heap_until_by(c_iterator_t* __c_random_iterator first,
 
     __C_ALGO_BEGIN_2(first, last);
 
-    c_iterator_operation_t* iter_ops = __first->iterator_ops;
-    if (*until == 0)
-        iter_ops->alloc_and_copy(until, __first);
-
-    bool is_heap = true;
-    ptrdiff_t __distance = iter_ops->distance(__first, __last);
+    bool __is_heap = true;
+    ptrdiff_t __distance = C_ITER_DISTANCE(__first, __last);
     ptrdiff_t __parent_index = 0;
-    ptrdiff_t __left_index = (__parent_index + 1) * 2 - 1;
-    ptrdiff_t __right_index = (__parent_index + 1) * 2;
+    ptrdiff_t __left_index = left(__parent_index);
+    ptrdiff_t __right_index = right(__parent_index);
     c_iterator_t* __parent = 0;
     c_iterator_t* __left = 0;
     c_iterator_t* __right = 0;
     while (__left_index < __distance) {
-        __random_iter_add(&__parent, __first, __parent_index);
+        __c_iter_move_copy(&__parent, __first, __parent_index);
 
-        __random_iter_add(&__left, __first, __left_index);
+        __c_iter_move_copy(&__left, __first, __left_index);
         if (comp(C_ITER_DEREF(__parent), C_ITER_DEREF(__left))) {
-            is_heap = false;
+            __is_heap = false;
             break;
         }
 
-        __random_iter_add(&__right, __first, __right_index);
+        __c_iter_move_copy(&__right, __first, __right_index);
         if ((__right_index < __distance) &&
             (comp(C_ITER_DEREF(__parent), C_ITER_DEREF(__right)))) {
-            is_heap = false;
+            __is_heap = false;
             break;
         }
 
         ++__parent_index;
-        __left_index = (__parent_index + 1) * 2 - 1;
-        __right_index = (__parent_index + 1) * 2;
+        __left_index = left(__parent_index);
+        __right_index = right(__parent_index);
     }
 
-    iter_ops->assign(*until, is_heap ? __last : __parent);
+    if (*until == 0)
+        C_ITER_COPY(until, __is_heap ? __last : __parent);
+    else {
+        assert(C_ITER_EXACT(*until, C_ITER_CATE_RANDOM));
+        C_ITER_ASSIGN(*until, __is_heap ? __last : __parent);
+    }
+
     __c_free(__right);
     __c_free(__left);
     __c_free(__parent);
@@ -123,11 +136,14 @@ void algo_push_heap_by(c_iterator_t* __c_random_iterator first,
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
 
+    if (C_ITER_DISTANCE(first, last) < 2) return;
+
     __C_ALGO_BEGIN_2(first, last)
 
     ptrdiff_t top_index = 0;
-    ptrdiff_t hole_index = __first->iterator_ops->distance(__first, __last) - 1;
-    push_heap(__first, __last, top_index, hole_index, comp);
+    ptrdiff_t hole_index = C_ITER_DISTANCE(__first, __last) - 1;
+    C_ITER_DEC(__last);
+    push_heap(__first, top_index, hole_index, C_ITER_DEREF(__last), comp);
 
     __C_ALGO_END_2(first, last)
 }
@@ -150,7 +166,19 @@ void algo_make_heap_by(c_iterator_t* __c_random_iterator first,
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
 
+    if (C_ITER_DISTANCE(first, last) <= 1) return;
+
     __C_ALGO_BEGIN_2(first, last)
+
+    c_iterator_t* __heap_last = 0;
+    __c_iter_move_copy(&__heap_last, __first, 2);
+
+    do {
+        algo_push_heap_by(__first, __heap_last, comp);
+    } while (C_ITER_NE(__heap_last, __last) && C_ITER_INC(__heap_last));
+
+    __c_free(__heap_last);
+
     __C_ALGO_END_2(first, last)
 }
 
@@ -164,9 +192,10 @@ void algo_sort_heap_by(c_iterator_t* __c_random_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    while (__first->iterator_ops->distance(__first, __last) > 1) {
+    while (C_ITER_DISTANCE(__first, __last) > 1) {
         algo_pop_heap_by(__first, __last, comp);
         C_ITER_DEC(__last);
     }
+
     __C_ALGO_END_2(first, last)
 }
