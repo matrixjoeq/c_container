@@ -91,10 +91,10 @@ void c_priority_queue_push(c_priority_queue_t* queue, c_ref_t data)
 
     c_iterator_t* first = 0;
     c_iterator_t* last = 0;
-    queue->backend->ops->begin(queue->backend, &first);
-    queue->backend->ops->end(queue->backend, &last);
 
     queue->backend->ops->push_back(queue->backend, data);
+    queue->backend->ops->begin(queue->backend, &first);
+    queue->backend->ops->end(queue->backend, &last);
     c_algo_push_heap_by(first, last, queue->comp);
 
     __c_free(first);

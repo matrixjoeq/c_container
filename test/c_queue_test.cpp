@@ -122,6 +122,7 @@ protected:
 TEST_F(CQueueTest, FrontBack)
 {
     SetupQueue(default_data, default_length);
+    EXPECT_EQ(default_length, c_queue_size(queue));
 
     c_ref_t front = 0, back = 0;
     int index = 0;
@@ -164,12 +165,41 @@ TEST_F(CPriorityQueueTest, PushPopTop)
 {
     int max = INT32_MAX;
     SetupQueue(default_data, default_length);
+    EXPECT_EQ(default_length, c_priority_queue_size(queue));
+
     while (!c_priority_queue_empty(queue)) {
         c_ref_t value = c_priority_queue_top(queue);
+        printf("value = %d\n", C_DEREF_INT(value));
         EXPECT_TRUE(C_DEREF_INT(value) < max);
         max = C_DEREF_INT(value);
         c_priority_queue_pop(queue);
     }
+}
+
+TEST_F(CPriorityQueueTest, Swap)
+{
+    SetupQueue(default_data, default_length);
+
+    c_priority_queue_t* other = C_PRIORITY_QUEUE_INT;
+
+    c_priority_queue_swap(queue, other);
+    ExpectEmpty();
+
+    c_priority_queue_swap(queue, other);
+    EXPECT_TRUE(c_priority_queue_empty(other));
+
+    int max = INT32_MAX;
+    while (!c_priority_queue_empty(queue)) {
+        c_ref_t value = c_priority_queue_top(queue);
+        printf("value = %d\n", C_DEREF_INT(value));
+        EXPECT_TRUE(C_DEREF_INT(value) < max);
+        max = C_DEREF_INT(value);
+        c_priority_queue_pop(queue);
+    }
+
+    ExpectEmpty();
+
+    c_priority_queue_destroy(other);
 }
 
 } // namespace
