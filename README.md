@@ -16,6 +16,8 @@ C container adapters:
 (3) priority queue, whose default backend is vector
 
 Note:
+0. To implement the most generic containers, elements are all passed by reference.
+
 1. C deque is implemented very much like C vector, except that it has spare space in 
 both header and tail. By this way, iterator operations are as simple as vector.
 Algorithms used on deque will be as fast as vector. But it loses the flexibility in
