@@ -275,7 +275,7 @@ TEST_F(CDequeTest, InsertErase)
     }
 
     ExpectNotEmpty();
-/*
+
     first = c_deque_begin(deque);
     last = c_deque_end(deque);
     while (C_ITER_NE(&first, &last)) {
@@ -301,7 +301,6 @@ TEST_F(CDequeTest, InsertErase)
     last = c_deque_end(deque);
     first = c_deque_erase_range(deque, first, last);
     ExpectEmpty();
-     */
 }
 
 } // namespace

@@ -494,7 +494,7 @@ __c_static c_deque_iterator_t fill(c_deque_iterator_t pos, size_t n, c_ref_t dat
     return pos;
 }
 
-__c_static c_iterator_t insert_aux(c_deque_t* deque, c_deque_iterator_t pos, size_t n, c_ref_t data)
+__c_static c_deque_iterator_t insert_aux(c_deque_t* deque, c_deque_iterator_t pos, size_t n, c_ref_t data)
 {
     assert(deque);
 
@@ -512,7 +512,8 @@ __c_static c_iterator_t insert_aux(c_deque_t* deque, c_deque_iterator_t pos, siz
         shift_size = n * data_size;
         memmove(deque->start - shift_size, deque->start, pos.pos - deque->start);
         deque->start -= shift_size;
-        fill(create_iterator(type_info, pos.pos - shift_size), n, data);
+        pos.pos -= shift_size;
+        fill(pos, n, data);
     }
     else {
         size_t first_half_size = pos.pos - deque->start;
@@ -521,10 +522,14 @@ __c_static c_iterator_t insert_aux(c_deque_t* deque, c_deque_iterator_t pos, siz
         deque->start = deque->start_of_storage;
 
         memmove(deque->start + first_half_size + n * data_size, pos.pos, second_half_size);
-        fill(create_iterator(type_info, deque->start + first_half_size), n, data);
 
-        deque->finish = deque->start + first_half_size + n * data_size + second_half_size;
+        pos.pos = deque->start + first_half_size;
+        fill(pos, n, data);
+
+        deque->finish = pos.pos + n * data_size + second_half_size;
     }
+
+    return pos;
 }
 
 __c_static int reallocate_and_move(c_deque_t* deque, size_t n)
@@ -748,9 +753,7 @@ c_deque_iterator_t c_deque_insert_n(
         pos.pos = deque->start + diff;
     }
 
-    insert_aux(deque, pos, count, data);
-
-    return pos;
+    return insert_aux(deque, pos, count, data);
 }
 
 c_deque_iterator_t c_deque_insert_range(
@@ -866,26 +869,7 @@ void c_deque_resize_with_value(c_deque_t* deque, size_t count, c_ref_t data)
             if (reallocate_and_move(deque, count * 2)) // make sure the end available part is large enough
                 return;
         }
-/*
-        if (count <= available_end(deque)) {
-            fill(c_deque_end(deque), count, data);
-            deque->finish += count * data_size;
-        }
-        else if (count <= available_start(deque)) {
-            size_t shift_size = count * data_size;
-            memmove(deque->start - shift_size, deque->start, deque->finish - deque->start);
-            deque->start -= shift_size;
-            fill(create_iterator(deque->type_info, deque->finish - shift_size), count, data);
-        }
-        else {
-            size_t shift_size = available_start(deque);
-            memmove(deque->start_of_storage, deque->start, deque->finish - deque->start);
-            deque->start = deque->start_of_storage;
-            deque->finish -= shift_size;
-            fill(create_iterator(deque->type_info, deque->finish), count, data);
-            deque->finish += count * data_size;
-        }
-         */
+
         insert_aux(deque, c_deque_end(deque), count, data);
     }
     else {
