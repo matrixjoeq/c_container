@@ -34,7 +34,7 @@
 struct __c_vector {
     c_ref_t start;
     c_ref_t finish;
-    c_ref_t end_of_storage;
+    c_storage_t end_of_storage;
     c_containable_t* type_info;
 };
 
@@ -306,7 +306,7 @@ __c_static __c_inline c_ref_t end(c_vector_t* vector)
     return vector->finish;
 }
 
-__c_static __c_inline c_ref_t eos(c_vector_t* vector)
+__c_static __c_inline c_storage_t eos(c_vector_t* vector)
 {
     assert(vector);
     return vector->end_of_storage;

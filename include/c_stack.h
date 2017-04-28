@@ -28,7 +28,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "c_def.h"
-#include "c_list.h"
+#include "c_deque.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,20 +64,23 @@ void c_stack_swap(c_stack_t* stack, c_stack_t* other);
 /**
  * helpers
  */
-#define C_STACK_INT c_stack_create(c_get_int_type_info(), c_list_create_backend)
-#define C_STACK_SINT c_stack_create(c_get_sint_type_info(), c_list_create_backend)
-#define C_STACK_UINT c_stack_create(c_get_uint_type_info(), c_list_create_backend)
-#define C_STACK_SHORT c_stack_create(c_get_short_type_info(), c_list_create_backend)
-#define C_STACK_SSHORT c_stack_create(c_get_sshort_type_info(), c_list_create_backend)
-#define C_STACK_USHORT c_stack_create(c_get_ushort_type_info(), c_list_create_backend)
-#define C_STACK_LONG c_stack_create(c_get_long_type_info(), c_list_create_backend)
-#define C_STACK_SLONG c_stack_create(c_get_slong_type_info(), c_list_create_backend)
-#define C_STACK_ULONG c_stack_create(c_get_ulong_type_info(), c_list_create_backend)
-#define C_STACK_CHAR c_stack_create(c_get_char_type_info(), c_list_create_backend)
-#define C_STACK_SCHAR c_stack_create(c_get_schar_type_info(), c_list_create_backend)
-#define C_STACK_UCHAR c_stack_create(c_get_uchar_type_info(), c_list_create_backend)
-#define C_STACK_FLOAT c_stack_create(c_get_float_type_info(), c_list_create_backend)
-#define C_STACK_DOUBLE c_stack_create(c_get_double_type_info(), c_list_create_backend)
+#define C_STACK_BASE(t, b)      c_stack_create((t), (b))
+#define C_STACK(t)              C_STACK_BASE((t), c_deque_create_backend)
+
+#define C_STACK_INT     C_STACK(c_get_int_type_info())
+#define C_STACK_SINT    C_STACK(c_get_sint_type_info())
+#define C_STACK_UINT    C_STACK(c_get_uint_type_info())
+#define C_STACK_SHORT   C_STACK(c_get_short_type_info())
+#define C_STACK_SSHORT  C_STACK(c_get_sshort_type_info())
+#define C_STACK_USHORT  C_STACK(c_get_ushort_type_info())
+#define C_STACK_LONG    C_STACK(c_get_long_type_info())
+#define C_STACK_SLONG   C_STACK(c_get_slong_type_info())
+#define C_STACK_ULONG   C_STACK(c_get_ulong_type_info())
+#define C_STACK_CHAR    C_STACK(c_get_char_type_info())
+#define C_STACK_SCHAR   C_STACK(c_get_schar_type_info())
+#define C_STACK_UCHAR   C_STACK(c_get_uchar_type_info())
+#define C_STACK_FLOAT   C_STACK(c_get_float_type_info())
+#define C_STACK_DOUBLE  C_STACK(c_get_double_type_info())
 
 #ifdef __cplusplus
 }

@@ -65,6 +65,8 @@ typedef enum __c_iterator_type {
 } c_iterator_type_t;
 
 typedef void* c_ref_t;
+typedef void* c_storage_t;
+
 typedef void (*c_unary_func)(c_ref_t __c_in_out);
 //typedef void (*c_binary_func)(c_ref_t, c_ref_t);
 

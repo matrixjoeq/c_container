@@ -28,7 +28,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "c_def.h"
-#include "c_list.h"
+#include "c_deque.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,20 +65,23 @@ void c_queue_swap(c_queue_t* queue, c_queue_t* other);
 /**
  * helpers
  */
-#define C_QUEUE_INT c_queue_create(c_get_int_type_info(), c_list_create_backend)
-#define C_QUEUE_SINT c_queue_create(c_get_sint_type_info(), c_list_create_backend)
-#define C_QUEUE_UINT c_queue_create(c_get_uint_type_info(), c_list_create_backend)
-#define C_QUEUE_SHORT c_queue_create(c_get_short_type_info(), c_list_create_backend)
-#define C_QUEUE_SSHORT c_queue_create(c_get_sshort_type_info(), c_list_create_backend)
-#define C_QUEUE_USHORT c_queue_create(c_get_ushort_type_info(), c_list_create_backend)
-#define C_QUEUE_LONG c_queue_create(c_get_long_type_info(), c_list_create_backend)
-#define C_QUEUE_SLONG c_queue_create(c_get_slong_type_info(), c_list_create_backend)
-#define C_QUEUE_ULONG c_queue_create(c_get_ulong_type_info(), c_list_create_backend)
-#define C_QUEUE_CHAR c_queue_create(c_get_char_type_info(), c_list_create_backend)
-#define C_QUEUE_SCHAR c_queue_create(c_get_schar_type_info(), c_list_create_backend)
-#define C_QUEUE_UCHAR c_queue_create(c_get_uchar_type_info(), c_list_create_backend)
-#define C_QUEUE_FLOAT c_queue_create(c_get_float_type_info(), c_list_create_backend)
-#define C_QUEUE_DOUBLE c_queue_create(c_get_double_type_info(), c_list_create_backend)
+#define C_QUEUE_BASE(t, b)      c_queue_create((t), (b))
+#define C_QUEUE(t)              C_QUEUE_BASE((t), c_deque_create_backend)
+
+#define C_QUEUE_INT     C_QUEUE(c_get_int_type_info())
+#define C_QUEUE_SINT    C_QUEUE(c_get_sint_type_info())
+#define C_QUEUE_UINT    C_QUEUE(c_get_uint_type_info())
+#define C_QUEUE_SHORT   C_QUEUE(c_get_short_type_info())
+#define C_QUEUE_SSHORT  C_QUEUE(c_get_sshort_type_info())
+#define C_QUEUE_USHORT  C_QUEUE(c_get_ushort_type_info())
+#define C_QUEUE_LONG    C_QUEUE(c_get_long_type_info())
+#define C_QUEUE_SLONG   C_QUEUE(c_get_slong_type_info())
+#define C_QUEUE_ULONG   C_QUEUE(c_get_ulong_type_info())
+#define C_QUEUE_CHAR    C_QUEUE(c_get_char_type_info())
+#define C_QUEUE_SCHAR   C_QUEUE(c_get_schar_type_info())
+#define C_QUEUE_UCHAR   C_QUEUE(c_get_uchar_type_info())
+#define C_QUEUE_FLOAT   C_QUEUE(c_get_float_type_info())
+#define C_QUEUE_DOUBLE  C_QUEUE(c_get_double_type_info())
 
 #ifdef __cplusplus
 }
