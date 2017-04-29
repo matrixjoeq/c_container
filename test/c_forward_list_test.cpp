@@ -84,17 +84,6 @@ public:
         ExpectNotEmpty();
     }
 
-    void Traverse(void)
-    {
-#ifdef CONFIG_TRAVERSE
-        c_slist_iterator_t last = c_slist_end(list);
-        for (c_slist_iterator_t iter = c_slist_begin(list); C_ITER_NE(&iter, &last); C_ITER_INC(&iter))
-            printf("%d ", C_DEREF_INT(C_ITER_DEREF(&iter)));
-
-        printf("\n");
-#endif
-    }
-
     void ExpectEqualToArray(const int* datas, int length)
     {
         c_slist_iterator_t first = c_slist_begin(list);
@@ -263,20 +252,15 @@ TEST_F(CForwardListTest, Swap)
 
 TEST_F(CForwardListTest, Merge)
 {
-    c_slist_t* other_list = C_SLIST_INT;
-
     int origin[] = { 11, 10, 10, 7, 5, 5, 5, 4, 3, 3, 1, -1, -2, -2 };
     int merged[] = { -2, -2, -1, 0, 1, 1, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5, 6, 7, 7, 8, 9, 10, 10, 11 };
 
-    __array_foreach(origin, i) {
-        c_slist_push_front(other_list, C_REF_T(&origin[i]));
-    }
-
+    c_slist_t* other_list = c_slist_create_from(c_get_int_type_info(), origin, __array_length(origin));
     SetupList(default_data, default_length);
-    //c_slist_sort(list);
-    //c_slist_sort(other_list);
+
+    c_slist_sort(list);
+    c_slist_sort(other_list);
     c_slist_merge(list, other_list);
-    Traverse();
     ExpectEqualToArray(merged, __array_length(merged));
 
     c_slist_destroy(other_list);
@@ -284,23 +268,13 @@ TEST_F(CForwardListTest, Merge)
 
 TEST_F(CForwardListTest, MergeBy)
 {
-    c_slist_t* other_list = C_SLIST_INT;
-
     int origin[] = { -2, -2, -1, 1, 3, 3, 4, 5, 5, 5, 7, 10, 10, 11 };
     int merged[] = { 11, 10, 10, 9, 8, 7, 7, 6, 5, 5, 5, 5, 4, 4, 3, 3, 3, 2, 1, 1, 0, -1, -2, -2 };
 
-    __array_foreach(origin, i) {
-        c_slist_push_front(other_list, C_REF_T(&origin[i]));
-    }
-
-    int default_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    __array_foreach(default_data, i) {
-        c_slist_push_front(list, C_REF_T(&default_data[i]));
-    }
-
-    //SetupList(default_data, default_length);
-    //c_slist_sort_by(list, c_int_greater);
-    //c_slist_sort_by(other_list, c_int_greater);
+    c_slist_t* other_list = c_slist_create_from(c_get_int_type_info(), origin, __array_length(origin));
+    SetupList(default_data, default_length);
+    c_slist_sort_by(list, c_int_greater);
+    c_slist_sort_by(other_list, c_int_greater);
     c_slist_merge_by(list, other_list, c_int_greater);
     ExpectEqualToArray(merged, __array_length(merged));
 
@@ -318,7 +292,6 @@ TEST_F(CForwardListTest, Splice)
         c_slist_push_front(other, C_REF_T(&origin[i]));
     }
     c_slist_splice_after(list, c_slist_before_begin(list), other);
-    Traverse();
     int spliced_before_begin[] = { 10, 11, 12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ExpectEqualToArray(spliced_before_begin, __array_length(spliced_before_begin));
     EXPECT_TRUE(c_slist_empty(other));
@@ -327,7 +300,6 @@ TEST_F(CForwardListTest, Splice)
         c_slist_push_front(other, C_REF_T(&origin[i]));
     }
     c_slist_splice_after(list, c_slist_begin(list), other);
-    Traverse();
     int spliced_begin[] = { 10, 10, 11, 12, 11, 12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ExpectEqualToArray(spliced_begin, __array_length(spliced_begin));
     EXPECT_TRUE(c_slist_empty(other));
@@ -336,7 +308,6 @@ TEST_F(CForwardListTest, Splice)
         c_slist_push_front(other, C_REF_T(&origin[i]));
     }
     c_slist_splice_after_from(list, c_slist_before_begin(list), other, c_slist_before_begin(other));
-    Traverse();
     int spliced_from[] = { 10, 11, 12, 10, 10, 11, 12, 11, 12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ExpectEqualToArray(spliced_from, __array_length(spliced_from));
     EXPECT_TRUE(c_slist_empty(other));
@@ -345,7 +316,6 @@ TEST_F(CForwardListTest, Splice)
         c_slist_push_front(other, C_REF_T(&origin[i]));
     }
     c_slist_splice_after_range(list, c_slist_before_begin(list), other, c_slist_begin(other), c_slist_end(other));
-    Traverse();
     int spliced_range[] = { 11, 12, 10, 11, 12, 10, 10, 11, 12, 11, 12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ExpectEqualToArray(spliced_range, __array_length(spliced_range));
     EXPECT_FALSE(c_slist_empty(other));
@@ -364,22 +334,18 @@ TEST_F(CForwardListTest, Remove)
 
     int to_be_removed = 4;
     c_slist_remove(list, C_REF_T(&to_be_removed));
-    Traverse();
     ExpectEqualToArray(removed_4, __array_length(removed_4));
 
     to_be_removed = 3;
     c_slist_remove(list, C_REF_T(&to_be_removed));
-    Traverse();
     ExpectEqualToArray(removed_3, __array_length(removed_3));
 
     to_be_removed = 2;
     c_slist_remove(list, C_REF_T(&to_be_removed));
-    Traverse();
     ExpectEqualToArray(removed_2, __array_length(removed_2));
 
     to_be_removed = 1;
     c_slist_remove(list, C_REF_T(&to_be_removed));
-    Traverse();
     ExpectEmpty();
 }
 
@@ -389,7 +355,6 @@ TEST_F(CForwardListTest, RemoveIf)
 
     SetupList(default_data, default_length);
     c_slist_remove_if(list, greater_than_five);
-    Traverse();
     ExpectEqualToArray(removed, __array_length(removed));
 }
 

@@ -125,15 +125,15 @@ typedef struct __c_iterator_operation {
 
     // operator++(int)
     // tmp stores the iterator before increment
-    // return tmp
+    // return *tmp
     struct __c_iterator* (*post_increment)(struct __c_iterator* __c_in_out self,
-                                           struct __c_iterator* __c_out tmp);
+                                           struct __c_iterator** __c_out tmp);
 
     // operator--(int)
     // tmp stores the iterator before decrement
-    // return tmp
+    // return *tmp
     struct __c_iterator* (*post_decrement)(struct __c_iterator* __c_in_out self,
-                                           struct __c_iterator* __c_out tmp);
+                                           struct __c_iterator** __c_out tmp);
 
     // operator*
     c_ref_t (*dereference)(struct __c_iterator* __c_in self);

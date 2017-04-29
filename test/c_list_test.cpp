@@ -84,17 +84,6 @@ public:
         EXPECT_EQ(length, c_list_size(list));
     }
 
-    void Traverse(void)
-    {
-#ifdef CONFIG_TRAVERSE
-        c_list_iterator_t last = c_list_end(list);
-        for (c_list_iterator_t iter = c_list_begin(list); C_ITER_NE(&iter, &last); C_ITER_INC(&iter))
-            printf("%d ", C_DEREF_INT(C_ITER_DEREF(&iter)));
-
-        printf("\n");
-#endif
-    }
-
     void ExpectEqualToArray(const int* datas, int length)
     {
         EXPECT_EQ(length, c_list_size(list));
@@ -164,10 +153,23 @@ TEST_F(CListTest, BeginEnd)
     c_list_iterator_t last = c_list_end(list);
     c_list_iterator_t rfirst = c_list_rbegin(list);
     c_list_iterator_t rlast = c_list_rend(list);
-    C_ITER_DEC(&last);
     C_ITER_DEC(&rlast);
-    EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&first)), C_DEREF_INT(C_ITER_DEREF(&rlast)));
-    EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&rfirst)), C_DEREF_INT(C_ITER_DEREF(&last)));
+    while (C_ITER_NE(&first, &last)) {
+        EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&first)), C_DEREF_INT(C_ITER_DEREF(&rlast)));
+        C_ITER_INC(&first);
+        C_ITER_DEC(&rlast);
+    }
+
+    first = c_list_begin(list);
+    last = c_list_end(list);
+    rfirst = c_list_rbegin(list);
+    rlast = c_list_rend(list);
+    C_ITER_DEC(&last);
+    while (C_ITER_NE(&rfirst, &rlast)) {
+        EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&rfirst)), C_DEREF_INT(C_ITER_DEREF(&last)));
+        C_ITER_INC(&rfirst);
+        C_ITER_DEC(&last);
+    }
 
     // iterate an empty list
     c_list_clear(list);

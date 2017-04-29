@@ -40,6 +40,11 @@ void print_value(c_ref_t data)
     printf("%d ", C_DEREF_INT(data));
 }
 
+inline void print_newline(void)
+{
+    printf("\n");
+}
+
 #pragma GCC diagnostic ignored "-Weffc++"
 class CDequeTest : public ::testing::Test
 {
@@ -123,14 +128,29 @@ TEST_F(CDequeTest, BeginEnd)
 {
     // iterate a non-empty deque
     SetupDeque(default_data, default_length);
+
+    // test iterator ++, -- operations
     c_deque_iterator_t first = c_deque_begin(deque);
     c_deque_iterator_t last = c_deque_end(deque);
     c_deque_iterator_t rfirst = c_deque_rbegin(deque);
     c_deque_iterator_t rlast = c_deque_rend(deque);
-    C_ITER_DEC(&last);
     C_ITER_DEC(&rlast);
-    EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&first)), C_DEREF_INT(C_ITER_DEREF(&rlast)));
-    EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&rfirst)), C_DEREF_INT(C_ITER_DEREF(&last)));
+    while (C_ITER_NE(&first, &last)) {
+        EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&first)), C_DEREF_INT(C_ITER_DEREF(&rlast)));
+        C_ITER_INC(&first);
+        C_ITER_DEC(&rlast);
+    }
+
+    first = c_deque_begin(deque);
+    last = c_deque_end(deque);
+    rfirst = c_deque_rbegin(deque);
+    rlast = c_deque_rend(deque);
+    C_ITER_DEC(&last);
+    while (C_ITER_NE(&rfirst, &rlast)) {
+        EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&rfirst)), C_DEREF_INT(C_ITER_DEREF(&last)));
+        C_ITER_INC(&rfirst);
+        C_ITER_DEC(&last);
+    }
 
     // iterate an empty deque
     c_deque_clear(deque);

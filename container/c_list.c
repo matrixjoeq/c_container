@@ -78,8 +78,7 @@ __c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 {
     if (is_list_iterator(iter)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-        _iter->node = _iter->node->next;
+        ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->next;
     }
     return iter;
 }
@@ -87,39 +86,45 @@ __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 __c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
 {
     if (is_list_iterator(iter)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-        _iter->node = _iter->node->prev;
+        ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->prev;
     }
     return iter;
 }
 
-__c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t* tmp)
+__c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
 {
-    if (is_list_iterator(iter) && is_list_iterator(tmp)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-        c_list_iterator_t* _tmp = (c_list_iterator_t*)tmp;
-        _tmp->node = _iter->node;
-        _iter->node = _iter->node->next;
+    assert(tmp);
+    if (is_list_iterator(iter)) {
+        if (*tmp == 0)
+            iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_list_iterator(*tmp));
+            iter_assign(*tmp, iter);
+        }
+        ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->next;
     }
-    return tmp;
+    return *tmp;
 }
 
-__c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t* tmp)
+__c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
 {
-    if (is_list_iterator(iter) && is_list_iterator(tmp)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-        c_list_iterator_t* _tmp = (c_list_iterator_t*)tmp;
-        _tmp->node = _iter->node;
-        _iter->node = _iter->node->prev;
+    assert(tmp);
+    if (is_list_iterator(iter)) {
+        if (*tmp == 0)
+            iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_list_iterator(*tmp));
+            iter_assign(*tmp, iter);
+        }
+        ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->prev;
     }
-    return tmp;
+    return *tmp;
 }
 
 __c_static c_ref_t iter_dereference(c_iterator_t* iter)
 {
     if (is_list_iterator(iter)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-        return _iter->node->data;
+        return ((c_list_iterator_t*)iter)->node->data;
     }
     return 0;
 }
@@ -127,10 +132,7 @@ __c_static c_ref_t iter_dereference(c_iterator_t* iter)
 __c_static bool iter_equal(c_iterator_t* x, c_iterator_t* y)
 {
     if (!is_list_iterator(x) || !is_list_iterator(y)) return false;
-
-    c_list_iterator_t* _x = (c_list_iterator_t*)x;
-    c_list_iterator_t* _y = (c_list_iterator_t*)y;
-    return _x->node == _y->node;
+    return ((c_list_iterator_t*)x)->node == ((c_list_iterator_t*)y)->node;
 }
 
 __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
@@ -141,13 +143,14 @@ __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 __c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (is_list_iterator(iter)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
+        c_list_node_t* node = ((c_list_iterator_t*)iter)->node;
         if (n > 0) {
-            while (n--) _iter->node = _iter->node->next;
+            while (n--) node = node->next;
         }
         else {
-            while (n++) _iter->node = _iter->node->prev;
+            while (n++) node = node->prev;
         }
+        ((c_list_iterator_t*)iter)->node = node;
     }
 }
 
@@ -185,8 +188,7 @@ __c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* sr
 __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 {
     if (is_list_reverse_iterator(iter)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-        _iter->node = _iter->node->prev;
+        ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->prev;
     }
     return iter;
 }
@@ -194,39 +196,45 @@ __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 __c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
 {
     if (is_list_reverse_iterator(iter)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-        _iter->node = _iter->node->next;
+        ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->next;
     }
     return iter;
 }
 
-__c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_iterator_t* tmp)
+__c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
 {
-    if (is_list_reverse_iterator(iter) && is_list_reverse_iterator(tmp)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-        c_list_iterator_t* _tmp = (c_list_iterator_t*)tmp;
-        _tmp->node = _iter->node;
-        _iter->node = _iter->node->prev;
+    assert(tmp);
+    if (is_list_reverse_iterator(iter)) {
+        if (*tmp == 0)
+            reverse_iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_list_reverse_iterator(*tmp));
+            reverse_iter_assign(*tmp, iter);
+        }
+        ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->prev;
     }
-    return tmp;
+    return *tmp;
 }
 
-__c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_iterator_t* tmp)
+__c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
 {
-    if (is_list_reverse_iterator(iter) && is_list_reverse_iterator(tmp)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-        c_list_iterator_t* _tmp = (c_list_iterator_t*)tmp;
-        _tmp->node = _iter->node;
-        _iter->node = _iter->node->next;
+    assert(tmp);
+    if (is_list_reverse_iterator(iter)) {
+        if (*tmp == 0)
+            reverse_iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_list_reverse_iterator(*tmp));
+            reverse_iter_assign(*tmp, iter);
+        }
+        ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->next;
     }
-    return tmp;
+    return *tmp;
 }
 
 __c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
 {
     if (is_list_reverse_iterator(iter)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
-        return _iter->node->prev->data;
+        return ((c_list_iterator_t*)iter)->node->prev->data;
     }
     return 0;
 }
@@ -234,10 +242,7 @@ __c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
 __c_static bool reverse_iter_equal(c_iterator_t* x, c_iterator_t* y)
 {
     if (!is_list_reverse_iterator(x) || !is_list_reverse_iterator(y)) return false;
-
-    c_list_iterator_t* _x = (c_list_iterator_t*)x;
-    c_list_iterator_t* _y = (c_list_iterator_t*)y;
-    return _x->node == _y->node;
+    return ((c_list_iterator_t*)x)->node == ((c_list_iterator_t*)y)->node;
 }
 
 __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
@@ -248,13 +253,14 @@ __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 __c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (is_list_reverse_iterator(iter)) {
-        c_list_iterator_t* _iter = (c_list_iterator_t*)iter;
+        c_list_node_t* node = ((c_list_iterator_t*)iter)->node;
         if (n > 0) {
-            while (n--) _iter->node = _iter->node->prev;
+            while (n--) node = node->prev;
         }
         else {
-            while (n++) _iter->node = _iter->node->next;
+            while (n++) node = node->next;
         }
+        ((c_list_iterator_t*)iter)->node = node;
     }
 }
 
@@ -785,16 +791,9 @@ void c_list_resize_with_value(c_list_t* list, size_t count, c_ref_t data)
 void c_list_swap(c_list_t* list, c_list_t* other)
 {
     if (!list || !other) return;
-
-    c_list_t* tmp = c_list_create(list->type_info);
-    if (!tmp) return;
-
-    transfer(end(tmp), begin(list), end(list));
-    transfer(end(list), begin(other), end(other));
-    transfer(end(other), begin(tmp), end(tmp));
-    other->type_info = tmp->type_info;
-
-    c_list_destroy(tmp);
+    c_list_t tmp = *list;
+    *list = *other;
+    *other = tmp;
 }
 
 /**

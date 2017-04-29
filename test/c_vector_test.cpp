@@ -25,7 +25,6 @@
 #include <gtest/gtest.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <vector>
 #include "c_internal.h"
 #include "c_vector.h"
 
@@ -49,17 +48,6 @@ public:
 
         ExpectNotEmpty();
         EXPECT_EQ(length, c_vector_size(vector));
-    }
-
-    void Traverse(void)
-    {
-#ifdef CONFIG_TRAVERSE
-        c_vector_iterator_t last = c_vector_end(vector);
-        for (c_vector_iterator_t iter = c_vector_begin(vector); C_ITER_NE(&iter, &last); C_ITER_INC(&iter))
-            printf("%d ", C_DEREF_INT(C_ITER_DEREF(&iter)));
-
-        printf("\n");
-#endif
     }
 
     void ExpectEqualToArray(const int* datas, int length)
@@ -131,10 +119,23 @@ TEST_F(CVectorTest, BeginEnd)
     c_vector_iterator_t last = c_vector_end(vector);
     c_vector_iterator_t rfirst = c_vector_rbegin(vector);
     c_vector_iterator_t rlast = c_vector_rend(vector);
-    C_ITER_DEC(&last);
     C_ITER_DEC(&rlast);
-    EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&first)), C_DEREF_INT(C_ITER_DEREF(&rlast)));
-    EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&rfirst)), C_DEREF_INT(C_ITER_DEREF(&last)));
+    while (C_ITER_NE(&first, &last)) {
+        EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&first)), C_DEREF_INT(C_ITER_DEREF(&rlast)));
+        C_ITER_INC(&first);
+        C_ITER_DEC(&rlast);
+    }
+
+    first = c_vector_begin(vector);
+    last = c_vector_end(vector);
+    rfirst = c_vector_rbegin(vector);
+    rlast = c_vector_rend(vector);
+    C_ITER_DEC(&last);
+    while (C_ITER_NE(&rfirst, &rlast)) {
+        EXPECT_EQ(C_DEREF_INT(C_ITER_DEREF(&rfirst)), C_DEREF_INT(C_ITER_DEREF(&last)));
+        C_ITER_INC(&rfirst);
+        C_ITER_DEC(&last);
+    }
 
     // iterate an empty vector
     c_vector_clear(vector);

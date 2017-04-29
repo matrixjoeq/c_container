@@ -103,22 +103,34 @@ __c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
     return iter;
 }
 
-__c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t* tmp)
+__c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
 {
-    if (is_deque_iterator(iter) && is_deque_iterator(tmp)) {
-        ((c_deque_iterator_t*)tmp)->pos = ((c_deque_iterator_t*)iter)->pos;
+    assert(tmp);
+    if (is_deque_iterator(iter)) {
+        if (*tmp == 0)
+            iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_deque_iterator(*tmp));
+            iter_assign(*tmp, iter);
+        }
         ((c_deque_iterator_t*)iter)->pos += iter->type_info->size();
     }
-    return tmp;
+    return *tmp;
 }
 
-__c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t* tmp)
+__c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
 {
+    assert(tmp);
     if (is_deque_iterator(iter)) {
-        ((c_deque_iterator_t*)tmp)->pos = ((c_deque_iterator_t*)iter)->pos;
+        if (*tmp == 0)
+            iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_deque_iterator(*tmp));
+            iter_assign(*tmp, iter);
+        }
         ((c_deque_iterator_t*)iter)->pos -= iter->type_info->size();
     }
-    return tmp;
+    return *tmp;
 }
 
 __c_static c_ref_t iter_dereference(c_iterator_t* iter)
@@ -184,22 +196,34 @@ __c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
     return iter;
 }
 
-__c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_iterator_t* tmp)
+__c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
 {
+    assert(tmp);
     if (is_deque_reverse_iterator(iter)) {
-        ((c_deque_iterator_t*)tmp)->pos = ((c_deque_iterator_t*)iter)->pos;
+        if (*tmp == 0)
+            reverse_iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_deque_reverse_iterator(*tmp));
+            reverse_iter_assign(*tmp, iter);
+        }
         ((c_deque_iterator_t*)iter)->pos -= iter->type_info->size();
     }
-    return tmp;
+    return *tmp;
 }
 
-__c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_iterator_t* tmp)
+__c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
 {
+    assert(tmp);
     if (is_deque_reverse_iterator(iter)) {
-        ((c_deque_iterator_t*)tmp)->pos = ((c_deque_iterator_t*)iter)->pos;
+        if (*tmp == 0)
+            reverse_iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_deque_reverse_iterator(*tmp));
+            reverse_iter_assign(*tmp, iter);
+        }
         ((c_deque_iterator_t*)iter)->pos += iter->type_info->size();
     }
-    return tmp;
+    return *tmp;
 }
 
 __c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
