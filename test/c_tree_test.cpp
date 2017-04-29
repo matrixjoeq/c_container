@@ -31,8 +31,11 @@
 namespace c_container {
 namespace {
 
-const int default_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-const int default_length = __array_length(default_data);
+const int unique_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+const int unique_length = __array_length(unique_data);
+
+const int equal_data[] = { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9 };
+const int equal_length = __array_length(equal_data);
 
 #pragma GCC diagnostic ignored "-Weffc++"
 class CTreeTest : public ::testing::Test
@@ -132,7 +135,7 @@ protected:
 TEST_F(CTreeTest, Clear)
 {
     // clear a non-empty tree
-    SetupUniqueTree(default_data, default_length);
+    SetupUniqueTree(unique_data, unique_length);
     c_tree_clear(__unique_tree);
     ExpectEmpty(__unique_tree);
 
@@ -144,7 +147,7 @@ TEST_F(CTreeTest, Clear)
 TEST_F(CTreeTest, BeginEnd)
 {
     // iterate a non-empty tree
-    SetupUniqueTree(default_data, default_length);
+    SetupUniqueTree(unique_data, unique_length);
     c_tree_iterator_t rfirst = c_tree_rbegin(__unique_tree);
     c_tree_iterator_t rlast = c_tree_rend(__unique_tree);
     C_ITER_DEC(&rlast);
@@ -173,6 +176,44 @@ TEST_F(CTreeTest, BeginEnd)
     rlast = c_tree_rend(__unique_tree);
     EXPECT_TRUE(C_ITER_EQ(&__unique_first, &__unique_last));
     EXPECT_TRUE(C_ITER_EQ(&rfirst, &rlast));
+}
+
+TEST_F(CTreeTest, InsertValue)
+{
+    __array_foreach(unique_data, i) {
+        c_tree_insert_unique_value(__unique_tree, C_REF_T(&unique_data[i]));
+        c_tree_insert_equal_value(__equal_tree, C_REF_T(&unique_data[i]));
+    }
+
+    ExpectEqualToArray(__unique_tree, unique_data, unique_length);
+    ExpectEqualToArray(__equal_tree, unique_data, unique_length);
+
+    c_tree_clear(__unique_tree);
+    c_tree_clear(__equal_tree);
+
+    __array_foreach(equal_data, i) {
+        c_tree_insert_unique_value(__unique_tree, C_REF_T(&equal_data[i]));
+        c_tree_insert_equal_value(__equal_tree, C_REF_T(&equal_data[i]));
+    }
+
+    ExpectEqualToArray(__unique_tree, unique_data, unique_length);
+    ExpectEqualToArray(__equal_tree, equal_data, equal_length);
+}
+
+TEST_F(CTreeTest, InsertValueRange)
+{
+    c_tree_insert_unique_from(__unique_tree, C_REF_T(unique_data), C_REF_T(unique_data + unique_length));
+    c_tree_insert_equal_from(__equal_tree, C_REF_T(unique_data), C_REF_T(unique_data + unique_length));
+    ExpectEqualToArray(__unique_tree, unique_data, unique_length);
+    ExpectEqualToArray(__equal_tree, unique_data, unique_length);
+
+    c_tree_clear(__unique_tree);
+    c_tree_clear(__equal_tree);
+
+    c_tree_insert_unique_from(__unique_tree, C_REF_T(equal_data), C_REF_T(equal_data + equal_length));
+    c_tree_insert_equal_from(__equal_tree, C_REF_T(equal_data), C_REF_T(equal_data + equal_length));
+    ExpectEqualToArray(__unique_tree, unique_data, unique_length);
+    ExpectEqualToArray(__equal_tree, equal_data, equal_length);
 }
 
 } // namespace

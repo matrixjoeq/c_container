@@ -805,6 +805,27 @@ c_tree_iterator_t c_tree_insert_unique_value(c_tree_t* tree, c_ref_t value)
     return z;
 }
 
+void c_tree_insert_unique_range(c_tree_t* tree, c_tree_iterator_t first, c_tree_iterator_t last)
+{
+    if (!tree) return;
+
+    while (C_ITER_NE(&first, &last)) {
+        c_tree_insert_unique_value(tree, C_ITER_DEREF(&first));
+        C_ITER_INC(&first);
+    }
+}
+
+void c_tree_insert_unique_from(c_tree_t* tree, c_ref_t first_value, c_ref_t last_value)
+{
+    if (!tree || !first_value || !last_value) return;
+
+    c_ref_t value = first_value;
+    while (value != last_value) {
+        c_tree_insert_unique_value(tree, value);
+        value += tree->type_info->size();
+    }
+}
+
 c_tree_iterator_t c_tree_insert_equal_value(c_tree_t* tree, c_ref_t value)
 {
     assert(tree);
@@ -819,6 +840,27 @@ c_tree_iterator_t c_tree_insert_equal_value(c_tree_t* tree, c_ref_t value)
     }
 
     return create_iterator(tree->type_info, __insert(tree, y, value));
+}
+
+void c_tree_insert_equal_range(c_tree_t* tree, c_tree_iterator_t first, c_tree_iterator_t last)
+{
+    if (!tree) return;
+
+    while (C_ITER_NE(&first, &last)) {
+        c_tree_insert_equal_value(tree, C_ITER_DEREF(&first));
+        C_ITER_INC(&first);
+    }
+}
+
+void c_tree_insert_equal_from(c_tree_t* tree, c_ref_t first_value, c_ref_t last_value)
+{
+    if (!tree || !first_value || !last_value) return;
+
+    c_ref_t value = first_value;
+    while (value != last_value) {
+        c_tree_insert_equal_value(tree, value);
+        value += tree->type_info->size();
+    }
 }
 
 void c_tree_erase(c_tree_t* tree, c_tree_iterator_t pos)
