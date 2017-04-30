@@ -33,6 +33,7 @@ extern "C" {
 #include "c_def.h"
 
 #define __c_static static
+
 #ifdef __GNUC__
 #define __c_inline __attribute__((always_inline)) inline
 #else

@@ -43,7 +43,7 @@ struct __c_backend_vector {
     c_vector_t* impl;
 };
 
-__c_static bool is_valid_pos(c_vector_t* vector, c_ref_t pos)
+__c_static __c_inline bool __is_valid_pos(c_vector_t* vector, c_ref_t pos)
 {
     if (!vector) return false;
 
@@ -56,14 +56,14 @@ __c_static bool is_valid_pos(c_vector_t* vector, c_ref_t pos)
     return false;
 }
 
-__c_static __c_inline bool is_vector_iterator(c_iterator_t* iter)
+__c_static __c_inline bool __is_vector_iterator(c_iterator_t* iter)
 {
     return (iter != 0 &&
             iter->iterator_category == C_ITER_CATE_RANDOM &&
             iter->iterator_type == C_ITER_TYPE_VECTOR);
 }
 
-__c_static __c_inline bool is_vector_reverse_iterator(c_iterator_t* iter)
+__c_static __c_inline bool __is_vector_reverse_iterator(c_iterator_t* iter)
 {
     return (iter != 0 &&
             iter->iterator_category == C_ITER_CATE_RANDOM &&
@@ -72,7 +72,7 @@ __c_static __c_inline bool is_vector_reverse_iterator(c_iterator_t* iter)
 
 __c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
 {
-    if (self && !(*self) && is_vector_iterator(other)) {
+    if (self && !(*self) && __is_vector_iterator(other)) {
         *self = (c_iterator_t*)malloc(sizeof(c_vector_iterator_t));
         if (*self) memcpy(*self, other, sizeof(c_vector_iterator_t));
     }
@@ -80,7 +80,7 @@ __c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
 
 __c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
 {
-    if (is_vector_iterator(dst) && is_vector_iterator(src) && dst != src) {
+    if (__is_vector_iterator(dst) && __is_vector_iterator(src) && dst != src) {
         ((c_vector_iterator_t*)dst)->pos = ((c_vector_iterator_t*)src)->pos;
     }
     return dst;
@@ -88,7 +88,7 @@ __c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
 
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 {
-    if (is_vector_iterator(iter)) {
+    if (__is_vector_iterator(iter)) {
         ((c_vector_iterator_t*)iter)->pos += iter->type_info->size();
     }
     return iter;
@@ -96,7 +96,7 @@ __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 
 __c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
 {
-    if (is_vector_iterator(iter)) {
+    if (__is_vector_iterator(iter)) {
         ((c_vector_iterator_t*)iter)->pos -= iter->type_info->size();
     }
     return iter;
@@ -105,11 +105,11 @@ __c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
 __c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
 {
     assert(tmp);
-    if (is_vector_iterator(iter)) {
+    if (__is_vector_iterator(iter)) {
         if (*tmp == 0)
             iter_alloc_and_copy(tmp, iter);
         else {
-            assert(is_vector_iterator(*tmp));
+            assert(__is_vector_iterator(*tmp));
             iter_assign(*tmp, iter);
         }
         ((c_vector_iterator_t*)iter)->pos += iter->type_info->size();
@@ -120,11 +120,11 @@ __c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** 
 __c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
 {
     assert(tmp);
-    if (is_vector_iterator(iter)) {
+    if (__is_vector_iterator(iter)) {
         if (*tmp == 0)
             iter_alloc_and_copy(tmp, iter);
         else {
-            assert(is_vector_iterator(*tmp));
+            assert(__is_vector_iterator(*tmp));
             iter_assign(*tmp, iter);
         }
         ((c_vector_iterator_t*)iter)->pos -= iter->type_info->size();
@@ -134,7 +134,7 @@ __c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t** 
 
 __c_static c_ref_t iter_dereference(c_iterator_t* iter)
 {
-    if (is_vector_iterator(iter)) {
+    if (__is_vector_iterator(iter)) {
         return ((c_vector_iterator_t*)iter)->pos;
     }
     return 0;
@@ -142,7 +142,7 @@ __c_static c_ref_t iter_dereference(c_iterator_t* iter)
 
 __c_static bool iter_equal(c_iterator_t* x, c_iterator_t* y)
 {
-    if (!is_vector_iterator(x) || !is_vector_iterator(y)) return false;
+    if (!__is_vector_iterator(x) || !__is_vector_iterator(y)) return false;
     return ((c_vector_iterator_t*)x)->pos == ((c_vector_iterator_t*)y)->pos;
 }
 
@@ -153,19 +153,19 @@ __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 
 __c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
-    if (!is_vector_iterator(iter)) return;
+    if (!__is_vector_iterator(iter)) return;
     ((c_vector_iterator_t*)iter)->pos += (n * iter->type_info->size());
 }
 
 __c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
-    if (!is_vector_iterator(first) || !is_vector_iterator(last)) return 0;
+    if (!__is_vector_iterator(first) || !__is_vector_iterator(last)) return 0;
     return (ptrdiff_t)(((c_vector_iterator_t*)last)->pos - ((c_vector_iterator_t*)first)->pos) / first->type_info->size();
 }
 
 __c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
 {
-    if (self && !(*self) && is_vector_reverse_iterator(other)) {
+    if (self && !(*self) && __is_vector_reverse_iterator(other)) {
         *self = (c_iterator_t*)malloc(sizeof(c_vector_iterator_t));
         if (*self) memcpy(*self, other, sizeof(c_vector_iterator_t));
     }
@@ -173,7 +173,7 @@ __c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* o
 
 __c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* src)
 {
-    if (is_vector_reverse_iterator(dst) && is_vector_reverse_iterator(src) && dst != src) {
+    if (__is_vector_reverse_iterator(dst) && __is_vector_reverse_iterator(src) && dst != src) {
         ((c_vector_iterator_t*)dst)->pos = ((c_vector_iterator_t*)src)->pos;
     }
     return dst;
@@ -181,7 +181,7 @@ __c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* sr
 
 __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 {
-    if (is_vector_reverse_iterator(iter)) {
+    if (__is_vector_reverse_iterator(iter)) {
         ((c_vector_iterator_t*)iter)->pos -= iter->type_info->size();
     }
     return iter;
@@ -189,7 +189,7 @@ __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 
 __c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
 {
-    if (is_vector_reverse_iterator(iter)) {
+    if (__is_vector_reverse_iterator(iter)) {
         ((c_vector_iterator_t*)iter)->pos += iter->type_info->size();
     }
     return iter;
@@ -198,11 +198,11 @@ __c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
 __c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
 {
     assert(tmp);
-    if (is_vector_reverse_iterator(iter)) {
+    if (__is_vector_reverse_iterator(iter)) {
         if (*tmp == 0)
             reverse_iter_alloc_and_copy(tmp, iter);
         else {
-            assert(is_vector_reverse_iterator(*tmp));
+            assert(__is_vector_reverse_iterator(*tmp));
             reverse_iter_assign(*tmp, iter);
         }
         ((c_vector_iterator_t*)iter)->pos -= iter->type_info->size();
@@ -213,11 +213,11 @@ __c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_itera
 __c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
 {
     assert(tmp);
-    if (is_vector_reverse_iterator(iter)) {
+    if (__is_vector_reverse_iterator(iter)) {
         if (*tmp == 0)
             reverse_iter_alloc_and_copy(tmp, iter);
         else {
-            assert(is_vector_reverse_iterator(*tmp));
+            assert(__is_vector_reverse_iterator(*tmp));
             reverse_iter_assign(*tmp, iter);
         }
         ((c_vector_iterator_t*)iter)->pos += iter->type_info->size();
@@ -227,7 +227,7 @@ __c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_itera
 
 __c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
 {
-    if (is_vector_reverse_iterator(iter)) {
+    if (__is_vector_reverse_iterator(iter)) {
         return (c_ref_t)(((c_vector_iterator_t*)iter)->pos - iter->type_info->size());
     }
     return 0;
@@ -235,7 +235,7 @@ __c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
 
 __c_static bool reverse_iter_equal(c_iterator_t* x, c_iterator_t* y)
 {
-    if (!is_vector_reverse_iterator(x) || !is_vector_reverse_iterator(y)) return false;
+    if (!__is_vector_reverse_iterator(x) || !__is_vector_reverse_iterator(y)) return false;
     return ((c_vector_iterator_t*)x)->pos == ((c_vector_iterator_t*)y)->pos;
 }
 
@@ -246,40 +246,39 @@ __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 
 __c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
-    if (!is_vector_reverse_iterator(iter)) return;
+    if (!__is_vector_reverse_iterator(iter)) return;
     ((c_vector_iterator_t*)iter)->pos -= (n * iter->type_info->size());
 }
 
 __c_static ptrdiff_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
-    if (!is_vector_reverse_iterator(first) || !is_vector_reverse_iterator(last)) return 0;
+    if (!__is_vector_reverse_iterator(first) || !__is_vector_reverse_iterator(last)) return 0;
     return (ptrdiff_t)(((c_vector_iterator_t*)first)->pos - ((c_vector_iterator_t*)last)->pos) / first->type_info->size();
 }
 
-__c_static c_vector_iterator_t create_iterator(
+static c_iterator_operation_t s_iter_ops = {
+    .alloc_and_copy = iter_alloc_and_copy,
+    .assign = iter_assign,
+    .increment = iter_increment,
+    .decrement = iter_decrement,
+    .post_increment = iter_post_increment,
+    .post_decrement = iter_post_decrement,
+    .dereference = iter_dereference,
+    .equal = iter_equal,
+    .not_equal = iter_not_equal,
+    .advance = iter_advance,
+    .distance = iter_distance
+};
+
+__c_static __c_inline c_vector_iterator_t __create_iterator(
     c_containable_t* type_info, c_ref_t pos)
 {
     assert(type_info);
-
-    static c_iterator_operation_t ops = {
-        .alloc_and_copy = iter_alloc_and_copy,
-        .assign = iter_assign,
-        .increment = iter_increment,
-        .decrement = iter_decrement,
-        .post_increment = iter_post_increment,
-        .post_decrement = iter_post_decrement,
-        .dereference = iter_dereference,
-        .equal = iter_equal,
-        .not_equal = iter_not_equal,
-        .advance = iter_advance,
-        .distance = iter_distance
-    };
-
     c_vector_iterator_t iter = {
         .base_iter = {
             .iterator_category = C_ITER_CATE_RANDOM,
             .iterator_type = C_ITER_TYPE_VECTOR,
-            .iterator_ops = &ops,
+            .iterator_ops = &s_iter_ops,
             .type_info = type_info
         },
         .pos = pos
@@ -287,30 +286,29 @@ __c_static c_vector_iterator_t create_iterator(
     return iter;
 }
 
-__c_static c_vector_iterator_t create_reverse_iterator(
+static c_iterator_operation_t s_reverse_ops = {
+    .alloc_and_copy = reverse_iter_alloc_and_copy,
+    .assign = reverse_iter_assign,
+    .increment = reverse_iter_increment,
+    .decrement = reverse_iter_decrement,
+    .post_increment = reverse_iter_post_increment,
+    .post_decrement = reverse_iter_post_decrement,
+    .dereference = reverse_iter_dereference,
+    .equal = reverse_iter_equal,
+    .not_equal = reverse_iter_not_equal,
+    .advance = reverse_iter_advance,
+    .distance = reverse_iter_distance
+};
+
+__c_static __c_inline c_vector_iterator_t __create_reverse_iterator(
     c_containable_t* type_info, c_ref_t pos)
 {
     assert(type_info);
-
-    static c_iterator_operation_t ops = {
-        .alloc_and_copy = reverse_iter_alloc_and_copy,
-        .assign = reverse_iter_assign,
-        .increment = reverse_iter_increment,
-        .decrement = reverse_iter_decrement,
-        .post_increment = reverse_iter_post_increment,
-        .post_decrement = reverse_iter_post_decrement,
-        .dereference = reverse_iter_dereference,
-        .equal = reverse_iter_equal,
-        .not_equal = reverse_iter_not_equal,
-        .advance = reverse_iter_advance,
-        .distance = reverse_iter_distance
-    };
-
     c_vector_iterator_t iter = {
         .base_iter = {
             .iterator_category = C_ITER_CATE_RANDOM,
             .iterator_type = C_ITER_TYPE_VECTOR_REVERSE,
-            .iterator_ops = &ops,
+            .iterator_ops = &s_reverse_ops,
             .type_info = type_info
         },
         .pos = pos
@@ -318,25 +316,25 @@ __c_static c_vector_iterator_t create_reverse_iterator(
     return iter;
 }
 
-__c_static __c_inline c_ref_t begin(c_vector_t* vector)
+__c_static __c_inline c_ref_t __begin(c_vector_t* vector)
 {
     assert(vector);
     return vector->start;
 }
 
-__c_static __c_inline c_ref_t end(c_vector_t* vector)
+__c_static __c_inline c_ref_t __end(c_vector_t* vector)
 {
     assert(vector);
     return vector->finish;
 }
 
-__c_static __c_inline c_storage_t eos(c_vector_t* vector)
+__c_static __c_inline c_storage_t __eos(c_vector_t* vector)
 {
     assert(vector);
     return vector->end_of_storage;
 }
 
-__c_static __c_inline size_t available(c_vector_t* vector)
+__c_static __c_inline size_t __available(c_vector_t* vector)
 {
     assert(vector);
     assert(vector->type_info->size);
@@ -445,7 +443,7 @@ __c_static void backend_swap(c_backend_container_t* c, c_backend_container_t* ot
     _other->interface = tmp;
 }
 
-__c_static void destroy(c_vector_iterator_t first, c_vector_iterator_t last)
+__c_static __c_inline void __destroy(c_vector_iterator_t first, c_vector_iterator_t last)
 {
     while (C_ITER_NE(&first, &last)) {
         first.base_iter.type_info->destroy(first.pos);
@@ -453,7 +451,7 @@ __c_static void destroy(c_vector_iterator_t first, c_vector_iterator_t last)
     }
 }
 
-__c_static void fill(c_vector_iterator_t pos, size_t n, c_ref_t data)
+__c_static __c_inline void __fill(c_vector_iterator_t pos, size_t n, c_ref_t data)
 {
     while (n--) {
         if (data) {
@@ -468,7 +466,7 @@ __c_static void fill(c_vector_iterator_t pos, size_t n, c_ref_t data)
     }
 }
 
-__c_static int reallocate_and_move(c_vector_t* vector, size_t n)
+__c_static __c_inline int __reallocate_and_move(c_vector_t* vector, size_t n)
 {
     assert(vector);
 
@@ -482,7 +480,7 @@ __c_static int reallocate_and_move(c_vector_t* vector, size_t n)
     if (!start) return -1;
 
     memcpy(start, vector->start, vector->finish - vector->start);
-    destroy(c_vector_begin(vector), c_vector_end(vector));
+    __destroy(c_vector_begin(vector), c_vector_end(vector));
     __c_free(vector->start);
     vector->start = start;
     vector->finish = start + size * data_size;
@@ -564,25 +562,25 @@ void c_vector_destroy(c_vector_t* vector)
 c_ref_t c_vector_at(c_vector_t* vector, size_t pos)
 {
     if (!vector) return 0;
-    return C_REF_T(begin(vector) + vector->type_info->size() * pos);
+    return C_REF_T(__begin(vector) + vector->type_info->size() * pos);
 }
 
 c_ref_t c_vector_front(c_vector_t* vector)
 {
-    return c_vector_empty(vector) ? 0 : begin(vector);
+    return c_vector_empty(vector) ? 0 : __begin(vector);
 }
 
 c_ref_t c_vector_back(c_vector_t* vector)
 {
     if (c_vector_empty(vector)) return 0;
 
-    return C_REF_T(end(vector) - vector->type_info->size());
+    return C_REF_T(__end(vector) - vector->type_info->size());
 }
 
 c_ref_t c_vector_data(c_vector_t* vector)
 {
     if (!vector) return 0;
-    return begin(vector);
+    return __begin(vector);
 }
 
 /**
@@ -591,25 +589,25 @@ c_ref_t c_vector_data(c_vector_t* vector)
 c_vector_iterator_t c_vector_begin(c_vector_t* vector)
 {
     assert(vector);
-    return create_iterator(vector->type_info, begin(vector));
+    return __create_iterator(vector->type_info, __begin(vector));
 }
 
 c_vector_iterator_t c_vector_rbegin(c_vector_t* vector)
 {
     assert(vector);
-    return create_reverse_iterator(vector->type_info, end(vector));
+    return __create_reverse_iterator(vector->type_info, __end(vector));
 }
 
 c_vector_iterator_t c_vector_end(c_vector_t* vector)
 {
     assert(vector);
-    return create_iterator(vector->type_info, end(vector));
+    return __create_iterator(vector->type_info, __end(vector));
 }
 
 c_vector_iterator_t c_vector_rend(c_vector_t* vector)
 {
     assert(vector);
-    return create_reverse_iterator(vector->type_info, begin(vector));
+    return __create_reverse_iterator(vector->type_info, __begin(vector));
 }
 
 /**
@@ -617,14 +615,14 @@ c_vector_iterator_t c_vector_rend(c_vector_t* vector)
  */
 bool c_vector_empty(c_vector_t* vector)
 {
-    return vector ? begin(vector) == end(vector) : true;
+    return vector ? __begin(vector) == __end(vector) : true;
 }
 
 size_t c_vector_size(c_vector_t* vector)
 {
     if (!vector) return 0;
 
-    return (end(vector) - begin(vector)) / vector->type_info->size();
+    return (__end(vector) - __begin(vector)) / vector->type_info->size();
 }
 
 size_t c_vector_max_size(void)
@@ -642,12 +640,12 @@ size_t c_vector_capacity(c_vector_t* vector)
 {
     if (!vector) return 0;
 
-    return (eos(vector) - begin(vector)) / vector->type_info->size();
+    return (__eos(vector) - __begin(vector)) / vector->type_info->size();
 }
 
 void c_vector_shrink_to_fit(c_vector_t* vector)
 {
-    if (!vector || eos(vector) == end(vector)) return;
+    if (!vector || __eos(vector) == __end(vector)) return;
 
     size_t size = (size_t)(vector->finish - vector->start);
     if (size == 0) {
@@ -660,7 +658,7 @@ void c_vector_shrink_to_fit(c_vector_t* vector)
     if (!start) return;
 
     memcpy(start, vector->start, size);
-    destroy(c_vector_begin(vector), c_vector_end(vector));
+    __destroy(c_vector_begin(vector), c_vector_end(vector));
     __c_free(vector->start);
     vector->start = start;
     vector->finish = start + size;
@@ -673,7 +671,7 @@ void c_vector_shrink_to_fit(c_vector_t* vector)
 void c_vector_clear(c_vector_t* vector)
 {
     if (c_vector_empty(vector)) return;
-    destroy(c_vector_begin(vector), c_vector_end(vector));
+    __destroy(c_vector_begin(vector), c_vector_end(vector));
     vector->finish = vector->start;
 }
 
@@ -687,18 +685,18 @@ c_vector_iterator_t c_vector_insert_n(
 {
     if (!vector || !data) return pos;
 
-    if (!is_valid_pos(vector, pos.pos)) return c_vector_end(vector);
+    if (!__is_valid_pos(vector, pos.pos)) return c_vector_end(vector);
 
-    if (available(vector) < count) {
+    if (__available(vector) < count) {
         ptrdiff_t diff = pos.pos - vector->start;
-        if (reallocate_and_move(vector, count - available(vector)))
+        if (__reallocate_and_move(vector, count - __available(vector)))
             return c_vector_end(vector);
 
         pos.pos = vector->start + diff;
     }
 
     memmove(pos.pos + count * vector->type_info->size(), pos.pos, vector->finish - pos.pos);
-    fill(pos, count, data);
+    __fill(pos, count, data);
     vector->finish += count * vector->type_info->size();
 
     return pos;
@@ -709,7 +707,7 @@ c_vector_iterator_t c_vector_insert_range(
 {
     if (!vector) return pos;
 
-    if (!is_valid_pos(vector, pos.pos)) return c_vector_end(vector);
+    if (!__is_valid_pos(vector, pos.pos)) return c_vector_end(vector);
 
     while (C_ITER_NE(&first, &last)) {
         pos = c_vector_insert(vector, pos, C_ITER_DEREF(&first));
@@ -727,7 +725,7 @@ c_vector_iterator_t c_vector_erase(c_vector_t* vector, c_vector_iterator_t pos)
 {
     if (!vector) return pos;
 
-    if (!is_valid_pos(vector, pos.pos) || pos.pos == vector->finish)
+    if (!__is_valid_pos(vector, pos.pos) || pos.pos == vector->finish)
         return c_vector_end(vector);
 
     vector->type_info->destroy(pos.pos);
@@ -743,14 +741,14 @@ c_vector_iterator_t c_vector_erase_range(
 {
     if (!vector) return last;
 
-    if (!is_valid_pos(vector, first.pos) ||
-        !is_valid_pos(vector, last.pos) ||
+    if (!__is_valid_pos(vector, first.pos) ||
+        !__is_valid_pos(vector, last.pos) ||
         (first.pos > last.pos))
         return c_vector_end(vector);
 
     if (first.pos == last.pos) return last;
 
-    destroy(first, last);
+    __destroy(first, last);
     size_t size = vector->finish - last.pos;
     memmove(first.pos, last.pos, size);
     vector->finish -= (last.pos - first.pos);
@@ -763,7 +761,7 @@ void c_vector_push_back(c_vector_t* vector, c_ref_t data)
     if (!vector || !data) return;
 
     if (vector->finish == vector->end_of_storage) {
-        if (reallocate_and_move(vector, 1))
+        if (__reallocate_and_move(vector, 1))
             return;
     }
 
@@ -792,16 +790,16 @@ void c_vector_resize_with_value(c_vector_t* vector, size_t count, c_ref_t data)
 
     if (count > c_vector_size(vector)) {
         count -= c_vector_size(vector);
-        if (count > available(vector)) {
-            if (reallocate_and_move(vector, count))
+        if (count > __available(vector)) {
+            if (__reallocate_and_move(vector, count))
                 return;
         }
-        fill(c_vector_end(vector), count, data);
+        __fill(c_vector_end(vector), count, data);
         vector->finish += count * data_size;
     }
     else {
         c_ref_t pos = vector->start + count * data_size;
-        destroy(create_iterator(vector->type_info, pos), c_vector_end(vector));
+        __destroy(__create_iterator(vector->type_info, pos), c_vector_end(vector));
         vector->finish = pos;
     }
 }

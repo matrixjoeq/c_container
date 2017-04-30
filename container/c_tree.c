@@ -48,21 +48,21 @@ struct __c_tree {
 static const __rb_tree_color_type s_rb_tree_color_red = false;
 static const __rb_tree_color_type s_rb_tree_color_black = true;
 
-__c_static c_tree_iterator_t create_iterator(c_containable_t* type_info, c_tree_node_t* node);
-__c_static c_tree_iterator_t create_reverse_iterator(c_containable_t* type_info, c_tree_node_t* node);
+__c_static c_tree_iterator_t __create_iterator(c_containable_t* type_info, c_tree_node_t* node);
+__c_static c_tree_iterator_t __create_reverse_iterator(c_containable_t* type_info, c_tree_node_t* node);
 
 __c_static __c_inline bool __is_header(c_tree_node_t* node)
 {
     return (node ? (node->parent->parent == node &&
                     node->color == s_rb_tree_color_red) : false);
 }
-
+/*
 __c_static __c_inline bool __is_root(c_tree_node_t* node)
 {
     return (node ? (node->parent->parent == node &&
                     node->color == s_rb_tree_color_black) : false);
 }
-
+*/
 __c_static __c_inline bool __is_left(c_tree_node_t* node)
 {
     return (node ? node->parent->left == node : false);
@@ -118,7 +118,7 @@ __c_static __c_inline c_tree_node_t* __uncle(c_tree_node_t* node)
     return (__is_left(__parent(node)) ? __right(__grand_parent(node))
                                       : __left(__grand_parent(node)));
 }
-
+/*
 __c_static __c_inline c_tree_node_t* __sibling(c_tree_node_t* node)
 {
     return (__is_left(node) ? __right(__parent(node))
@@ -134,7 +134,7 @@ __c_static __c_inline c_ref_t __value(c_tree_node_t* node)
 {
     return node->value;
 }
-
+*/
 __c_static __c_inline c_tree_node_t* __root(c_tree_t* tree)
 {
     return tree->header->parent;
@@ -185,7 +185,7 @@ __c_static __c_inline c_tree_node_t* __maximum(c_tree_node_t* node)
     return node;
 }
 
-__c_static void __rotate_right(c_tree_node_t* node, c_tree_node_t* root)
+__c_static __c_inline void __rotate_right(c_tree_node_t* node, c_tree_node_t* root)
 {
     if (!node || !node->left) return;
 
@@ -208,7 +208,7 @@ __c_static void __rotate_right(c_tree_node_t* node, c_tree_node_t* root)
     x->parent = y;
 }
 
-__c_static void __rotate_left(c_tree_node_t* node, c_tree_node_t* root)
+__c_static __c_inline void __rotate_left(c_tree_node_t* node, c_tree_node_t* root)
 {
     if (!node || !node->right) return;
 
@@ -231,7 +231,7 @@ __c_static void __rotate_left(c_tree_node_t* node, c_tree_node_t* root)
     x->parent = y;
 }
 
-__c_static c_tree_node_t* __create_node(c_tree_t* tree, c_ref_t value)
+__c_static __c_inline c_tree_node_t* __create_node(c_tree_t* tree, c_ref_t value)
 {
     assert(tree);
 
@@ -260,7 +260,7 @@ __c_static c_tree_node_t* __create_node(c_tree_t* tree, c_ref_t value)
     return node;
 }
 
-__c_static void __destroy_node(c_tree_t* tree, c_tree_node_t* node)
+__c_static __c_inline void __destroy_node(c_tree_t* tree, c_tree_node_t* node)
 {
     assert(tree);
     assert(node);
@@ -280,7 +280,7 @@ __c_static void __erase(c_tree_t* tree, c_tree_node_t* node) // erase node and i
     }
 }
 
-__c_static void __rebalance_insert(c_tree_t* tree, c_tree_node_t* node)
+__c_static __c_inline void __rebalance_insert(c_tree_t* tree, c_tree_node_t* node)
 {
     if (!tree || !node) return;
 
@@ -326,548 +326,10 @@ __c_static void __rebalance_insert(c_tree_t* tree, c_tree_node_t* node)
     __root(tree)->color = s_rb_tree_color_black;
 }
 
-__c_static c_tree_node_t* __insert(c_tree_t* tree, c_tree_node_t* parent, c_ref_t value)
+__c_static __c_inline c_tree_node_t* __rebalance_erase(c_tree_t* tree, c_tree_node_t* node)
 {
-    assert(tree);
-    assert(parent);
+    if (!tree || !node) return 0;
 
-    c_tree_node_t* node = __create_node(tree, value);
-    if (!node) return 0;
-
-    c_compare key_comp = tree->key_comp;
-    c_tree_node_t* header = tree->header;
-    if (parent == tree->header || key_comp(value, parent->value)) {
-        parent->left = node;
-
-        if (parent == header) {
-            header->parent = node;
-            header->right = node;
-        }
-        else if (parent == __leftmost(tree)) {
-            header->left = node;
-        }
-    }
-    else {
-        parent->right = node;
-
-        if (parent == __rightmost(tree)) {
-            header->right = node;
-        }
-    }
-
-    node->parent = parent;
-
-    __rebalance_insert(tree, node);
-    ++(tree->node_count);
-
-    return node;
-}
-
-__c_static __c_inline bool is_tree_iterator(c_iterator_t* iter)
-{
-    return (iter != 0 &&
-            iter->iterator_category == C_ITER_CATE_BIDIRECTION &&
-            iter->iterator_type == C_ITER_TYPE_TREE);
-}
-
-__c_static __c_inline bool is_tree_reverse_iterator(c_iterator_t* iter)
-{
-    return (iter != 0 &&
-            iter->iterator_category == C_ITER_CATE_BIDIRECTION &&
-            iter->iterator_type == C_ITER_TYPE_TREE_REVERSE);
-}
-
-__c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
-{
-    if (self && !(*self) && is_tree_iterator(other)) {
-        *self = (c_iterator_t*)malloc(sizeof(c_tree_iterator_t));
-        if (*self) memcpy(*self, other, sizeof(c_tree_iterator_t));
-    }
-}
-
-__c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
-{
-    if (is_tree_iterator(dst) && is_tree_iterator(src) && dst != src) {
-        ((c_tree_iterator_t*)dst)->node = ((c_tree_iterator_t*)src)->node;
-    }
-    return dst;
-}
-
-__c_static c_iterator_t* iter_increment(c_iterator_t* iter)
-{
-    if (is_tree_iterator(iter)) {
-        c_tree_iterator_t* _iter = (c_tree_iterator_t*)iter;
-        if (_iter->node->right)
-            _iter->node = __minimum(_iter->node->right);
-        else {
-            c_tree_node_t* parent = _iter->node->parent;
-            while (parent->right == _iter->node) {
-                _iter->node = parent;
-                parent = parent->parent;
-            }
-
-            // in the case of node is header and parent is root
-            if (parent != _iter->node->right)
-                _iter->node = parent;
-        }
-    }
-    return iter;
-}
-
-__c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
-{
-    if (is_tree_iterator(iter)) {
-        c_tree_iterator_t* _iter = (c_tree_iterator_t*)iter;
-        if (__is_header(_iter->node))
-            _iter->node = _iter->node->right;
-        else if (_iter->node->left)
-            _iter->node = __maximum(_iter->node->left);
-        else {
-            c_tree_node_t* parent = _iter->node->parent;
-            while (parent->left == _iter->node) {
-                _iter->node = parent;
-                parent = parent->parent;
-            }
-
-            _iter->node = parent;
-        }
-    }
-    return iter;
-}
-
-__c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
-{
-    assert(tmp);
-    if (is_tree_iterator(iter)) {
-        if (*tmp == 0)
-            iter_alloc_and_copy(tmp, iter);
-        else {
-            assert(is_tree_iterator(*tmp));
-            iter_assign(*tmp, iter);
-        }
-        iter_increment(iter);
-    }
-    return *tmp;
-}
-
-__c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
-{
-    assert(tmp);
-    if (is_tree_iterator(iter)) {
-        if (*tmp == 0)
-            iter_alloc_and_copy(tmp, iter);
-        else {
-            assert(is_tree_iterator(*tmp));
-            iter_assign(*tmp, iter);
-        }
-        iter_decrement(iter);
-    }
-    return *tmp;
-}
-
-__c_static c_ref_t iter_dereference(c_iterator_t* iter)
-{
-    if (is_tree_iterator(iter)) {
-        return ((c_tree_iterator_t*)iter)->node->value;
-    }
-    return 0;
-}
-
-__c_static bool iter_equal(c_iterator_t* x, c_iterator_t* y)
-{
-    if (!is_tree_iterator(x) || !is_tree_iterator(y)) return false;
-    return ((c_tree_iterator_t*)x)->node == ((c_tree_iterator_t*)y)->node;
-}
-
-__c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
-{
-    return !iter_equal(x, y);
-}
-
-__c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
-{
-    if (is_tree_iterator(iter)) {
-        if (n > 0) {
-            while (n--) iter_increment(iter);
-        }
-        else {
-            while (n++) iter_decrement(iter);
-        }
-    }
-}
-
-__c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
-{
-    if (!is_tree_iterator(first) || !is_tree_iterator(last)) return 0;
-
-    c_tree_iterator_t x = create_iterator(first->type_info, ((c_tree_iterator_t*)first)->node);
-
-    ptrdiff_t n = 0;
-    while (!iter_equal((c_iterator_t*)(&x), last)) {
-        iter_increment((c_iterator_t*)(&x));
-        ++n;
-    }
-
-    return n;
-}
-
-__c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
-{
-    if (self && !(*self) && is_tree_reverse_iterator(other)) {
-        *self = (c_iterator_t*)malloc(sizeof(c_tree_iterator_t));
-        if (*self) memcpy(*self, other, sizeof(c_tree_iterator_t));
-    }
-}
-
-__c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* src)
-{
-    if (is_tree_reverse_iterator(dst) && is_tree_reverse_iterator(src) && dst != src) {
-        ((c_tree_iterator_t*)dst)->node = ((c_tree_iterator_t*)src)->node;
-    }
-    return dst;
-}
-
-__c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
-{
-    if (is_tree_reverse_iterator(iter)) {
-        c_tree_iterator_t x = create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
-        iter_decrement((c_iterator_t*)(&x));
-        ((c_tree_iterator_t*)iter)->node = x.node;
-    }
-    return iter;
-}
-
-__c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
-{
-    if (is_tree_reverse_iterator(iter)) {
-        c_tree_iterator_t x = create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
-        iter_increment((c_iterator_t*)(&x));
-        ((c_tree_iterator_t*)iter)->node = x.node;
-    }
-    return iter;
-}
-
-__c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
-{
-    assert(tmp);
-    if (is_tree_reverse_iterator(iter)) {
-        if (*tmp == 0)
-            reverse_iter_alloc_and_copy(tmp, iter);
-        else {
-            assert(is_tree_reverse_iterator(*tmp));
-            reverse_iter_assign(*tmp, iter);
-        }
-        c_tree_iterator_t x = create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
-        iter_decrement((c_iterator_t*)(&x));
-        ((c_tree_iterator_t*)iter)->node = x.node;
-    }
-    return *tmp;
-}
-
-__c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
-{
-    assert(tmp);
-    if (is_tree_reverse_iterator(iter)) {
-        if (*tmp == 0)
-            reverse_iter_alloc_and_copy(tmp, iter);
-        else {
-            assert(is_tree_reverse_iterator(*tmp));
-            reverse_iter_assign(*tmp, iter);
-        }
-        c_tree_iterator_t x = create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
-        iter_increment((c_iterator_t*)(&x));
-        ((c_tree_iterator_t*)iter)->node = x.node;
-    }
-    return *tmp;
-}
-
-__c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
-{
-    if (is_tree_reverse_iterator(iter)) {
-        c_tree_iterator_t x = create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
-        iter_decrement((c_iterator_t*)(&x));
-        return x.node->value;
-    }
-    return 0;
-}
-
-__c_static bool reverse_iter_equal(c_iterator_t* x, c_iterator_t* y)
-{
-    if (!is_tree_reverse_iterator(x) || !is_tree_reverse_iterator(y)) return false;
-    return ((c_tree_iterator_t*)x)->node == ((c_tree_iterator_t*)y)->node;
-}
-
-__c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
-{
-    return !reverse_iter_equal(x, y);
-}
-
-__c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
-{
-    if (is_tree_reverse_iterator(iter)) {
-        if (n > 0) {
-            while (n--) reverse_iter_increment(iter);
-        }
-        else {
-            while (n++) reverse_iter_decrement(iter);
-        }
-    }
-}
-
-__c_static ptrdiff_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* last)
-{
-    if (!is_tree_reverse_iterator(first) || !is_tree_reverse_iterator(last)) return 0;
-
-    c_tree_iterator_t x = create_reverse_iterator(first->type_info, ((c_tree_iterator_t*)first)->node);
-
-    ptrdiff_t n = 0;
-    while (!reverse_iter_equal((c_iterator_t*)(&x), last)) {
-        reverse_iter_increment((c_iterator_t*)(&x));
-        ++n;
-    }
-
-    return n;
-}
-
-__c_static c_tree_iterator_t create_iterator(
-    c_containable_t* type_info, c_tree_node_t* node)
-{
-    assert(type_info);
-    assert(node);
-
-    static c_iterator_operation_t ops = {
-        .alloc_and_copy = iter_alloc_and_copy,
-        .assign = iter_assign,
-        .increment = iter_increment,
-        .decrement = iter_decrement,
-        .post_increment = iter_post_increment,
-        .post_decrement = iter_post_decrement,
-        .dereference = iter_dereference,
-        .equal = iter_equal,
-        .not_equal = iter_not_equal,
-        .advance = iter_advance,
-        .distance = iter_distance
-    };
-
-    c_tree_iterator_t iter = {
-        .base_iter = {
-            .iterator_category = C_ITER_CATE_BIDIRECTION,
-            .iterator_type = C_ITER_TYPE_TREE,
-            .iterator_ops = &ops,
-            .type_info = type_info
-        },
-        .node = node
-    };
-    return iter;
-}
-
-__c_static c_tree_iterator_t create_reverse_iterator(
-    c_containable_t* type_info, c_tree_node_t* node)
-{
-    assert(type_info);
-    assert(node);
-
-    static c_iterator_operation_t ops = {
-        .alloc_and_copy = reverse_iter_alloc_and_copy,
-        .assign = reverse_iter_assign,
-        .increment = reverse_iter_increment,
-        .decrement = reverse_iter_decrement,
-        .post_increment = reverse_iter_post_increment,
-        .post_decrement = reverse_iter_post_decrement,
-        .dereference = reverse_iter_dereference,
-        .equal = reverse_iter_equal,
-        .not_equal = reverse_iter_not_equal,
-        .advance = reverse_iter_advance,
-        .distance = reverse_iter_distance
-    };
-
-    c_tree_iterator_t iter = {
-        .base_iter = {
-            .iterator_category = C_ITER_CATE_BIDIRECTION,
-            .iterator_type = C_ITER_TYPE_TREE_REVERSE,
-            .iterator_ops = &ops,
-            .type_info = type_info
-        },
-        .node = node
-    };
-    return iter;
-}
-
-c_tree_t* c_tree_create(c_containable_t* type_info, c_compare comp)
-{
-    c_tree_t* tree = (c_tree_t*)malloc(sizeof(c_tree_t));
-    if (!tree) return 0;
-
-    tree->header = (c_tree_node_t*)malloc(sizeof(c_tree_node_t));
-    if (!tree->header) {
-        __c_free(tree);
-        return 0;
-    }
-
-    tree->header->color = s_rb_tree_color_red;
-    tree->header->left = tree->header;
-    tree->header->right = tree->header;
-    tree->header->parent = 0;
-    tree->header->value = 0;
-
-    tree->type_info = type_info;
-    tree->key_comp = comp;
-    tree->node_count = 0;
-
-    return tree;
-}
-
-void c_tree_destroy(c_tree_t* tree)
-{
-    c_tree_clear(tree);
-    __c_free(tree);
-}
-
-c_tree_iterator_t c_tree_begin(c_tree_t* tree)
-{
-    assert(tree);
-    return create_iterator(tree->type_info, __leftmost(tree));
-}
-
-c_tree_iterator_t c_tree_end(c_tree_t* tree)
-{
-    assert(tree);
-    return create_iterator(tree->type_info, tree->header);
-}
-
-c_tree_iterator_t c_tree_rbegin(c_tree_t* tree)
-{
-    assert(tree);
-    return create_reverse_iterator(tree->type_info, tree->header);
-}
-
-c_tree_iterator_t c_tree_rend(c_tree_t* tree)
-{
-    assert(tree);
-    return create_reverse_iterator(tree->type_info, __leftmost(tree));
-}
-
-bool c_tree_empty(c_tree_t* tree)
-{
-    return tree ? tree->node_count == 0 : true;
-}
-
-size_t c_tree_size(c_tree_t* tree)
-{
-    return tree ? tree->node_count : 0;
-}
-
-size_t c_tree_max_size(void)
-{
-    return (-1);
-}
-
-void c_tree_clear(c_tree_t* tree)
-{
-    if (!tree) return;
-
-    __erase(tree, __root(tree));
-    c_tree_node_t* header = tree->header;
-    header->parent = 0;
-    header->left = header;
-    header->right = header;
-    tree->node_count = 0;
-}
-
-c_tree_iterator_t c_tree_insert_unique_value(c_tree_t* tree, c_ref_t value)
-{
-    assert(tree);
-    assert(value);
-
-    c_tree_node_t* y = tree->header;
-    c_tree_node_t* x = __root(tree);
-    bool comp = true;
-    while (x) {
-        y = x;
-        comp = tree->key_comp(value, x->value);
-        x = comp ? x->left : x->right;
-    }
-
-    c_tree_iterator_t z = create_iterator(tree->type_info, y);
-    if (comp) {
-        if (z.node == __leftmost(tree)) {
-            return create_iterator(tree->type_info, __insert(tree, y, value));
-        }
-        else {
-            iter_decrement((c_iterator_t*)(&z));
-        }
-    }
-
-    if (tree->key_comp(z.node->value, value)) {
-        return create_iterator(tree->type_info, __insert(tree, y, value));
-    }
-
-    return z;
-}
-
-void c_tree_insert_unique_range(c_tree_t* tree, c_tree_iterator_t first, c_tree_iterator_t last)
-{
-    if (!tree) return;
-
-    while (C_ITER_NE(&first, &last)) {
-        c_tree_insert_unique_value(tree, C_ITER_DEREF(&first));
-        C_ITER_INC(&first);
-    }
-}
-
-void c_tree_insert_unique_from(c_tree_t* tree, c_ref_t first_value, c_ref_t last_value)
-{
-    if (!tree || !first_value || !last_value) return;
-
-    c_ref_t value = first_value;
-    while (value != last_value) {
-        c_tree_insert_unique_value(tree, value);
-        value += tree->type_info->size();
-    }
-}
-
-c_tree_iterator_t c_tree_insert_equal_value(c_tree_t* tree, c_ref_t value)
-{
-    assert(tree);
-    assert(value);
-
-    c_tree_node_t* y = tree->header;
-    c_tree_node_t* x = __root(tree);
-
-    while (x) {
-        y = x;
-        x = tree->key_comp(value, x->value) ? x->left : x->right;
-    }
-
-    return create_iterator(tree->type_info, __insert(tree, y, value));
-}
-
-void c_tree_insert_equal_range(c_tree_t* tree, c_tree_iterator_t first, c_tree_iterator_t last)
-{
-    if (!tree) return;
-
-    while (C_ITER_NE(&first, &last)) {
-        c_tree_insert_equal_value(tree, C_ITER_DEREF(&first));
-        C_ITER_INC(&first);
-    }
-}
-
-void c_tree_insert_equal_from(c_tree_t* tree, c_ref_t first_value, c_ref_t last_value)
-{
-    if (!tree || !first_value || !last_value) return;
-
-    c_ref_t value = first_value;
-    while (value != last_value) {
-        c_tree_insert_equal_value(tree, value);
-        value += tree->type_info->size();
-    }
-}
-
-void c_tree_erase(c_tree_t* tree, c_tree_iterator_t pos)
-{
-    assert(tree);
-
-    c_tree_node_t* node = pos.node;
     c_tree_node_t* erase_node = node;
     c_tree_node_t* replace_node = 0;
     c_tree_node_t* replace_parent = 0;
@@ -1048,8 +510,580 @@ void c_tree_erase(c_tree_t* tree, c_tree_iterator_t pos)
         }
     }
 
+    return erase_node;
+}
+
+__c_static __c_inline c_tree_node_t* __insert(c_tree_t* tree, c_tree_node_t* parent, c_ref_t value)
+{
+    assert(tree);
+    assert(parent);
+
+    c_tree_node_t* node = __create_node(tree, value);
+    if (!node) return 0;
+
+    c_compare key_comp = tree->key_comp;
+    c_tree_node_t* header = tree->header;
+    if (parent == tree->header || key_comp(value, parent->value)) {
+        parent->left = node;
+
+        if (parent == header) {
+            header->parent = node;
+            header->right = node;
+        }
+        else if (parent == __leftmost(tree)) {
+            header->left = node;
+        }
+    }
+    else {
+        parent->right = node;
+
+        if (parent == __rightmost(tree)) {
+            header->right = node;
+        }
+    }
+
+    node->parent = parent;
+
+    __rebalance_insert(tree, node);
+    ++(tree->node_count);
+
+    return node;
+}
+
+__c_static __c_inline bool is_tree_iterator(c_iterator_t* iter)
+{
+    return (iter != 0 &&
+            iter->iterator_category == C_ITER_CATE_BIDIRECTION &&
+            iter->iterator_type == C_ITER_TYPE_TREE);
+}
+
+__c_static __c_inline bool is_tree_reverse_iterator(c_iterator_t* iter)
+{
+    return (iter != 0 &&
+            iter->iterator_category == C_ITER_CATE_BIDIRECTION &&
+            iter->iterator_type == C_ITER_TYPE_TREE_REVERSE);
+}
+
+__c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
+{
+    if (self && !(*self) && is_tree_iterator(other)) {
+        *self = (c_iterator_t*)malloc(sizeof(c_tree_iterator_t));
+        if (*self) memcpy(*self, other, sizeof(c_tree_iterator_t));
+    }
+}
+
+__c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
+{
+    if (is_tree_iterator(dst) && is_tree_iterator(src) && dst != src) {
+        ((c_tree_iterator_t*)dst)->node = ((c_tree_iterator_t*)src)->node;
+    }
+    return dst;
+}
+
+__c_static c_iterator_t* iter_increment(c_iterator_t* iter)
+{
+    if (is_tree_iterator(iter)) {
+        c_tree_iterator_t* _iter = (c_tree_iterator_t*)iter;
+        if (_iter->node->right)
+            _iter->node = __minimum(_iter->node->right);
+        else {
+            c_tree_node_t* parent = _iter->node->parent;
+            while (parent->right == _iter->node) {
+                _iter->node = parent;
+                parent = parent->parent;
+            }
+
+            // in the case of node is header and parent is root
+            if (parent != _iter->node->right)
+                _iter->node = parent;
+        }
+    }
+    return iter;
+}
+
+__c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
+{
+    if (is_tree_iterator(iter)) {
+        c_tree_iterator_t* _iter = (c_tree_iterator_t*)iter;
+        if (__is_header(_iter->node))
+            _iter->node = _iter->node->right;
+        else if (_iter->node->left)
+            _iter->node = __maximum(_iter->node->left);
+        else {
+            c_tree_node_t* parent = _iter->node->parent;
+            while (parent->left == _iter->node) {
+                _iter->node = parent;
+                parent = parent->parent;
+            }
+
+            _iter->node = parent;
+        }
+    }
+    return iter;
+}
+
+__c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
+{
+    assert(tmp);
+    if (is_tree_iterator(iter)) {
+        if (*tmp == 0)
+            iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_tree_iterator(*tmp));
+            iter_assign(*tmp, iter);
+        }
+        iter_increment(iter);
+    }
+    return *tmp;
+}
+
+__c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
+{
+    assert(tmp);
+    if (is_tree_iterator(iter)) {
+        if (*tmp == 0)
+            iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_tree_iterator(*tmp));
+            iter_assign(*tmp, iter);
+        }
+        iter_decrement(iter);
+    }
+    return *tmp;
+}
+
+__c_static c_ref_t iter_dereference(c_iterator_t* iter)
+{
+    if (is_tree_iterator(iter)) {
+        return ((c_tree_iterator_t*)iter)->node->value;
+    }
+    return 0;
+}
+
+__c_static bool iter_equal(c_iterator_t* x, c_iterator_t* y)
+{
+    if (!is_tree_iterator(x) || !is_tree_iterator(y)) return false;
+    return ((c_tree_iterator_t*)x)->node == ((c_tree_iterator_t*)y)->node;
+}
+
+__c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
+{
+    return !iter_equal(x, y);
+}
+
+__c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
+{
+    if (is_tree_iterator(iter)) {
+        if (n > 0) {
+            while (n--) iter_increment(iter);
+        }
+        else {
+            while (n++) iter_decrement(iter);
+        }
+    }
+}
+
+__c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
+{
+    if (!is_tree_iterator(first) || !is_tree_iterator(last)) return 0;
+
+    c_tree_iterator_t x = __create_iterator(first->type_info, ((c_tree_iterator_t*)first)->node);
+
+    ptrdiff_t n = 0;
+    while (!iter_equal((c_iterator_t*)(&x), last)) {
+        iter_increment((c_iterator_t*)(&x));
+        ++n;
+    }
+
+    return n;
+}
+
+__c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
+{
+    if (self && !(*self) && is_tree_reverse_iterator(other)) {
+        *self = (c_iterator_t*)malloc(sizeof(c_tree_iterator_t));
+        if (*self) memcpy(*self, other, sizeof(c_tree_iterator_t));
+    }
+}
+
+__c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* src)
+{
+    if (is_tree_reverse_iterator(dst) && is_tree_reverse_iterator(src) && dst != src) {
+        ((c_tree_iterator_t*)dst)->node = ((c_tree_iterator_t*)src)->node;
+    }
+    return dst;
+}
+
+__c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
+{
+    if (is_tree_reverse_iterator(iter)) {
+        c_tree_iterator_t x = __create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
+        iter_decrement((c_iterator_t*)(&x));
+        ((c_tree_iterator_t*)iter)->node = x.node;
+    }
+    return iter;
+}
+
+__c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
+{
+    if (is_tree_reverse_iterator(iter)) {
+        c_tree_iterator_t x = __create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
+        iter_increment((c_iterator_t*)(&x));
+        ((c_tree_iterator_t*)iter)->node = x.node;
+    }
+    return iter;
+}
+
+__c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
+{
+    assert(tmp);
+    if (is_tree_reverse_iterator(iter)) {
+        if (*tmp == 0)
+            reverse_iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_tree_reverse_iterator(*tmp));
+            reverse_iter_assign(*tmp, iter);
+        }
+        c_tree_iterator_t x = __create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
+        iter_decrement((c_iterator_t*)(&x));
+        ((c_tree_iterator_t*)iter)->node = x.node;
+    }
+    return *tmp;
+}
+
+__c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
+{
+    assert(tmp);
+    if (is_tree_reverse_iterator(iter)) {
+        if (*tmp == 0)
+            reverse_iter_alloc_and_copy(tmp, iter);
+        else {
+            assert(is_tree_reverse_iterator(*tmp));
+            reverse_iter_assign(*tmp, iter);
+        }
+        c_tree_iterator_t x = __create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
+        iter_increment((c_iterator_t*)(&x));
+        ((c_tree_iterator_t*)iter)->node = x.node;
+    }
+    return *tmp;
+}
+
+__c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
+{
+    if (is_tree_reverse_iterator(iter)) {
+        c_tree_iterator_t x = __create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
+        iter_decrement((c_iterator_t*)(&x));
+        return x.node->value;
+    }
+    return 0;
+}
+
+__c_static bool reverse_iter_equal(c_iterator_t* x, c_iterator_t* y)
+{
+    if (!is_tree_reverse_iterator(x) || !is_tree_reverse_iterator(y)) return false;
+    return ((c_tree_iterator_t*)x)->node == ((c_tree_iterator_t*)y)->node;
+}
+
+__c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
+{
+    return !reverse_iter_equal(x, y);
+}
+
+__c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
+{
+    if (is_tree_reverse_iterator(iter)) {
+        if (n > 0) {
+            while (n--) reverse_iter_increment(iter);
+        }
+        else {
+            while (n++) reverse_iter_decrement(iter);
+        }
+    }
+}
+
+__c_static ptrdiff_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* last)
+{
+    if (!is_tree_reverse_iterator(first) || !is_tree_reverse_iterator(last)) return 0;
+
+    c_tree_iterator_t x = __create_reverse_iterator(first->type_info, ((c_tree_iterator_t*)first)->node);
+
+    ptrdiff_t n = 0;
+    while (!reverse_iter_equal((c_iterator_t*)(&x), last)) {
+        reverse_iter_increment((c_iterator_t*)(&x));
+        ++n;
+    }
+
+    return n;
+}
+
+static c_iterator_operation_t s_iter_ops = {
+    .alloc_and_copy = iter_alloc_and_copy,
+    .assign = iter_assign,
+    .increment = iter_increment,
+    .decrement = iter_decrement,
+    .post_increment = iter_post_increment,
+    .post_decrement = iter_post_decrement,
+    .dereference = iter_dereference,
+    .equal = iter_equal,
+    .not_equal = iter_not_equal,
+    .advance = iter_advance,
+    .distance = iter_distance
+};
+
+__c_static __c_inline c_tree_iterator_t __create_iterator(
+    c_containable_t* type_info, c_tree_node_t* node)
+{
+    assert(type_info);
+    assert(node);
+
+    c_tree_iterator_t iter = {
+        .base_iter = {
+            .iterator_category = C_ITER_CATE_BIDIRECTION,
+            .iterator_type = C_ITER_TYPE_TREE,
+            .iterator_ops = &s_iter_ops,
+            .type_info = type_info
+        },
+        .node = node
+    };
+    return iter;
+}
+
+static c_iterator_operation_t s_reverse_iter_ops = {
+    .alloc_and_copy = reverse_iter_alloc_and_copy,
+    .assign = reverse_iter_assign,
+    .increment = reverse_iter_increment,
+    .decrement = reverse_iter_decrement,
+    .post_increment = reverse_iter_post_increment,
+    .post_decrement = reverse_iter_post_decrement,
+    .dereference = reverse_iter_dereference,
+    .equal = reverse_iter_equal,
+    .not_equal = reverse_iter_not_equal,
+    .advance = reverse_iter_advance,
+    .distance = reverse_iter_distance
+};
+
+__c_static __c_inline c_tree_iterator_t __create_reverse_iterator(
+    c_containable_t* type_info, c_tree_node_t* node)
+{
+    assert(type_info);
+    assert(node);
+
+    c_tree_iterator_t iter = {
+        .base_iter = {
+            .iterator_category = C_ITER_CATE_BIDIRECTION,
+            .iterator_type = C_ITER_TYPE_TREE_REVERSE,
+            .iterator_ops = &s_reverse_iter_ops,
+            .type_info = type_info
+        },
+        .node = node
+    };
+    return iter;
+}
+
+c_tree_t* c_tree_create(c_containable_t* type_info, c_compare comp)
+{
+    c_tree_t* tree = (c_tree_t*)malloc(sizeof(c_tree_t));
+    if (!tree) return 0;
+
+    tree->header = (c_tree_node_t*)malloc(sizeof(c_tree_node_t));
+    if (!tree->header) {
+        __c_free(tree);
+        return 0;
+    }
+
+    tree->header->color = s_rb_tree_color_red;
+    tree->header->left = tree->header;
+    tree->header->right = tree->header;
+    tree->header->parent = 0;
+    tree->header->value = 0;
+
+    tree->type_info = type_info;
+    tree->key_comp = comp;
+    tree->node_count = 0;
+
+    return tree;
+}
+
+void c_tree_destroy(c_tree_t* tree)
+{
+    c_tree_clear(tree);
+    __c_free(tree);
+}
+
+c_tree_iterator_t c_tree_begin(c_tree_t* tree)
+{
+    assert(tree);
+    return __create_iterator(tree->type_info, __leftmost(tree));
+}
+
+c_tree_iterator_t c_tree_end(c_tree_t* tree)
+{
+    assert(tree);
+    return __create_iterator(tree->type_info, tree->header);
+}
+
+c_tree_iterator_t c_tree_rbegin(c_tree_t* tree)
+{
+    assert(tree);
+    return __create_reverse_iterator(tree->type_info, tree->header);
+}
+
+c_tree_iterator_t c_tree_rend(c_tree_t* tree)
+{
+    assert(tree);
+    return __create_reverse_iterator(tree->type_info, __leftmost(tree));
+}
+
+bool c_tree_empty(c_tree_t* tree)
+{
+    return tree ? tree->node_count == 0 : true;
+}
+
+size_t c_tree_size(c_tree_t* tree)
+{
+    return tree ? tree->node_count : 0;
+}
+
+size_t c_tree_max_size(void)
+{
+    return (-1);
+}
+
+void c_tree_clear(c_tree_t* tree)
+{
+    if (!tree) return;
+
+    __erase(tree, __root(tree));
+    c_tree_node_t* header = tree->header;
+    header->parent = 0;
+    header->left = header;
+    header->right = header;
+    tree->node_count = 0;
+}
+
+c_tree_iterator_t c_tree_insert_unique_value(c_tree_t* tree, c_ref_t value)
+{
+    assert(tree);
+    assert(value);
+
+    c_tree_node_t* y = tree->header;
+    c_tree_node_t* x = __root(tree);
+    bool comp = true;
+    while (x) {
+        y = x;
+        comp = tree->key_comp(value, x->value);
+        x = comp ? x->left : x->right;
+    }
+
+    c_tree_iterator_t z = __create_iterator(tree->type_info, y);
+    if (comp) {
+        if (z.node == __leftmost(tree)) {
+            return __create_iterator(tree->type_info, __insert(tree, y, value));
+        }
+        else {
+            iter_decrement((c_iterator_t*)(&z));
+        }
+    }
+
+    if (tree->key_comp(z.node->value, value)) {
+        return __create_iterator(tree->type_info, __insert(tree, y, value));
+    }
+
+    return z;
+}
+
+void c_tree_insert_unique_range(c_tree_t* tree, c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last)
+{
+    if (!tree || !first || !last) return;
+
+    while (C_ITER_NE(first, last)) {
+        c_tree_insert_unique_value(tree, C_ITER_DEREF(first));
+        C_ITER_INC(first);
+    }
+}
+
+void c_tree_insert_unique_from(c_tree_t* tree, c_ref_t first_value, c_ref_t last_value)
+{
+    if (!tree || !first_value || !last_value) return;
+
+    c_ref_t value = first_value;
+    while (value != last_value) {
+        c_tree_insert_unique_value(tree, value);
+        value += tree->type_info->size();
+    }
+}
+
+c_tree_iterator_t c_tree_insert_equal_value(c_tree_t* tree, c_ref_t value)
+{
+    assert(tree);
+    assert(value);
+
+    c_tree_node_t* y = tree->header;
+    c_tree_node_t* x = __root(tree);
+
+    while (x) {
+        y = x;
+        x = tree->key_comp(value, x->value) ? x->left : x->right;
+    }
+
+    return __create_iterator(tree->type_info, __insert(tree, y, value));
+}
+
+void c_tree_insert_equal_range(c_tree_t* tree, c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last)
+{
+    if (!tree || !first || !last) return;
+
+    while (C_ITER_NE(first, last)) {
+        c_tree_insert_equal_value(tree, C_ITER_DEREF(first));
+        C_ITER_INC(first);
+    }
+}
+
+void c_tree_insert_equal_from(c_tree_t* tree, c_ref_t first_value, c_ref_t last_value)
+{
+    if (!tree || !first_value || !last_value) return;
+
+    c_ref_t value = first_value;
+    while (value != last_value) {
+        c_tree_insert_equal_value(tree, value);
+        value += tree->type_info->size();
+    }
+}
+
+void c_tree_erase(c_tree_t* tree, c_tree_iterator_t pos)
+{
+    assert(tree);
+    c_tree_node_t* erase_node = __rebalance_erase(tree, pos.node);
+
     __destroy_node(tree, erase_node);
     --(tree->node_count);
+}
+
+size_t c_tree_erase_key(c_tree_t* tree, c_ref_t key)
+{
+    if (!tree || !key) return 0;
+
+    size_t n = 0;
+    c_tree_iterator_t found = c_tree_find(tree, key);
+    c_tree_iterator_t last = c_tree_end(tree);
+    while (C_ITER_NE(&found, &last)) {
+        c_tree_erase(tree, found);
+        ++n;
+        found = c_tree_find(tree, key);
+    }
+
+    return n;
+}
+
+void c_tree_erase_from(c_tree_t* tree, c_ref_t first_key, c_ref_t last_key)
+{
+    if (!tree || !first_key || !last_key) return;
+
+    c_ref_t key = first_key;
+    while (key != last_key) {
+        c_tree_erase_key(tree, key);
+        key += tree->type_info->size();
+    }
 }
 
 void c_tree_swap(c_tree_t* tree, c_tree_t* other)
@@ -1071,7 +1105,7 @@ c_tree_iterator_t c_tree_find(c_tree_t* tree, c_ref_t key)
         }
         else {
             if (!tree->key_comp(node->value, key)) {
-                return create_iterator(tree->type_info, node);
+                return __create_iterator(tree->type_info, node);
             }
 
             node = node->right;

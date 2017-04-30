@@ -36,7 +36,7 @@ struct __c_list_node {
 typedef struct __c_list_node c_list_node_t;
 
 struct __c_list {
-    c_list_node_t* node; // end() of list
+    c_list_node_t* node; // __end() of list
     c_containable_t* type_info;
 };
 
@@ -45,14 +45,14 @@ struct __c_backend_list {
     c_list_t* impl;
 };
 
-__c_static __c_inline bool is_list_iterator(c_iterator_t* iter)
+__c_static __c_inline bool __is_list_iterator(c_iterator_t* iter)
 {
     return (iter != 0 &&
             iter->iterator_category == C_ITER_CATE_BIDIRECTION &&
             iter->iterator_type == C_ITER_TYPE_LIST);
 }
 
-__c_static __c_inline bool is_list_reverse_iterator(c_iterator_t* iter)
+__c_static __c_inline bool __is_list_reverse_iterator(c_iterator_t* iter)
 {
     return (iter != 0 &&
             iter->iterator_category == C_ITER_CATE_BIDIRECTION &&
@@ -61,7 +61,7 @@ __c_static __c_inline bool is_list_reverse_iterator(c_iterator_t* iter)
 
 __c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
 {
-    if (self && !(*self) && is_list_iterator(other)) {
+    if (self && !(*self) && __is_list_iterator(other)) {
         *self = (c_iterator_t*)malloc(sizeof(c_list_iterator_t));
         if (*self) memcpy(*self, other, sizeof(c_list_iterator_t));
     }
@@ -69,7 +69,7 @@ __c_static void iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
 
 __c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
 {
-    if (is_list_iterator(dst) && is_list_iterator(src) && dst != src) {
+    if (__is_list_iterator(dst) && __is_list_iterator(src) && dst != src) {
         ((c_list_iterator_t*)dst)->node = ((c_list_iterator_t*)src)->node;
     }
     return dst;
@@ -77,7 +77,7 @@ __c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
 
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 {
-    if (is_list_iterator(iter)) {
+    if (__is_list_iterator(iter)) {
         ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->next;
     }
     return iter;
@@ -85,7 +85,7 @@ __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 
 __c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
 {
-    if (is_list_iterator(iter)) {
+    if (__is_list_iterator(iter)) {
         ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->prev;
     }
     return iter;
@@ -94,11 +94,11 @@ __c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
 __c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
 {
     assert(tmp);
-    if (is_list_iterator(iter)) {
+    if (__is_list_iterator(iter)) {
         if (*tmp == 0)
             iter_alloc_and_copy(tmp, iter);
         else {
-            assert(is_list_iterator(*tmp));
+            assert(__is_list_iterator(*tmp));
             iter_assign(*tmp, iter);
         }
         ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->next;
@@ -109,11 +109,11 @@ __c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** 
 __c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
 {
     assert(tmp);
-    if (is_list_iterator(iter)) {
+    if (__is_list_iterator(iter)) {
         if (*tmp == 0)
             iter_alloc_and_copy(tmp, iter);
         else {
-            assert(is_list_iterator(*tmp));
+            assert(__is_list_iterator(*tmp));
             iter_assign(*tmp, iter);
         }
         ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->prev;
@@ -123,7 +123,7 @@ __c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t** 
 
 __c_static c_ref_t iter_dereference(c_iterator_t* iter)
 {
-    if (is_list_iterator(iter)) {
+    if (__is_list_iterator(iter)) {
         return ((c_list_iterator_t*)iter)->node->data;
     }
     return 0;
@@ -131,7 +131,7 @@ __c_static c_ref_t iter_dereference(c_iterator_t* iter)
 
 __c_static bool iter_equal(c_iterator_t* x, c_iterator_t* y)
 {
-    if (!is_list_iterator(x) || !is_list_iterator(y)) return false;
+    if (!__is_list_iterator(x) || !__is_list_iterator(y)) return false;
     return ((c_list_iterator_t*)x)->node == ((c_list_iterator_t*)y)->node;
 }
 
@@ -142,7 +142,7 @@ __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 
 __c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
-    if (is_list_iterator(iter)) {
+    if (__is_list_iterator(iter)) {
         c_list_node_t* node = ((c_list_iterator_t*)iter)->node;
         if (n > 0) {
             while (n--) node = node->next;
@@ -156,7 +156,7 @@ __c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
 
 __c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
-    if (!is_list_iterator(first) || !is_list_iterator(last)) return 0;
+    if (!__is_list_iterator(first) || !__is_list_iterator(last)) return 0;
 
     c_list_node_t* _first = ((c_list_iterator_t*)first)->node;
     c_list_node_t* _last = ((c_list_iterator_t*)last)->node;
@@ -171,7 +171,7 @@ __c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
 
 __c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
 {
-    if (self && !(*self) && is_list_reverse_iterator(other)) {
+    if (self && !(*self) && __is_list_reverse_iterator(other)) {
         *self = (c_iterator_t*)malloc(sizeof(c_list_iterator_t));
         if (*self) memcpy(*self, other, sizeof(c_list_iterator_t));
     }
@@ -179,7 +179,7 @@ __c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* o
 
 __c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* src)
 {
-    if (is_list_reverse_iterator(dst) && is_list_reverse_iterator(src) && dst != src) {
+    if (__is_list_reverse_iterator(dst) && __is_list_reverse_iterator(src) && dst != src) {
         ((c_list_iterator_t*)dst)->node = ((c_list_iterator_t*)src)->node;
     }
     return dst;
@@ -187,7 +187,7 @@ __c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* sr
 
 __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 {
-    if (is_list_reverse_iterator(iter)) {
+    if (__is_list_reverse_iterator(iter)) {
         ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->prev;
     }
     return iter;
@@ -195,7 +195,7 @@ __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 
 __c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
 {
-    if (is_list_reverse_iterator(iter)) {
+    if (__is_list_reverse_iterator(iter)) {
         ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->next;
     }
     return iter;
@@ -204,11 +204,11 @@ __c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
 __c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_iterator_t** tmp)
 {
     assert(tmp);
-    if (is_list_reverse_iterator(iter)) {
+    if (__is_list_reverse_iterator(iter)) {
         if (*tmp == 0)
             reverse_iter_alloc_and_copy(tmp, iter);
         else {
-            assert(is_list_reverse_iterator(*tmp));
+            assert(__is_list_reverse_iterator(*tmp));
             reverse_iter_assign(*tmp, iter);
         }
         ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->prev;
@@ -219,11 +219,11 @@ __c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_itera
 __c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_iterator_t** tmp)
 {
     assert(tmp);
-    if (is_list_reverse_iterator(iter)) {
+    if (__is_list_reverse_iterator(iter)) {
         if (*tmp == 0)
             reverse_iter_alloc_and_copy(tmp, iter);
         else {
-            assert(is_list_reverse_iterator(*tmp));
+            assert(__is_list_reverse_iterator(*tmp));
             reverse_iter_assign(*tmp, iter);
         }
         ((c_list_iterator_t*)iter)->node = ((c_list_iterator_t*)iter)->node->next;
@@ -233,7 +233,7 @@ __c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_itera
 
 __c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
 {
-    if (is_list_reverse_iterator(iter)) {
+    if (__is_list_reverse_iterator(iter)) {
         return ((c_list_iterator_t*)iter)->node->prev->data;
     }
     return 0;
@@ -241,7 +241,7 @@ __c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
 
 __c_static bool reverse_iter_equal(c_iterator_t* x, c_iterator_t* y)
 {
-    if (!is_list_reverse_iterator(x) || !is_list_reverse_iterator(y)) return false;
+    if (!__is_list_reverse_iterator(x) || !__is_list_reverse_iterator(y)) return false;
     return ((c_list_iterator_t*)x)->node == ((c_list_iterator_t*)y)->node;
 }
 
@@ -252,7 +252,7 @@ __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 
 __c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
-    if (is_list_reverse_iterator(iter)) {
+    if (__is_list_reverse_iterator(iter)) {
         c_list_node_t* node = ((c_list_iterator_t*)iter)->node;
         if (n > 0) {
             while (n--) node = node->prev;
@@ -266,7 +266,7 @@ __c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
 
 __c_static ptrdiff_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
-    if (!is_list_reverse_iterator(first) || !is_list_reverse_iterator(last)) return 0;
+    if (!__is_list_reverse_iterator(first) || !__is_list_reverse_iterator(last)) return 0;
 
     c_list_node_t* _first = ((c_list_iterator_t*)first)->node;
     c_list_node_t* _last = ((c_list_iterator_t*)last)->node;
@@ -279,31 +279,31 @@ __c_static ptrdiff_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* la
     return n;
 }
 
-__c_static c_list_iterator_t create_iterator(
+static c_iterator_operation_t s_iter_ops = {
+    .alloc_and_copy = iter_alloc_and_copy,
+    .assign = iter_assign,
+    .increment = iter_increment,
+    .decrement = iter_decrement,
+    .post_increment = iter_post_increment,
+    .post_decrement = iter_post_decrement,
+    .dereference = iter_dereference,
+    .equal = iter_equal,
+    .not_equal = iter_not_equal,
+    .advance = iter_advance,
+    .distance = iter_distance
+};
+
+__c_static __c_inline c_list_iterator_t __create_iterator(
     c_containable_t* type_info, c_list_node_t* node)
 {
     assert(type_info);
     assert(node);
-
-    static c_iterator_operation_t ops = {
-        .alloc_and_copy = iter_alloc_and_copy,
-        .assign = iter_assign,
-        .increment = iter_increment,
-        .decrement = iter_decrement,
-        .post_increment = iter_post_increment,
-        .post_decrement = iter_post_decrement,
-        .dereference = iter_dereference,
-        .equal = iter_equal,
-        .not_equal = iter_not_equal,
-        .advance = iter_advance,
-        .distance = iter_distance
-    };
 
     c_list_iterator_t iter = {
         .base_iter = {
             .iterator_category = C_ITER_CATE_BIDIRECTION,
             .iterator_type = C_ITER_TYPE_LIST,
-            .iterator_ops = &ops,
+            .iterator_ops = &s_iter_ops,
             .type_info = type_info
         },
         .node = node
@@ -311,31 +311,31 @@ __c_static c_list_iterator_t create_iterator(
     return iter;
 }
 
-__c_static c_list_iterator_t create_reverse_iterator(
+static c_iterator_operation_t s_reverse_iter_ops = {
+    .alloc_and_copy = reverse_iter_alloc_and_copy,
+    .assign = reverse_iter_assign,
+    .increment = reverse_iter_increment,
+    .decrement = reverse_iter_decrement,
+    .post_increment = reverse_iter_post_increment,
+    .post_decrement = reverse_iter_post_decrement,
+    .dereference = reverse_iter_dereference,
+    .equal = reverse_iter_equal,
+    .not_equal = reverse_iter_not_equal,
+    .advance = reverse_iter_advance,
+    .distance = reverse_iter_distance
+};
+
+__c_static __c_inline c_list_iterator_t __create_reverse_iterator(
     c_containable_t* type_info, c_list_node_t* node)
 {
     assert(type_info);
     assert(node);
 
-    static c_iterator_operation_t ops = {
-        .alloc_and_copy = reverse_iter_alloc_and_copy,
-        .assign = reverse_iter_assign,
-        .increment = reverse_iter_increment,
-        .decrement = reverse_iter_decrement,
-        .post_increment = reverse_iter_post_increment,
-        .post_decrement = reverse_iter_post_decrement,
-        .dereference = reverse_iter_dereference,
-        .equal = reverse_iter_equal,
-        .not_equal = reverse_iter_not_equal,
-        .advance = reverse_iter_advance,
-        .distance = reverse_iter_distance
-    };
-
     c_list_iterator_t iter = {
         .base_iter = {
             .iterator_category = C_ITER_CATE_BIDIRECTION,
             .iterator_type = C_ITER_TYPE_LIST_REVERSE,
-            .iterator_ops = &ops,
+            .iterator_ops = &s_reverse_iter_ops,
             .type_info = type_info
         },
         .node = node
@@ -343,19 +343,19 @@ __c_static c_list_iterator_t create_reverse_iterator(
     return iter;
 }
 
-__c_static __c_inline c_list_node_t* begin(c_list_t* list)
+__c_static __c_inline c_list_node_t* __begin(c_list_t* list)
 {
     assert(list);
     return list->node->next;
 }
 
-__c_static __c_inline c_list_node_t* end(c_list_t* list)
+__c_static __c_inline c_list_node_t* __end(c_list_t* list)
 {
     assert(list);
     return list->node;
 }
 
-__c_static c_list_node_t* create_node(c_list_t* list, c_ref_t data)
+__c_static __c_inline c_list_node_t* __create_node(c_list_t* list, c_ref_t data)
 {
     assert(list);
 
@@ -379,7 +379,7 @@ __c_static c_list_node_t* create_node(c_list_t* list, c_ref_t data)
     return node;
 }
 
-__c_static c_list_node_t* pop_node(c_list_t* list, c_list_node_t* node)
+__c_static __c_inline c_list_node_t* __pop_node(c_list_t* list, c_list_node_t* node)
 {
     assert(list);
     assert(node);
@@ -400,7 +400,7 @@ __c_static c_list_node_t* pop_node(c_list_t* list, c_list_node_t* node)
 }
 
 // move [first, last) in front of pos
-__c_static void transfer(c_list_node_t* pos, c_list_node_t* first, c_list_node_t* last)
+__c_static __c_inline void __transfer(c_list_node_t* pos, c_list_node_t* first, c_list_node_t* last)
 {
     if (pos != last && first != last) {
         pos->prev->next = first;
@@ -579,7 +579,7 @@ c_list_t* c_list_copy(c_list_t* other)
     c_list_t* list = c_list_create(other->type_info);
     if (!list) return 0;
 
-    for (c_list_node_t* node = begin(other); node != end(other); node = node->next)
+    for (c_list_node_t* node = __begin(other); node != __end(other); node = node->next)
         c_list_push_back(list, node->data);
 
     return list;
@@ -592,7 +592,7 @@ c_list_t* c_list_assign(c_list_t* self, c_list_t* other)
     if (self != other) {
         c_list_clear(self);
         self->type_info = other->type_info;
-        for (c_list_node_t* node = begin(other); node != end(other); node = node->next)
+        for (c_list_node_t* node = __begin(other); node != __end(other); node = node->next)
             c_list_push_back(self, node->data);
     }
 
@@ -613,12 +613,12 @@ void c_list_destroy(c_list_t* list)
  */
 c_ref_t c_list_front(c_list_t* list)
 {
-    return c_list_empty(list) ? 0 : begin(list)->data;
+    return c_list_empty(list) ? 0 : __begin(list)->data;
 }
 
 c_ref_t c_list_back(c_list_t* list)
 {
-    return c_list_empty(list) ? 0 : end(list)->prev->data;
+    return c_list_empty(list) ? 0 : __end(list)->prev->data;
 }
 
 /**
@@ -627,25 +627,25 @@ c_ref_t c_list_back(c_list_t* list)
 c_list_iterator_t c_list_begin(c_list_t* list)
 {
     assert(list);
-    return create_iterator(list->type_info, begin(list));
+    return __create_iterator(list->type_info, __begin(list));
 }
 
 c_list_iterator_t c_list_rbegin(c_list_t* list)
 {
     assert(list);
-    return create_reverse_iterator(list->type_info, end(list));
+    return __create_reverse_iterator(list->type_info, __end(list));
 }
 
 c_list_iterator_t c_list_end(c_list_t* list)
 {
     assert(list);
-    return create_iterator(list->type_info, end(list));
+    return __create_iterator(list->type_info, __end(list));
 }
 
 c_list_iterator_t c_list_rend(c_list_t* list)
 {
     assert(list);
-    return create_reverse_iterator(list->type_info, begin(list));
+    return __create_reverse_iterator(list->type_info, __begin(list));
 }
 
 /**
@@ -653,7 +653,7 @@ c_list_iterator_t c_list_rend(c_list_t* list)
  */
 bool c_list_empty(c_list_t* list)
 {
-    return list ? begin(list) == end(list) : true;
+    return list ? __begin(list) == __end(list) : true;
 }
 
 size_t c_list_size(c_list_t* list)
@@ -676,10 +676,10 @@ void c_list_clear(c_list_t* list)
 {
     if (c_list_empty(list)) return;
 
-    c_list_node_t* node = begin(list);
-    c_list_node_t* last = end(list);
+    c_list_node_t* node = __begin(list);
+    c_list_node_t* last = __end(list);
     while (node != last) {
-        node = pop_node(list, node);
+        node = __pop_node(list, node);
     }
 }
 
@@ -687,7 +687,7 @@ c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, c_ref_t d
 {
     if (!list || !data) return pos;
 
-    c_list_node_t* node = create_node(list, data);
+    c_list_node_t* node = __create_node(list, data);
     if (!node) return pos;
 
     node->next = pos.node;
@@ -695,15 +695,15 @@ c_list_iterator_t c_list_insert(c_list_t* list, c_list_iterator_t pos, c_ref_t d
     pos.node->prev->next = node;
     pos.node->prev = node;
 
-    return create_iterator(list->type_info, node);
+    return __create_iterator(list->type_info, node);
 }
 
 c_list_iterator_t c_list_erase(c_list_t* list, c_list_iterator_t pos)
 {
     if (!list) return pos;
 
-    c_list_node_t* node = pop_node(list, pos.node);
-    return create_iterator(list->type_info, node);
+    c_list_node_t* node = __pop_node(list, pos.node);
+    return __create_iterator(list->type_info, node);
 }
 
 c_list_iterator_t c_list_erase_range(c_list_t* list, c_list_iterator_t first, c_list_iterator_t last)
@@ -721,7 +721,7 @@ void c_list_push_back(c_list_t* list, c_ref_t data)
     if (!list || !data)
         return;
 
-    c_list_node_t* node = create_node(list, data);
+    c_list_node_t* node = __create_node(list, data);
     if (!node) return;
 
     node->next = list->node;
@@ -733,7 +733,7 @@ void c_list_push_back(c_list_t* list, c_ref_t data)
 void c_list_pop_back(c_list_t* list)
 {
     if (!c_list_empty(list))
-        pop_node(list, list->node->prev);
+        __pop_node(list, list->node->prev);
 }
 
 void c_list_push_front(c_list_t* list, c_ref_t data)
@@ -741,7 +741,7 @@ void c_list_push_front(c_list_t* list, c_ref_t data)
     if (!list || !data)
         return;
 
-    c_list_node_t* node = create_node(list, data);
+    c_list_node_t* node = __create_node(list, data);
     if (!node) return;
 
     node->next = list->node->next;
@@ -753,7 +753,7 @@ void c_list_push_front(c_list_t* list, c_ref_t data)
 void c_list_pop_front(c_list_t* list)
 {
     if (!c_list_empty(list))
-        pop_node(list, list->node->next);
+        __pop_node(list, list->node->next);
 }
 
 void c_list_resize(c_list_t* list, size_t count)
@@ -773,7 +773,7 @@ void c_list_resize_with_value(c_list_t* list, size_t count, c_ref_t data)
 
     if (count > 0) {
         do {
-            c_list_node_t* node = create_node(list, data);
+            c_list_node_t* node = __create_node(list, data);
             if (!node) return;
 
             node->next = list->node;
@@ -784,7 +784,7 @@ void c_list_resize_with_value(c_list_t* list, size_t count, c_ref_t data)
     }
     else {
         while (node != list->node)
-            node = pop_node(list, node);
+            node = __pop_node(list, node);
     }
 }
 
@@ -810,14 +810,14 @@ void c_list_merge_by(c_list_t* list, c_list_t* other, c_compare comp)
     if (!list || c_list_empty(other) || !comp || !__c_is_same(list->type_info, other->type_info))
         return;
 
-    c_list_node_t* node = begin(list);
-    c_list_node_t* last = end(list);
-    c_list_node_t* other_node = begin(other);
-    c_list_node_t* other_last = end(other);
+    c_list_node_t* node = __begin(list);
+    c_list_node_t* last = __end(list);
+    c_list_node_t* other_node = __begin(other);
+    c_list_node_t* other_last = __end(other);
     while (node != last && other_node != other_last) {
         if (comp(other_node->data, node->data)) {
             c_list_node_t* other_next = other_node->next;
-            transfer(node, other_node, other_next);
+            __transfer(node, other_node, other_next);
             other_node = other_next;
         }
         else
@@ -825,7 +825,7 @@ void c_list_merge_by(c_list_t* list, c_list_t* other, c_compare comp)
     }
 
     if (other_node != other_last)
-        transfer(last, other_node, other_last);
+        __transfer(last, other_node, other_last);
 }
 
 void c_list_splice(c_list_t* list, c_list_iterator_t pos, c_list_t* other)
@@ -833,7 +833,7 @@ void c_list_splice(c_list_t* list, c_list_iterator_t pos, c_list_t* other)
     if (!list || c_list_empty(other) || !__c_is_same(list->type_info, other->type_info))
         return;
 
-    transfer(pos.node, begin(other), end(other));
+    __transfer(pos.node, __begin(other), __end(other));
 }
 
 void c_list_splice_from(c_list_t* list, c_list_iterator_t pos, c_list_t* other, c_list_iterator_t from)
@@ -841,7 +841,7 @@ void c_list_splice_from(c_list_t* list, c_list_iterator_t pos, c_list_t* other, 
     if (!list || c_list_empty(other) || !__c_is_same(list->type_info, other->type_info))
         return;
 
-    transfer(pos.node, from.node, end(other));
+    __transfer(pos.node, from.node, __end(other));
 }
 
 void c_list_splice_range(c_list_t* list, c_list_iterator_t pos, c_list_t* other, c_list_iterator_t first, c_list_iterator_t last)
@@ -849,7 +849,7 @@ void c_list_splice_range(c_list_t* list, c_list_iterator_t pos, c_list_t* other,
     if (!list || c_list_empty(other) || !__c_is_same(list->type_info, other->type_info))
         return;
 
-    transfer(pos.node, first.node, last.node);
+    __transfer(pos.node, first.node, last.node);
 }
 
 void c_list_remove(c_list_t* list, c_ref_t data)
@@ -857,11 +857,11 @@ void c_list_remove(c_list_t* list, c_ref_t data)
     if (c_list_empty(list) || !data)
         return;
 
-    c_list_node_t* node = begin(list);
-    c_list_node_t* last = end(list);
+    c_list_node_t* node = __begin(list);
+    c_list_node_t* last = __end(list);
     while (node != last) {
         if (list->type_info->equal(node->data, data))
-            node = pop_node(list, node);
+            node = __pop_node(list, node);
         else
             node = node->next;
     }
@@ -872,11 +872,11 @@ void c_list_remove_if(c_list_t* list, c_unary_predicate pred)
     if (c_list_empty(list) || !pred)
         return;
 
-    c_list_node_t* node = begin(list);
-    c_list_node_t* last = end(list);
+    c_list_node_t* node = __begin(list);
+    c_list_node_t* last = __end(list);
     while (node != last) {
         if (pred(node->data))
-            node = pop_node(list, node);
+            node = __pop_node(list, node);
         else
             node = node->next;
     }
@@ -906,7 +906,7 @@ void c_list_sort_by(c_list_t* list, c_compare comp)
 
     int fill = 0;
     while (!c_list_empty(list)) {
-        transfer(begin(carry), begin(list), begin(list)->next);
+        __transfer(__begin(carry), __begin(list), __begin(list)->next);
         int i = 0;
         while (i < fill && !c_list_empty(counter[i])) {
             c_list_merge_by(counter[i], carry, comp);
@@ -933,9 +933,9 @@ void c_list_reverse(c_list_t* list)
         return;
     }
 
-    c_list_node_t* x = begin(list);
+    c_list_node_t* x = __begin(list);
     c_list_node_t* y = 0;
-    while (x != end(list)) {
+    while (x != __end(list)) {
         y = x->next;
         x->next = x->prev;
         x->prev = y;
@@ -958,12 +958,12 @@ void c_list_unique_if(c_list_t* list, c_binary_predicate pred)
     if (c_list_empty(list) || c_list_size(list) == 1 || !pred)
         return;
 
-    c_list_node_t* x = begin(list);
+    c_list_node_t* x = __begin(list);
     c_list_node_t* y = 0;
-    while (x != end(list) && x->next != end(list)) {
+    while (x != __end(list) && x->next != __end(list)) {
         y = x->next;
-        while (y != end(list) && pred(x->data, y->data)) {
-            y = pop_node(list, y);
+        while (y != __end(list) && pred(x->data, y->data)) {
+            y = __pop_node(list, y);
         }
         x = x->next;
     }
