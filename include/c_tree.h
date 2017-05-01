@@ -72,14 +72,14 @@ size_t c_tree_max_size(void);
  */
 void c_tree_clear(c_tree_t* tree);
 c_tree_iterator_t c_tree_insert_unique_value(c_tree_t* tree, c_ref_t value);
-c_tree_iterator_t c_tree_insert_unique(c_tree_t* tree, c_tree_iterator_t pos, c_ref_t value);
+c_tree_iterator_t c_tree_insert_unique(c_tree_t* tree, c_tree_iterator_t hint, c_ref_t value);
 void c_tree_insert_unique_range(c_tree_t* tree, c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last);
 void c_tree_insert_unique_from(c_tree_t* tree, c_ref_t first_value, c_ref_t last_value);
 c_tree_iterator_t c_tree_insert_equal_value(c_tree_t* tree, c_ref_t value);
-c_tree_iterator_t c_tree_insert_equal(c_tree_t* tree, c_tree_iterator_t pos, c_ref_t value);
+c_tree_iterator_t c_tree_insert_equal(c_tree_t* tree, c_tree_iterator_t hint, c_ref_t value);
 void c_tree_insert_equal_range(c_tree_t* tree, c_iterator_t* __c_input_iterator first, c_iterator_t* __c_input_iterator last);
 void c_tree_insert_equal_from(c_tree_t* tree, c_ref_t first_value, c_ref_t last_value);
-void c_tree_erase(c_tree_t* tree, c_tree_iterator_t pos);
+c_tree_iterator_t c_tree_erase(c_tree_t* tree, c_tree_iterator_t pos);
 size_t c_tree_erase_key(c_tree_t* tree, c_ref_t key);
 void c_tree_erase_range(c_tree_t* tree, c_tree_iterator_t first, c_tree_iterator_t last);
 void c_tree_erase_from(c_tree_t* tree, c_ref_t first_key, c_ref_t last_key);
@@ -98,11 +98,6 @@ void c_tree_equal_range(c_tree_t* tree, c_ref_t key, c_tree_iterator_t** lower, 
  * debugging
  */
 bool c_tree_rb_verify(c_tree_t* tree);
-
-/**
- * backend
- */
-c_backend_container_t* c_tree_create_backend(c_containable_t* type_info);
 
 /**
  * helpers
