@@ -25,9 +25,8 @@
 #include <gtest/gtest.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <time.h>
-#include <sys/time.h>
 #include <forward_list>
+#include "c_test_util.hpp"
 #include "c_internal.h"
 #include "c_forward_list.h"
 
@@ -37,22 +36,6 @@ namespace {
 const int default_data[] = { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
 const int expect_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 const int default_length = __array_length(default_data);
-
-uint64_t get_time_ms(void)
-{
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-
-    uint64_t ret = tv.tv_usec;
-    /* Convert from micro seconds (10^-6) to milliseconds (10^-3) */
-    ret /= 1000;
-
-    /* Adds the seconds (10^0) after converting them to milliseconds (10^-3) */
-    ret += (tv.tv_sec * 1000);
-
-    return ret;
-}
 
 bool c_int_greater(const c_ref_t lhs, const c_ref_t rhs)
 {
