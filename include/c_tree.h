@@ -35,11 +35,9 @@ extern "C" {
 
 struct __c_tree;
 struct __c_tree_node;
-struct __c_backend_tree;
 
 typedef struct __c_tree c_tree_t;
 typedef struct __c_tree_node c_tree_node_t;
-typedef struct __c_backend_tree c_backend_tree_t;
 
 typedef struct __c_tree_iterator {
     c_iterator_t base_iter;
