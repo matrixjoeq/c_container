@@ -33,12 +33,12 @@ struct __c_stack {
 /**
  * constructor/destructor
  */
-c_stack_t* c_stack_create(c_containable_t* type_info, BackendContainerCreator creator)
+c_stack_t* c_stack_create(c_containable_t* value_type, BackendContainerCreator creator)
 {
     c_stack_t* stack = (c_stack_t*)malloc(sizeof(c_stack_t));
     if (!stack) return 0;
 
-    stack->backend = creator(type_info);
+    stack->backend = creator(value_type);
     if (!stack->backend) {
         __c_free(stack);
         return 0;
@@ -81,10 +81,10 @@ size_t c_stack_max_size(c_stack_t* stack)
 /**
  * modifiers
  */
-void c_stack_push(c_stack_t* stack, c_ref_t data)
+void c_stack_push(c_stack_t* stack, c_ref_t value)
 {
-    if (!stack || !data) return;
-    stack->backend->ops->push_back(stack->backend, data);
+    if (!stack || !value) return;
+    stack->backend->ops->push_back(stack->backend, value);
 }
 
 void c_stack_pop(c_stack_t* stack)

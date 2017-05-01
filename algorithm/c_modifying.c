@@ -218,9 +218,9 @@ size_t algo_transform(c_iterator_t* __c_forward_iterator first,
 
     __C_ALGO_BEGIN_3(first, last, d_first)
 
-    c_ref_t __value = malloc(__first->type_info->size());
+    c_ref_t __value = malloc(__first->value_type->size());
     assert(__value);
-    __first->type_info->create(__value);
+    __first->value_type->create(__value);
 
     while (C_ITER_NE(__first, __last)) {
         C_ITER_V_ASSIGN_DEREF(__value, __first);
@@ -248,7 +248,7 @@ size_t algo_generate(c_iterator_t* __c_forward_iterator first,
 
     size_t gened = 0;
 
-    size_t __size = first->type_info->size();
+    size_t __size = first->value_type->size();
     c_ref_t __value = malloc(__size);
     if (!__value) goto out;
 
@@ -283,7 +283,7 @@ void algo_generate_n(c_iterator_t* __c_forward_iterator first,
 
     if (n == 0) goto out;
 
-    size_t __size = __first->type_info->size();
+    size_t __size = __first->value_type->size();
     c_ref_t __value = malloc(__size);
     if (!__value) goto out;
 
@@ -597,17 +597,17 @@ size_t algo_replace_copy_if(c_iterator_t* __c_forward_iterator first,
     return copied;
 }
 
-void algo_swap(c_containable_t* type_info,
+void algo_swap(c_containable_t* value_type,
                c_ref_t x,
                c_ref_t y)
 {
-    if (!type_info || !x || !y) return;
+    if (!value_type || !x || !y) return;
 
-    c_ref_t tmp = malloc(type_info->size());
+    c_ref_t tmp = malloc(value_type->size());
     if (tmp) {
-        type_info->copy(tmp, x);
-        type_info->assign(x, y);
-        type_info->assign(y, tmp);
+        value_type->copy(tmp, x);
+        value_type->assign(x, y);
+        value_type->assign(y, tmp);
     }
     __c_free(tmp);
 }
@@ -626,7 +626,7 @@ size_t algo_swap_range(c_iterator_t* __c_forward_iterator first,
     __C_ALGO_BEGIN_3(first, last, first2);
 
     while (C_ITER_NE(__first, __last)) {
-        algo_swap(__first->type_info, C_ITER_DEREF(__first), C_ITER_DEREF(__first2));
+        algo_swap(__first->value_type, C_ITER_DEREF(__first), C_ITER_DEREF(__first2));
         C_ITER_INC(__first);
         C_ITER_INC(__first2);
         ++swapped;
@@ -643,7 +643,7 @@ void algo_iter_swap(c_iterator_t* __c_forward_iterator x,
     if (!x || !y) return;
     assert(C_ITER_AT_LEAST(x, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(y, C_ITER_CATE_FORWARD));
-    algo_swap(x->type_info, C_ITER_DEREF(x), C_ITER_DEREF(y));
+    algo_swap(x->value_type, C_ITER_DEREF(x), C_ITER_DEREF(y));
 }
 
 size_t algo_reverse(c_iterator_t* __c_bidirection_iterator first,
@@ -660,7 +660,7 @@ size_t algo_reverse(c_iterator_t* __c_bidirection_iterator first,
     while (C_ITER_NE(__first, __last)) {
         C_ITER_DEC(__last);
         if (C_ITER_NE(__first, __last)) {
-            algo_swap(__first->type_info, C_ITER_DEREF(__first), C_ITER_DEREF(__last));
+            algo_swap(__first->value_type, C_ITER_DEREF(__first), C_ITER_DEREF(__last));
             C_ITER_INC(__first);
             ++reversed;
         }

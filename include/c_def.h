@@ -68,6 +68,7 @@ typedef void* c_ref_t;
 typedef void* c_storage_t;
 
 typedef void (*c_unary_func)(c_ref_t __c_in_out);
+typedef c_ref_t (*c_key_of_value)(c_ref_t __c_in value);
 //typedef void (*c_binary_func)(c_ref_t, c_ref_t);
 
 // generate any type in the input address
@@ -77,7 +78,7 @@ typedef void (*c_generator_emplace)(c_ref_t __c_in_out);
 typedef unsigned long long c_random_int_t;
 typedef c_random_int_t (*c_random_func)(c_random_int_t n);
 
-// return true if data matches condition
+// return true if value matches condition
 typedef bool (*c_unary_predicate)(c_ref_t __c_in);
 typedef bool (*c_binary_predicate)(c_ref_t __c_in, c_ref_t __c_in);
 
@@ -159,7 +160,7 @@ typedef struct __c_iterator {
     c_iterator_category_t iterator_category;
     c_iterator_type_t iterator_type;
     c_iterator_operation_t* iterator_ops;
-    c_containable_t* type_info;
+    c_containable_t* value_type;
 } c_iterator_t;
 
 struct __c_backend_container;
@@ -183,9 +184,9 @@ typedef struct __c_backend_operation {
     size_t (*max_size)(void);
 
     // modifier
-    void (*push_back)(struct __c_backend_container* __c_in_out self, c_ref_t __c_in data);
+    void (*push_back)(struct __c_backend_container* __c_in_out self, c_ref_t __c_in value);
     void (*pop_back)(struct __c_backend_container* __c_in_out self);
-    void (*push_front)(struct __c_backend_container* __c_in_out self, c_ref_t __c_in data);
+    void (*push_front)(struct __c_backend_container* __c_in_out self, c_ref_t __c_in value);
     void (*pop_front)(struct __c_backend_container* __c_in_out self);
     void (*swap)(struct __c_backend_container* __c_in_out self, struct __c_backend_container* __c_in_out other);
 } c_backend_operation_t;
@@ -194,7 +195,7 @@ typedef struct __c_backend_container {
     c_backend_operation_t* ops;
 } c_backend_container_t;
 
-typedef c_backend_container_t* (*BackendContainerCreator)(c_containable_t* type_info);
+typedef c_backend_container_t* (*BackendContainerCreator)(c_containable_t* value_type);
 
 c_containable_t* c_get_sint_type_info(void);
 c_containable_t* c_get_uint_type_info(void);
@@ -210,6 +211,12 @@ c_containable_t* c_get_uchar_type_info(void);
 c_containable_t* c_get_char_type_info(void);
 c_containable_t* c_get_float_type_info(void);
 c_containable_t* c_get_double_type_info(void);
+
+#ifdef __GNUC__
+inline c_ref_t __c_identity(c_ref_t value) __attribute__((always_inline));
+#else
+inline c_ref_t __c_identity(c_ref_t value);
+#endif
 
 #define C_REF_T(x)      ((c_ref_t)(x))
 #define C_ITER_T(x)     ((c_iterator_t*)(x))
@@ -246,16 +253,16 @@ c_containable_t* c_get_double_type_info(void);
 #define C_ITER_AT_LEAST(x, c)   (C_ITER_T(x)->iterator_category >= (c_iterator_category_t)(c))
 #define C_ITER_EXACT(x, c)      (C_ITER_T(x)->iterator_category == (c_iterator_category_t)(c))
 
-#define C_ITER_V_ASSIGN_DEREF(v, x) C_ITER_T(x)->type_info->assign(C_REF_T(v), C_ITER_DEREF(C_ITER_T(x)))
-#define C_ITER_DEREF_ASSIGN_V(x, v) C_ITER_T(x)->type_info->assign(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))
-#define C_ITER_DEREF_ASSIGN(x, y)   C_ITER_T(x)->type_info->assign(C_ITER_DEREF(C_ITER_T(x)), C_ITER_DEREF(C_ITER_T(y)))
+#define C_ITER_V_ASSIGN_DEREF(v, x) C_ITER_T(x)->value_type->assign(C_REF_T(v), C_ITER_DEREF(C_ITER_T(x)))
+#define C_ITER_DEREF_ASSIGN_V(x, v) C_ITER_T(x)->value_type->assign(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))
+#define C_ITER_DEREF_ASSIGN(x, y)   C_ITER_T(x)->value_type->assign(C_ITER_DEREF(C_ITER_T(x)), C_ITER_DEREF(C_ITER_T(y)))
 
-#define C_ITER_DEREF_EQUAL_V(x, v)  C_ITER_T(x)->type_info->equal(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))
-#define C_ITER_DEREF_EQUAL(x, y)    C_ITER_T(x)->type_info->equal(C_ITER_DEREF(C_ITER_T(x)), C_ITER_DEREF(C_ITER_T(y)))
+#define C_ITER_DEREF_EQUAL_V(x, v)  C_ITER_T(x)->value_type->equal(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))
+#define C_ITER_DEREF_EQUAL(x, y)    C_ITER_T(x)->value_type->equal(C_ITER_DEREF(C_ITER_T(x)), C_ITER_DEREF(C_ITER_T(y)))
 
-#define C_ITER_V_LESS_DEREF(v, x)   C_ITER_T(x)->type_info->less(C_REF_T(v), C_ITER_DEREF(C_ITER_T(x)))
-#define C_ITER_DEREF_LESS_V(x, v)   C_ITER_T(x)->type_info->less(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))
-#define C_ITER_DEREF_LESS(x, y)     C_ITER_T(x)->type_info->less(C_ITER_DEREF(C_ITER_T(x)), C_ITER_DEREF(C_ITER_T(y)))
+#define C_ITER_V_LESS_DEREF(v, x)   C_ITER_T(x)->value_type->less(C_REF_T(v), C_ITER_DEREF(C_ITER_T(x)))
+#define C_ITER_DEREF_LESS_V(x, v)   C_ITER_T(x)->value_type->less(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))
+#define C_ITER_DEREF_LESS(x, y)     C_ITER_T(x)->value_type->less(C_ITER_DEREF(C_ITER_T(x)), C_ITER_DEREF(C_ITER_T(y)))
 
 #define __c_output_iterator
 #define __c_input_iterator
@@ -264,8 +271,8 @@ c_containable_t* c_get_double_type_info(void);
 #define __c_random_iterator
 
 #define __c_is_same(x, y)       ((!(x) || !(y)) ? false : memcmp((x), (y), sizeof(*(x))) == 0)
-#define __c_get_less(iter)      C_ITER_T(iter)->type_info->less
-#define __c_get_equal(iter)     C_ITER_T(iter)->type_info->equal
+#define __c_get_less(iter)      C_ITER_T(iter)->value_type->less
+#define __c_get_equal(iter)     C_ITER_T(iter)->value_type->equal
 
 #ifdef __cplusplus
 }

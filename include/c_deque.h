@@ -48,7 +48,7 @@ typedef struct __c_deque_iterator {
  * constructor/destructor
  */
 c_deque_t* c_deque_create(c_containable_t* type_info);
-c_deque_t* c_deque_create_from(c_containable_t* type_info, c_ref_t datas, size_t length);
+c_deque_t* c_deque_create_from(c_containable_t* type_info, c_ref_t values, size_t length);
 c_deque_t* c_deque_copy(c_deque_t* other);
 c_deque_t* c_deque_assign(c_deque_t* self, c_deque_t* other);
 void c_deque_destroy(c_deque_t* deque);
@@ -80,17 +80,17 @@ void c_deque_shrink_to_fit(c_deque_t* deque);
  * modifiers
  */
 void c_deque_clear(c_deque_t* deque);
-c_deque_iterator_t c_deque_insert(c_deque_t* deque, c_deque_iterator_t pos, c_ref_t data);
-c_deque_iterator_t c_deque_insert_n(c_deque_t* deque, c_deque_iterator_t pos, size_t count, c_ref_t data);
+c_deque_iterator_t c_deque_insert(c_deque_t* deque, c_deque_iterator_t pos, c_ref_t value);
+c_deque_iterator_t c_deque_insert_n(c_deque_t* deque, c_deque_iterator_t pos, size_t count, c_ref_t value);
 c_deque_iterator_t c_deque_insert_range(c_deque_t* deque, c_deque_iterator_t pos, c_iterator_t first, c_iterator_t last);
 c_deque_iterator_t c_deque_erase(c_deque_t* deque, c_deque_iterator_t pos);
 c_deque_iterator_t c_deque_erase_range(c_deque_t* deque, c_deque_iterator_t first, c_deque_iterator_t last);
-void c_deque_push_back(c_deque_t* deque, c_ref_t data);
+void c_deque_push_back(c_deque_t* deque, c_ref_t value);
 void c_deque_pop_back(c_deque_t* deque);
-void c_deque_push_front(c_deque_t* deque, c_ref_t data);
+void c_deque_push_front(c_deque_t* deque, c_ref_t value);
 void c_deque_pop_front(c_deque_t* deque);
 void c_deque_resize(c_deque_t* deque, size_t count);
-void c_deque_resize_with_value(c_deque_t* deque, size_t count, c_ref_t data);
+void c_deque_resize_with_value(c_deque_t* deque, size_t count, c_ref_t value);
 void c_deque_swap(c_deque_t* deque, c_deque_t* other);
 
 /**

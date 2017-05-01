@@ -57,7 +57,7 @@ size_t c_priority_queue_size(c_priority_queue_t* queue);
 /**
  * modifiers
  */
-void c_priority_queue_push(c_priority_queue_t* queue, c_ref_t data);
+void c_priority_queue_push(c_priority_queue_t* queue, c_ref_t value);
 void c_priority_queue_pop(c_priority_queue_t* queue);
 void c_priority_queue_swap(c_priority_queue_t* queue, c_priority_queue_t* other);
 

@@ -35,7 +35,7 @@ struct __c_vector {
     c_ref_t start;
     c_ref_t finish;
     c_storage_t end_of_storage;
-    c_containable_t* type_info;
+    c_containable_t* value_type;
 };
 
 struct __c_backend_vector {
@@ -49,7 +49,7 @@ __c_static __c_inline bool __is_valid_pos(c_vector_t* vector, c_ref_t pos)
 
     if (pos >= vector->start && pos <= vector->finish) {
         ptrdiff_t diff = pos - vector->start;
-        if (diff % vector->type_info->size() == 0)
+        if (diff % vector->value_type->size() == 0)
             return true;
     }
 
@@ -89,7 +89,7 @@ __c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 {
     if (__is_vector_iterator(iter)) {
-        ((c_vector_iterator_t*)iter)->pos += iter->type_info->size();
+        ((c_vector_iterator_t*)iter)->pos += iter->value_type->size();
     }
     return iter;
 }
@@ -97,7 +97,7 @@ __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 __c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
 {
     if (__is_vector_iterator(iter)) {
-        ((c_vector_iterator_t*)iter)->pos -= iter->type_info->size();
+        ((c_vector_iterator_t*)iter)->pos -= iter->value_type->size();
     }
     return iter;
 }
@@ -112,7 +112,7 @@ __c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** 
             assert(__is_vector_iterator(*tmp));
             iter_assign(*tmp, iter);
         }
-        ((c_vector_iterator_t*)iter)->pos += iter->type_info->size();
+        ((c_vector_iterator_t*)iter)->pos += iter->value_type->size();
     }
     return *tmp;
 }
@@ -127,7 +127,7 @@ __c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t** 
             assert(__is_vector_iterator(*tmp));
             iter_assign(*tmp, iter);
         }
-        ((c_vector_iterator_t*)iter)->pos -= iter->type_info->size();
+        ((c_vector_iterator_t*)iter)->pos -= iter->value_type->size();
     }
     return *tmp;
 }
@@ -154,13 +154,13 @@ __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 __c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (!__is_vector_iterator(iter)) return;
-    ((c_vector_iterator_t*)iter)->pos += (n * iter->type_info->size());
+    ((c_vector_iterator_t*)iter)->pos += (n * iter->value_type->size());
 }
 
 __c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
     if (!__is_vector_iterator(first) || !__is_vector_iterator(last)) return 0;
-    return (ptrdiff_t)(((c_vector_iterator_t*)last)->pos - ((c_vector_iterator_t*)first)->pos) / first->type_info->size();
+    return (ptrdiff_t)(((c_vector_iterator_t*)last)->pos - ((c_vector_iterator_t*)first)->pos) / first->value_type->size();
 }
 
 __c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
@@ -182,7 +182,7 @@ __c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* sr
 __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 {
     if (__is_vector_reverse_iterator(iter)) {
-        ((c_vector_iterator_t*)iter)->pos -= iter->type_info->size();
+        ((c_vector_iterator_t*)iter)->pos -= iter->value_type->size();
     }
     return iter;
 }
@@ -190,7 +190,7 @@ __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 __c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
 {
     if (__is_vector_reverse_iterator(iter)) {
-        ((c_vector_iterator_t*)iter)->pos += iter->type_info->size();
+        ((c_vector_iterator_t*)iter)->pos += iter->value_type->size();
     }
     return iter;
 }
@@ -205,7 +205,7 @@ __c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_itera
             assert(__is_vector_reverse_iterator(*tmp));
             reverse_iter_assign(*tmp, iter);
         }
-        ((c_vector_iterator_t*)iter)->pos -= iter->type_info->size();
+        ((c_vector_iterator_t*)iter)->pos -= iter->value_type->size();
     }
     return *tmp;
 }
@@ -220,7 +220,7 @@ __c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_itera
             assert(__is_vector_reverse_iterator(*tmp));
             reverse_iter_assign(*tmp, iter);
         }
-        ((c_vector_iterator_t*)iter)->pos += iter->type_info->size();
+        ((c_vector_iterator_t*)iter)->pos += iter->value_type->size();
     }
     return *tmp;
 }
@@ -228,7 +228,7 @@ __c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_itera
 __c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
 {
     if (__is_vector_reverse_iterator(iter)) {
-        return (c_ref_t)(((c_vector_iterator_t*)iter)->pos - iter->type_info->size());
+        return (c_ref_t)(((c_vector_iterator_t*)iter)->pos - iter->value_type->size());
     }
     return 0;
 }
@@ -247,13 +247,13 @@ __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 __c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (!__is_vector_reverse_iterator(iter)) return;
-    ((c_vector_iterator_t*)iter)->pos -= (n * iter->type_info->size());
+    ((c_vector_iterator_t*)iter)->pos -= (n * iter->value_type->size());
 }
 
 __c_static ptrdiff_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
     if (!__is_vector_reverse_iterator(first) || !__is_vector_reverse_iterator(last)) return 0;
-    return (ptrdiff_t)(((c_vector_iterator_t*)first)->pos - ((c_vector_iterator_t*)last)->pos) / first->type_info->size();
+    return (ptrdiff_t)(((c_vector_iterator_t*)first)->pos - ((c_vector_iterator_t*)last)->pos) / first->value_type->size();
 }
 
 static c_iterator_operation_t s_iter_ops = {
@@ -271,15 +271,15 @@ static c_iterator_operation_t s_iter_ops = {
 };
 
 __c_static __c_inline c_vector_iterator_t __create_iterator(
-    c_containable_t* type_info, c_ref_t pos)
+    c_containable_t* value_type, c_ref_t pos)
 {
-    assert(type_info);
+    assert(value_type);
     c_vector_iterator_t iter = {
         .base_iter = {
             .iterator_category = C_ITER_CATE_RANDOM,
             .iterator_type = C_ITER_TYPE_VECTOR,
             .iterator_ops = &s_iter_ops,
-            .type_info = type_info
+            .value_type = value_type
         },
         .pos = pos
     };
@@ -301,15 +301,15 @@ static c_iterator_operation_t s_reverse_ops = {
 };
 
 __c_static __c_inline c_vector_iterator_t __create_reverse_iterator(
-    c_containable_t* type_info, c_ref_t pos)
+    c_containable_t* value_type, c_ref_t pos)
 {
-    assert(type_info);
+    assert(value_type);
     c_vector_iterator_t iter = {
         .base_iter = {
             .iterator_category = C_ITER_CATE_RANDOM,
             .iterator_type = C_ITER_TYPE_VECTOR_REVERSE,
             .iterator_ops = &s_reverse_ops,
-            .type_info = type_info
+            .value_type = value_type
         },
         .pos = pos
     };
@@ -337,8 +337,8 @@ __c_static __c_inline c_storage_t __eos(c_vector_t* vector)
 __c_static __c_inline size_t __available(c_vector_t* vector)
 {
     assert(vector);
-    assert(vector->type_info->size);
-    return (vector->end_of_storage - vector->finish) / vector->type_info->size();
+    assert(vector->value_type->size);
+    return (vector->end_of_storage - vector->finish) / vector->value_type->size();
 }
 
 __c_static void backend_destroy(c_backend_container_t* c)
@@ -415,12 +415,12 @@ __c_static size_t backend_max_size(void)
     return (-1);
 }
 
-__c_static void backend_push_back(c_backend_container_t* c, c_ref_t data)
+__c_static void backend_push_back(c_backend_container_t* c, c_ref_t value)
 {
-    if (!c || !data) return;
+    if (!c || !value) return;
 
     c_backend_vector_t* _c = (c_backend_vector_t*)c;
-    c_vector_push_back(_c->impl, data);
+    c_vector_push_back(_c->impl, value);
 }
 
 __c_static void backend_pop_back(c_backend_container_t* c)
@@ -446,21 +446,21 @@ __c_static void backend_swap(c_backend_container_t* c, c_backend_container_t* ot
 __c_static __c_inline void __destroy(c_vector_iterator_t first, c_vector_iterator_t last)
 {
     while (C_ITER_NE(&first, &last)) {
-        first.base_iter.type_info->destroy(first.pos);
+        first.base_iter.value_type->destroy(first.pos);
         C_ITER_INC(&first);
     }
 }
 
-__c_static __c_inline void __fill(c_vector_iterator_t pos, size_t n, c_ref_t data)
+__c_static __c_inline void __fill(c_vector_iterator_t pos, size_t n, c_ref_t value)
 {
     while (n--) {
-        if (data) {
-            assert(pos.base_iter.type_info->copy);
-            pos.base_iter.type_info->copy(pos.pos, data);
+        if (value) {
+            assert(pos.base_iter.value_type->copy);
+            pos.base_iter.value_type->copy(pos.pos, value);
         }
         else {
-            assert(pos.base_iter.type_info->create);
-            pos.base_iter.type_info->create(pos.pos);
+            assert(pos.base_iter.value_type->create);
+            pos.base_iter.value_type->create(pos.pos);
         }
         C_ITER_INC(&pos);
     }
@@ -470,21 +470,21 @@ __c_static __c_inline int __reallocate_and_move(c_vector_t* vector, size_t n)
 {
     assert(vector);
 
-    size_t data_size = vector->type_info->size();
+    size_t value_size = vector->value_type->size();
 
     // double the capacity or make it large enough
     size_t size = c_vector_size(vector);
     size_t cap = c_vector_capacity(vector);
     cap = ((cap * 2) < (n + size) ? (n + size) : (cap * 2));
-    c_ref_t start = malloc(cap * data_size);
+    c_ref_t start = malloc(cap * value_size);
     if (!start) return -1;
 
     memcpy(start, vector->start, vector->finish - vector->start);
     __destroy(c_vector_begin(vector), c_vector_end(vector));
     __c_free(vector->start);
     vector->start = start;
-    vector->finish = start + size * data_size;
-    vector->end_of_storage = start + cap * data_size;
+    vector->finish = start + size * value_size;
+    vector->end_of_storage = start + cap * value_size;
 
     return 0;
 }
@@ -492,9 +492,9 @@ __c_static __c_inline int __reallocate_and_move(c_vector_t* vector, size_t n)
 /**
  * constructor/destructor
  */
-c_vector_t* c_vector_create(c_containable_t* type_info)
+c_vector_t* c_vector_create(c_containable_t* value_type)
 {
-    if (!type_info) return 0;
+    if (!value_type) return 0;
 
     c_vector_t* vector = (c_vector_t*)malloc(sizeof(c_vector_t));
     if (!vector) return 0;
@@ -502,20 +502,20 @@ c_vector_t* c_vector_create(c_containable_t* type_info)
     vector->start = 0;
     vector->finish = 0;
     vector->end_of_storage = 0;
-    vector->type_info = type_info;
+    vector->value_type = value_type;
 
     return vector;
 }
 
-c_vector_t* c_vector_create_from(c_containable_t* type_info, c_ref_t datas, size_t length)
+c_vector_t* c_vector_create_from(c_containable_t* value_type, c_ref_t values, size_t length)
 {
-    if (!type_info || !datas || length == 0) return 0;
+    if (!value_type || !values || length == 0) return 0;
 
-    c_vector_t* vector = c_vector_create(type_info);
+    c_vector_t* vector = c_vector_create(value_type);
     if (!vector) return 0;
 
     c_vector_reserve(vector, length);
-    memcpy(vector->start, datas, type_info->size() * length);
+    memcpy(vector->start, values, value_type->size() * length);
 
     return vector;
 }
@@ -524,11 +524,11 @@ c_vector_t* c_vector_copy(c_vector_t* other)
 {
     if (!other) return 0;
 
-    c_vector_t* vector = c_vector_create(other->type_info);
+    c_vector_t* vector = c_vector_create(other->value_type);
     if (!vector) return 0;
 
     c_vector_reserve(vector, c_vector_capacity(other));
-    memcpy(vector->start, other->start, vector->type_info->size() * c_vector_size(other));
+    memcpy(vector->start, other->start, vector->value_type->size() * c_vector_size(other));
 
     return vector;
 }
@@ -539,9 +539,9 @@ c_vector_t* c_vector_assign(c_vector_t* self, c_vector_t* other)
 
     if (self != other) {
         c_vector_clear(self);
-        self->type_info = other->type_info;
+        self->value_type = other->value_type;
         c_vector_reserve(self, c_vector_capacity(other));
-        memcpy(self->start, other->start, self->type_info->size() * c_vector_size(other));
+        memcpy(self->start, other->start, self->value_type->size() * c_vector_size(other));
     }
 
     return self;
@@ -562,7 +562,7 @@ void c_vector_destroy(c_vector_t* vector)
 c_ref_t c_vector_at(c_vector_t* vector, size_t pos)
 {
     if (!vector) return 0;
-    return C_REF_T(__begin(vector) + vector->type_info->size() * pos);
+    return C_REF_T(__begin(vector) + vector->value_type->size() * pos);
 }
 
 c_ref_t c_vector_front(c_vector_t* vector)
@@ -574,7 +574,7 @@ c_ref_t c_vector_back(c_vector_t* vector)
 {
     if (c_vector_empty(vector)) return 0;
 
-    return C_REF_T(__end(vector) - vector->type_info->size());
+    return C_REF_T(__end(vector) - vector->value_type->size());
 }
 
 c_ref_t c_vector_data(c_vector_t* vector)
@@ -589,25 +589,25 @@ c_ref_t c_vector_data(c_vector_t* vector)
 c_vector_iterator_t c_vector_begin(c_vector_t* vector)
 {
     assert(vector);
-    return __create_iterator(vector->type_info, __begin(vector));
+    return __create_iterator(vector->value_type, __begin(vector));
 }
 
 c_vector_iterator_t c_vector_rbegin(c_vector_t* vector)
 {
     assert(vector);
-    return __create_reverse_iterator(vector->type_info, __end(vector));
+    return __create_reverse_iterator(vector->value_type, __end(vector));
 }
 
 c_vector_iterator_t c_vector_end(c_vector_t* vector)
 {
     assert(vector);
-    return __create_iterator(vector->type_info, __end(vector));
+    return __create_iterator(vector->value_type, __end(vector));
 }
 
 c_vector_iterator_t c_vector_rend(c_vector_t* vector)
 {
     assert(vector);
-    return __create_reverse_iterator(vector->type_info, __begin(vector));
+    return __create_reverse_iterator(vector->value_type, __begin(vector));
 }
 
 /**
@@ -622,7 +622,7 @@ size_t c_vector_size(c_vector_t* vector)
 {
     if (!vector) return 0;
 
-    return (__end(vector) - __begin(vector)) / vector->type_info->size();
+    return (__end(vector) - __begin(vector)) / vector->value_type->size();
 }
 
 size_t c_vector_max_size(void)
@@ -640,7 +640,7 @@ size_t c_vector_capacity(c_vector_t* vector)
 {
     if (!vector) return 0;
 
-    return (__eos(vector) - __begin(vector)) / vector->type_info->size();
+    return (__eos(vector) - __begin(vector)) / vector->value_type->size();
 }
 
 void c_vector_shrink_to_fit(c_vector_t* vector)
@@ -675,15 +675,15 @@ void c_vector_clear(c_vector_t* vector)
     vector->finish = vector->start;
 }
 
-c_vector_iterator_t c_vector_insert(c_vector_t* vector, c_vector_iterator_t pos, c_ref_t data)
+c_vector_iterator_t c_vector_insert(c_vector_t* vector, c_vector_iterator_t pos, c_ref_t value)
 {
-    return c_vector_insert_n(vector, pos, 1, data);
+    return c_vector_insert_n(vector, pos, 1, value);
 }
 
 c_vector_iterator_t c_vector_insert_n(
-    c_vector_t* vector, c_vector_iterator_t pos, size_t count, c_ref_t data)
+    c_vector_t* vector, c_vector_iterator_t pos, size_t count, c_ref_t value)
 {
-    if (!vector || !data) return pos;
+    if (!vector || !value) return pos;
 
     if (!__is_valid_pos(vector, pos.pos)) return c_vector_end(vector);
 
@@ -695,9 +695,9 @@ c_vector_iterator_t c_vector_insert_n(
         pos.pos = vector->start + diff;
     }
 
-    memmove(pos.pos + count * vector->type_info->size(), pos.pos, vector->finish - pos.pos);
-    __fill(pos, count, data);
-    vector->finish += count * vector->type_info->size();
+    memmove(pos.pos + count * vector->value_type->size(), pos.pos, vector->finish - pos.pos);
+    __fill(pos, count, value);
+    vector->finish += count * vector->value_type->size();
 
     return pos;
 }
@@ -728,10 +728,10 @@ c_vector_iterator_t c_vector_erase(c_vector_t* vector, c_vector_iterator_t pos)
     if (!__is_valid_pos(vector, pos.pos) || pos.pos == vector->finish)
         return c_vector_end(vector);
 
-    vector->type_info->destroy(pos.pos);
-    c_ref_t next_pos = pos.pos + vector->type_info->size();
+    vector->value_type->destroy(pos.pos);
+    c_ref_t next_pos = pos.pos + vector->value_type->size();
     memmove(pos.pos, next_pos, vector->finish - next_pos);
-    vector->finish -= vector->type_info->size();
+    vector->finish -= vector->value_type->size();
 
     return pos;
 }
@@ -756,24 +756,24 @@ c_vector_iterator_t c_vector_erase_range(
     return first;
 }
 
-void c_vector_push_back(c_vector_t* vector, c_ref_t data)
+void c_vector_push_back(c_vector_t* vector, c_ref_t value)
 {
-    if (!vector || !data) return;
+    if (!vector || !value) return;
 
     if (vector->finish == vector->end_of_storage) {
         if (__reallocate_and_move(vector, 1))
             return;
     }
 
-    vector->type_info->copy(vector->finish, data);
-    vector->finish += vector->type_info->size();
+    vector->value_type->copy(vector->finish, value);
+    vector->finish += vector->value_type->size();
 }
 
 void c_vector_pop_back(c_vector_t* vector)
 {
     if (!c_vector_empty(vector)) {
-        vector->type_info->destroy(c_vector_back(vector));
-        vector->finish -= vector->type_info->size();
+        vector->value_type->destroy(c_vector_back(vector));
+        vector->finish -= vector->value_type->size();
     }
 }
 
@@ -782,11 +782,11 @@ void c_vector_resize(c_vector_t* vector, size_t count)
     c_vector_resize_with_value(vector, count, 0);
 }
 
-void c_vector_resize_with_value(c_vector_t* vector, size_t count, c_ref_t data)
+void c_vector_resize_with_value(c_vector_t* vector, size_t count, c_ref_t value)
 {
     if (!vector) return;
 
-    size_t data_size = vector->type_info->size();
+    size_t value_size = vector->value_type->size();
 
     if (count > c_vector_size(vector)) {
         count -= c_vector_size(vector);
@@ -794,12 +794,12 @@ void c_vector_resize_with_value(c_vector_t* vector, size_t count, c_ref_t data)
             if (__reallocate_and_move(vector, count))
                 return;
         }
-        __fill(c_vector_end(vector), count, data);
-        vector->finish += count * data_size;
+        __fill(c_vector_end(vector), count, value);
+        vector->finish += count * value_size;
     }
     else {
-        c_ref_t pos = vector->start + count * data_size;
-        __destroy(__create_iterator(vector->type_info, pos), c_vector_end(vector));
+        c_ref_t pos = vector->start + count * value_size;
+        __destroy(__create_iterator(vector->value_type, pos), c_vector_end(vector));
         vector->finish = pos;
     }
 }
@@ -816,7 +816,7 @@ void c_vector_swap(c_vector_t* vector, c_vector_t* other)
 /**
  * backend
  */
-c_backend_container_t* c_vector_create_backend(c_containable_t* type_info)
+c_backend_container_t* c_vector_create_backend(c_containable_t* value_type)
 {
     static c_backend_operation_t backend_vector_ops = {
         .destroy = backend_destroy,
@@ -837,7 +837,7 @@ c_backend_container_t* c_vector_create_backend(c_containable_t* type_info)
     c_backend_vector_t* backend = (c_backend_vector_t*)malloc(sizeof(c_backend_vector_t));
     if (!backend) return 0;
 
-    backend->impl = c_vector_create(type_info);
+    backend->impl = c_vector_create(value_type);
     if (!backend->impl) {
         __c_free(backend);
         return 0;

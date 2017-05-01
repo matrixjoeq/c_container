@@ -59,6 +59,11 @@ __c_inline c_iterator_t* __c_iter_move_copy(c_iterator_t** __c_random_iterator d
     return *dst;
 }
 
+inline c_ref_t __c_identity(c_ref_t value)
+{
+    return value;
+}
+
 // general macro
 #define __c_free(x) \
     do { \

@@ -27,32 +27,32 @@
 #include "c_internal.h"
 #include "c_algorithm.h"
 
-c_ref_t algo_max_by(c_containable_t* type_info,
+c_ref_t algo_max_by(c_containable_t* value_type,
                     c_ref_t x,
                     c_ref_t y,
                     c_compare comp)
 {
-    if (!type_info || !x || !y || !comp) return 0;
+    if (!value_type || !x || !y || !comp) return 0;
 
-    c_ref_t r = malloc(type_info->size());
+    c_ref_t r = malloc(value_type->size());
     if (!r) return 0;
 
-    type_info->copy(r, comp(x, y) ? y : x);
+    value_type->copy(r, comp(x, y) ? y : x);
 
     return r;
 }
 
-c_ref_t algo_min_by(c_containable_t* type_info,
+c_ref_t algo_min_by(c_containable_t* value_type,
                     c_ref_t x,
                     c_ref_t y,
                     c_compare comp)
 {
-    if (!type_info || !x || !y || !comp) return 0;
+    if (!value_type || !x || !y || !comp) return 0;
 
-    c_ref_t r = malloc(type_info->size());
+    c_ref_t r = malloc(value_type->size());
     if (!r) return 0;
 
-    type_info->copy(r, comp(x, y) ? x : y);
+    value_type->copy(r, comp(x, y) ? x : y);
 
     return r;
 }
@@ -171,16 +171,16 @@ void algo_minmax_element_by(c_iterator_t* __c_forward_iterator first,
     __C_ALGO_END_2(first, last)
 }
 
-c_ref_t algo_clamp_by(c_containable_t* type_info,
+c_ref_t algo_clamp_by(c_containable_t* value_type,
                       c_ref_t v,
                       c_ref_t lo,
                       c_ref_t hi,
                       c_compare comp)
 {
-    if (!type_info || !v || !lo || !hi || !comp) return 0;
+    if (!value_type || !v || !lo || !hi || !comp) return 0;
     assert(!comp(hi, lo));
 
-    return comp(v, hi) ? algo_max_by(type_info, v, lo, comp)
-                       : algo_min_by(type_info, v, hi, comp);
+    return comp(v, hi) ? algo_max_by(value_type, v, lo, comp)
+                       : algo_min_by(value_type, v, hi, comp);
 }
 

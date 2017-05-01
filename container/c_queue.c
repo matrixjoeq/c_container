@@ -33,12 +33,12 @@ struct __c_queue {
 /**
  * constructor/destructor
  */
-c_queue_t* c_queue_create(c_containable_t* type_info, BackendContainerCreator creator)
+c_queue_t* c_queue_create(c_containable_t* value_type, BackendContainerCreator creator)
 {
     c_queue_t* queue = (c_queue_t*)malloc(sizeof(c_queue_t));
     if (!queue) return 0;
 
-    queue->backend = creator(type_info);
+    queue->backend = creator(value_type);
     if (!queue->backend) {
         __c_free(queue);
         return 0;
@@ -87,10 +87,10 @@ size_t c_queue_size(c_queue_t* queue)
 /**
  * modifiers
  */
-void c_queue_push(c_queue_t* queue, c_ref_t data)
+void c_queue_push(c_queue_t* queue, c_ref_t value)
 {
-    if (!queue || !data) return;
-    queue->backend->ops->push_back(queue->backend, data);
+    if (!queue || !value) return;
+    queue->backend->ops->push_back(queue->backend, value);
 }
 
 void c_queue_pop(c_queue_t* queue)

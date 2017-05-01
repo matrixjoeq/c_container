@@ -57,7 +57,7 @@ size_t c_stack_max_size(c_stack_t* stack);
 /**
  * modifiers
  */
-void c_stack_push(c_stack_t* stack, c_ref_t data);
+void c_stack_push(c_stack_t* stack, c_ref_t value);
 void c_stack_pop(c_stack_t* stack);
 void c_stack_swap(c_stack_t* stack, c_stack_t* other);
 

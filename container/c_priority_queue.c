@@ -36,18 +36,18 @@ struct __c_priority_queue {
  * constructor/destructor
  */
 c_priority_queue_t* c_priority_queue_create(
-    c_containable_t* type_info, BackendContainerCreator creator, c_compare comp)
+    c_containable_t* value_type, BackendContainerCreator creator, c_compare comp)
 {
     c_priority_queue_t* queue = (c_priority_queue_t*)malloc(sizeof(c_priority_queue_t));
     if (!queue) return 0;
 
-    queue->backend = creator(type_info);
+    queue->backend = creator(value_type);
     if (!queue->backend) {
         __c_free(queue);
         return 0;
     }
 
-    queue->comp = comp ? comp : type_info->less;
+    queue->comp = comp ? comp : value_type->less;
     return queue;
 }
 
@@ -85,14 +85,14 @@ size_t c_priority_queue_size(c_priority_queue_t* queue)
 /**
  * modifiers
  */
-void c_priority_queue_push(c_priority_queue_t* queue, c_ref_t data)
+void c_priority_queue_push(c_priority_queue_t* queue, c_ref_t value)
 {
-    if (!queue || !data) return;
+    if (!queue || !value) return;
 
     c_iterator_t* first = 0;
     c_iterator_t* last = 0;
 
-    queue->backend->ops->push_back(queue->backend, data);
+    queue->backend->ops->push_back(queue->backend, value);
     queue->backend->ops->begin(queue->backend, &first);
     queue->backend->ops->end(queue->backend, &last);
     c_algo_push_heap_by(first, last, queue->comp);

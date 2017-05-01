@@ -58,7 +58,7 @@ size_t c_queue_size(c_queue_t* queue);
 /**
  * modifiers
  */
-void c_queue_push(c_queue_t* queue, c_ref_t data);
+void c_queue_push(c_queue_t* queue, c_ref_t value);
 void c_queue_pop(c_queue_t* queue);
 void c_queue_swap(c_queue_t* queue, c_queue_t* other);
 

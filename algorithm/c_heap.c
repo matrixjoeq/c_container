@@ -135,8 +135,8 @@ void algo_push_heap_by(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __parent = 0;
     c_iterator_t* __hole = 0;
 
-    c_ref_t __value = malloc(first->type_info->size());
-    __first->type_info->copy(__value, C_ITER_DEREF(__last));
+    c_ref_t __value = malloc(first->value_type->size());
+    __first->value_type->copy(__value, C_ITER_DEREF(__last));
 
     while (__hole_index > __top_index) {
         __c_iter_move_copy(&__parent, __first, __parent_index);

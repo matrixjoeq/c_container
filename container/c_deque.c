@@ -36,7 +36,7 @@ struct __c_deque {
     c_ref_t start;
     c_ref_t finish;
     c_storage_t end_of_storage;
-    c_containable_t* type_info;
+    c_containable_t* value_type;
 };
 
 struct __c_backend_deque {
@@ -58,7 +58,7 @@ __c_static __c_inline bool __is_valid_pos(c_deque_t* deque, c_ref_t pos)
 
     if (pos >= deque->start && pos <= deque->finish) {
         ptrdiff_t diff = pos - deque->start;
-        if (diff % deque->type_info->size() == 0)
+        if (diff % deque->value_type->size() == 0)
             return true;
     }
 
@@ -98,7 +98,7 @@ __c_static c_iterator_t* iter_assign(c_iterator_t* dst, c_iterator_t* src)
 __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 {
     if (__is_deque_iterator(iter)) {
-        ((c_deque_iterator_t*)iter)->pos += iter->type_info->size();
+        ((c_deque_iterator_t*)iter)->pos += iter->value_type->size();
     }
     return iter;
 }
@@ -106,7 +106,7 @@ __c_static c_iterator_t* iter_increment(c_iterator_t* iter)
 __c_static c_iterator_t* iter_decrement(c_iterator_t* iter)
 {
     if (__is_deque_iterator(iter)) {
-        ((c_deque_iterator_t*)iter)->pos -= iter->type_info->size();
+        ((c_deque_iterator_t*)iter)->pos -= iter->value_type->size();
     }
     return iter;
 }
@@ -121,7 +121,7 @@ __c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** 
             assert(__is_deque_iterator(*tmp));
             iter_assign(*tmp, iter);
         }
-        ((c_deque_iterator_t*)iter)->pos += iter->type_info->size();
+        ((c_deque_iterator_t*)iter)->pos += iter->value_type->size();
     }
     return *tmp;
 }
@@ -136,7 +136,7 @@ __c_static c_iterator_t* iter_post_decrement(c_iterator_t* iter, c_iterator_t** 
             assert(__is_deque_iterator(*tmp));
             iter_assign(*tmp, iter);
         }
-        ((c_deque_iterator_t*)iter)->pos -= iter->type_info->size();
+        ((c_deque_iterator_t*)iter)->pos -= iter->value_type->size();
     }
     return *tmp;
 }
@@ -163,13 +163,13 @@ __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 __c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (!__is_deque_iterator(iter)) return;
-    ((c_deque_iterator_t*)iter)->pos += (n * iter->type_info->size());
+    ((c_deque_iterator_t*)iter)->pos += (n * iter->value_type->size());
 }
 
 __c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
     if (!__is_deque_iterator(first) || !__is_deque_iterator(last)) return 0;
-    return (ptrdiff_t)(((c_deque_iterator_t*)last)->pos - ((c_deque_iterator_t*)first)->pos) / first->type_info->size();
+    return (ptrdiff_t)(((c_deque_iterator_t*)last)->pos - ((c_deque_iterator_t*)first)->pos) / first->value_type->size();
 }
 
 __c_static void reverse_iter_alloc_and_copy(c_iterator_t** self, c_iterator_t* other)
@@ -191,7 +191,7 @@ __c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* sr
 __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 {
     if (__is_deque_reverse_iterator(iter)) {
-        ((c_deque_iterator_t*)iter)->pos -= iter->type_info->size();
+        ((c_deque_iterator_t*)iter)->pos -= iter->value_type->size();
     }
     return iter;
 }
@@ -199,7 +199,7 @@ __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 __c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
 {
     if (__is_deque_reverse_iterator(iter)) {
-        ((c_deque_iterator_t*)iter)->pos += iter->type_info->size();
+        ((c_deque_iterator_t*)iter)->pos += iter->value_type->size();
     }
     return iter;
 }
@@ -214,7 +214,7 @@ __c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_itera
             assert(__is_deque_reverse_iterator(*tmp));
             reverse_iter_assign(*tmp, iter);
         }
-        ((c_deque_iterator_t*)iter)->pos -= iter->type_info->size();
+        ((c_deque_iterator_t*)iter)->pos -= iter->value_type->size();
     }
     return *tmp;
 }
@@ -229,7 +229,7 @@ __c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_itera
             assert(__is_deque_reverse_iterator(*tmp));
             reverse_iter_assign(*tmp, iter);
         }
-        ((c_deque_iterator_t*)iter)->pos += iter->type_info->size();
+        ((c_deque_iterator_t*)iter)->pos += iter->value_type->size();
     }
     return *tmp;
 }
@@ -237,7 +237,7 @@ __c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_itera
 __c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
 {
     if (__is_deque_reverse_iterator(iter)) {
-        return (c_ref_t)(((c_deque_iterator_t*)iter)->pos - iter->type_info->size());
+        return (c_ref_t)(((c_deque_iterator_t*)iter)->pos - iter->value_type->size());
     }
     return 0;
 }
@@ -256,13 +256,13 @@ __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 __c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (!__is_deque_reverse_iterator(iter)) return;
-    ((c_deque_iterator_t*)iter)->pos -= (n * iter->type_info->size());
+    ((c_deque_iterator_t*)iter)->pos -= (n * iter->value_type->size());
 }
 
 __c_static ptrdiff_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
     if (!__is_deque_reverse_iterator(first) || !__is_deque_reverse_iterator(last)) return 0;
-    return (ptrdiff_t)(((c_deque_iterator_t*)first)->pos - ((c_deque_iterator_t*)last)->pos) / first->type_info->size();
+    return (ptrdiff_t)(((c_deque_iterator_t*)first)->pos - ((c_deque_iterator_t*)last)->pos) / first->value_type->size();
 }
 
 static c_iterator_operation_t s_iter_ops = {
@@ -280,16 +280,16 @@ static c_iterator_operation_t s_iter_ops = {
 };
 
 __c_static __c_inline c_deque_iterator_t __create_iterator(
-    c_containable_t* type_info, c_ref_t pos)
+    c_containable_t* value_type, c_ref_t pos)
 {
-    assert(type_info);
+    assert(value_type);
 
     c_deque_iterator_t iter = {
         .base_iter = {
             .iterator_category = C_ITER_CATE_RANDOM,
             .iterator_type = C_ITER_TYPE_DEQUE,
             .iterator_ops = &s_iter_ops,
-            .type_info = type_info
+            .value_type = value_type
         },
         .pos = pos
     };
@@ -311,15 +311,15 @@ static c_iterator_operation_t s_reverse_iter_ops = {
 };
 
 __c_static __c_inline c_deque_iterator_t __create_reverse_iterator(
-    c_containable_t* type_info, c_ref_t pos)
+    c_containable_t* value_type, c_ref_t pos)
 {
-    assert(type_info);
+    assert(value_type);
     c_deque_iterator_t iter = {
         .base_iter = {
             .iterator_category = C_ITER_CATE_RANDOM,
             .iterator_type = C_ITER_TYPE_DEQUE_REVERSE,
             .iterator_ops = &s_reverse_iter_ops,
-            .type_info = type_info
+            .value_type = value_type
         },
         .pos = pos
     };
@@ -353,15 +353,15 @@ __c_static __c_inline c_ref_t __eos(c_deque_t* deque)
 __c_static __c_inline size_t __available_start(c_deque_t* deque)
 {
     assert(deque);
-    assert(deque->type_info->size);
-    return (deque->start - deque->start_of_storage) / deque->type_info->size();
+    assert(deque->value_type->size);
+    return (deque->start - deque->start_of_storage) / deque->value_type->size();
 }
 
 __c_static __c_inline size_t __available_end(c_deque_t* deque)
 {
     assert(deque);
-    assert(deque->type_info->size);
-    return (deque->end_of_storage - deque->finish) / deque->type_info->size();
+    assert(deque->value_type->size);
+    return (deque->end_of_storage - deque->finish) / deque->value_type->size();
 }
 
 __c_static __c_inline size_t __available(c_deque_t* deque)
@@ -372,8 +372,8 @@ __c_static __c_inline size_t __available(c_deque_t* deque)
 __c_static __c_inline size_t __capacity(c_deque_t* deque)
 {
     assert(deque);
-    assert(deque->type_info->size);
-    return (__eos(deque) - __sos(deque)) / deque->type_info->size();
+    assert(deque->value_type->size);
+    return (__eos(deque) - __sos(deque)) / deque->value_type->size();
 }
 
 __c_static __c_inline void __reserve(c_deque_t* deque, size_t new_cap)
@@ -456,12 +456,12 @@ __c_static size_t backend_max_size(void)
     return (-1);
 }
 
-__c_static void backend_push_back(c_backend_container_t* c, c_ref_t data)
+__c_static void backend_push_back(c_backend_container_t* c, c_ref_t value)
 {
-    if (!c || !data) return;
+    if (!c || !value) return;
 
     c_backend_deque_t* _c = (c_backend_deque_t*)c;
-    c_deque_push_back(_c->impl, data);
+    c_deque_push_back(_c->impl, value);
 }
 
 __c_static void backend_pop_back(c_backend_container_t* c)
@@ -472,12 +472,12 @@ __c_static void backend_pop_back(c_backend_container_t* c)
     c_deque_pop_back(_c->impl);
 }
 
-__c_static void backend_push_front(c_backend_container_t* c, c_ref_t data)
+__c_static void backend_push_front(c_backend_container_t* c, c_ref_t value)
 {
-    if (!c || !data) return;
+    if (!c || !value) return;
 
     c_backend_deque_t* _c = (c_backend_deque_t*)c;
-    c_deque_push_front(_c->impl, data);
+    c_deque_push_front(_c->impl, value);
 }
 
 __c_static void backend_pop_front(c_backend_container_t* c)
@@ -503,22 +503,22 @@ __c_static void backend_swap(c_backend_container_t* c, c_backend_container_t* ot
 __c_static __c_inline void __destroy(c_deque_iterator_t first, c_deque_iterator_t last)
 {
     while (C_ITER_NE(&first, &last)) {
-        first.base_iter.type_info->destroy(first.pos);
+        first.base_iter.value_type->destroy(first.pos);
         C_ITER_INC(&first);
     }
 }
 
 __c_static __c_inline c_deque_iterator_t __fill(
-    c_deque_iterator_t pos, size_t n, c_ref_t data)
+    c_deque_iterator_t pos, size_t n, c_ref_t value)
 {
     while (n--) {
-        if (data) {
-            assert(pos.base_iter.type_info->copy);
-            pos.base_iter.type_info->copy(pos.pos, data);
+        if (value) {
+            assert(pos.base_iter.value_type->copy);
+            pos.base_iter.value_type->copy(pos.pos, value);
         }
         else {
-            assert(pos.base_iter.type_info->create);
-            pos.base_iter.type_info->create(pos.pos);
+            assert(pos.base_iter.value_type->create);
+            pos.base_iter.value_type->create(pos.pos);
         }
         C_ITER_INC(&pos);
     }
@@ -527,27 +527,27 @@ __c_static __c_inline c_deque_iterator_t __fill(
 }
 
 __c_static __c_inline c_deque_iterator_t __insert_aux(
-    c_deque_t* deque, c_deque_iterator_t pos, size_t n, c_ref_t data)
+    c_deque_t* deque, c_deque_iterator_t pos, size_t n, c_ref_t value)
 {
     assert(deque);
 
-    c_containable_t* type_info = deque->type_info;
-    size_t data_size = type_info->size();
+    c_containable_t* value_type = deque->value_type;
+    size_t value_size = value_type->size();
     size_t shift_size = 0;
 
     if (n <= __available_end(deque)) {
-        shift_size = n * data_size;
+        shift_size = n * value_size;
         memmove(pos.pos + shift_size, pos.pos, deque->finish - pos.pos);
-        __fill(pos, n, data);
+        __fill(pos, n, value);
         deque->finish += shift_size;
         //assert(__check_deque_state(deque));
     }
     else if (n <= __available_start(deque)) {
-        shift_size = n * data_size;
+        shift_size = n * value_size;
         memmove(deque->start - shift_size, deque->start, pos.pos - deque->start);
         deque->start -= shift_size;
         pos.pos -= shift_size;
-        __fill(pos, n, data);
+        __fill(pos, n, value);
         //assert(__check_deque_state(deque));
     }
     else {
@@ -556,12 +556,12 @@ __c_static __c_inline c_deque_iterator_t __insert_aux(
         memmove(deque->start_of_storage, deque->start, first_half_size);
         deque->start = deque->start_of_storage;
 
-        memmove(deque->start + first_half_size + n * data_size, pos.pos, second_half_size);
+        memmove(deque->start + first_half_size + n * value_size, pos.pos, second_half_size);
 
         pos.pos = deque->start + first_half_size;
-        __fill(pos, n, data);
+        __fill(pos, n, value);
 
-        deque->finish = pos.pos + n * data_size + second_half_size;
+        deque->finish = pos.pos + n * value_size + second_half_size;
         //assert(__check_deque_state(deque));
     }
 
@@ -572,23 +572,23 @@ __c_static __c_inline int __reallocate_and_move(c_deque_t* deque, size_t n)
 {
     assert(deque);
 
-    size_t data_size = deque->type_info->size();
+    size_t value_size = deque->value_type->size();
 
     // double the capacity or make it large enough
     size_t size = c_deque_size(deque);
     size_t cap = __capacity(deque);
     cap = ((cap * 2) < (n + size) ? (n + size) : (cap * 2));
-    c_storage_t start_of_storage = malloc(cap * data_size);
+    c_storage_t start_of_storage = malloc(cap * value_size);
     if (!start_of_storage) return -1;
 
-    c_ref_t start = start_of_storage + (cap - size) / 2 * data_size;
+    c_ref_t start = start_of_storage + (cap - size) / 2 * value_size;
     memcpy(start, deque->start, deque->finish - deque->start);
     __destroy(c_deque_begin(deque), c_deque_end(deque));
     __c_free(deque->start_of_storage);
     deque->start_of_storage = start_of_storage;
     deque->start = start;
-    deque->finish = start + size * data_size;
-    deque->end_of_storage = start_of_storage + cap * data_size;
+    deque->finish = start + size * value_size;
+    deque->end_of_storage = start_of_storage + cap * value_size;
     //assert(__check_deque_state(deque));
 
     return 0;
@@ -597,9 +597,9 @@ __c_static __c_inline int __reallocate_and_move(c_deque_t* deque, size_t n)
 /**
  * constructor/destructor
  */
-c_deque_t* c_deque_create(c_containable_t* type_info)
+c_deque_t* c_deque_create(c_containable_t* value_type)
 {
-    if (!type_info) return 0;
+    if (!value_type) return 0;
 
     c_deque_t* deque = (c_deque_t*)malloc(sizeof(c_deque_t));
     if (!deque) return 0;
@@ -608,20 +608,20 @@ c_deque_t* c_deque_create(c_containable_t* type_info)
     deque->start = 0;
     deque->finish = 0;
     deque->end_of_storage = 0;
-    deque->type_info = type_info;
+    deque->value_type = value_type;
 
     return deque;
 }
 
-c_deque_t* c_deque_create_from(c_containable_t* type_info, c_ref_t datas, size_t length)
+c_deque_t* c_deque_create_from(c_containable_t* value_type, c_ref_t values, size_t length)
 {
-    if (!type_info || !datas || length == 0) return 0;
+    if (!value_type || !values || length == 0) return 0;
 
-    c_deque_t* deque = c_deque_create(type_info);
+    c_deque_t* deque = c_deque_create(value_type);
     if (!deque) return 0;
 
     __reserve(deque, length);
-    memcpy(deque->start, datas, type_info->size() * length);
+    memcpy(deque->start, values, value_type->size() * length);
 
     return deque;
 }
@@ -630,11 +630,11 @@ c_deque_t* c_deque_copy(c_deque_t* other)
 {
     if (!other) return 0;
 
-    c_deque_t* deque = c_deque_create(other->type_info);
+    c_deque_t* deque = c_deque_create(other->value_type);
     if (!deque) return 0;
 
     __reserve(deque, __capacity(other));
-    memcpy(deque->start, other->start, deque->type_info->size() * c_deque_size(other));
+    memcpy(deque->start, other->start, deque->value_type->size() * c_deque_size(other));
 
     return deque;
 }
@@ -645,9 +645,9 @@ c_deque_t* c_deque_assign(c_deque_t* self, c_deque_t* other)
 
     if (self != other) {
         c_deque_clear(self);
-        self->type_info = other->type_info;
+        self->value_type = other->value_type;
         __reserve(self, __capacity(other));
-        memcpy(self->start, other->start, self->type_info->size() * c_deque_size(other));
+        memcpy(self->start, other->start, self->value_type->size() * c_deque_size(other));
     }
 
     return self;
@@ -668,7 +668,7 @@ void c_deque_destroy(c_deque_t* deque)
 c_ref_t c_deque_at(c_deque_t* deque, size_t pos)
 {
     if (!deque) return 0;
-    return C_REF_T(__begin(deque) + deque->type_info->size() * pos);
+    return C_REF_T(__begin(deque) + deque->value_type->size() * pos);
 }
 
 c_ref_t c_deque_front(c_deque_t* deque)
@@ -680,7 +680,7 @@ c_ref_t c_deque_back(c_deque_t* deque)
 {
     if (c_deque_empty(deque)) return 0;
 
-    return C_REF_T(__end(deque) - deque->type_info->size());
+    return C_REF_T(__end(deque) - deque->value_type->size());
 }
 
 /**
@@ -689,25 +689,25 @@ c_ref_t c_deque_back(c_deque_t* deque)
 c_deque_iterator_t c_deque_begin(c_deque_t* deque)
 {
     assert(deque);
-    return __create_iterator(deque->type_info, __begin(deque));
+    return __create_iterator(deque->value_type, __begin(deque));
 }
 
 c_deque_iterator_t c_deque_rbegin(c_deque_t* deque)
 {
     assert(deque);
-    return __create_reverse_iterator(deque->type_info, __end(deque));
+    return __create_reverse_iterator(deque->value_type, __end(deque));
 }
 
 c_deque_iterator_t c_deque_end(c_deque_t* deque)
 {
     assert(deque);
-    return __create_iterator(deque->type_info, __end(deque));
+    return __create_iterator(deque->value_type, __end(deque));
 }
 
 c_deque_iterator_t c_deque_rend(c_deque_t* deque)
 {
     assert(deque);
-    return __create_reverse_iterator(deque->type_info, __begin(deque));
+    return __create_reverse_iterator(deque->value_type, __begin(deque));
 }
 
 /**
@@ -722,7 +722,7 @@ size_t c_deque_size(c_deque_t* deque)
 {
     if (!deque) return 0;
 
-    return (__end(deque) - __begin(deque)) / deque->type_info->size();
+    return (__end(deque) - __begin(deque)) / deque->value_type->size();
 }
 
 size_t c_deque_max_size(void)
@@ -765,22 +765,22 @@ void c_deque_clear(c_deque_t* deque)
     if (c_deque_empty(deque)) return;
 
     __destroy(c_deque_begin(deque), c_deque_end(deque));
-    size_t data_size = deque->type_info->size();
-    size_t cap = (__eos(deque) - __sos(deque)) / data_size;
-    deque->start = __sos(deque) + (cap / 2) * data_size;
+    size_t value_size = deque->value_type->size();
+    size_t cap = (__eos(deque) - __sos(deque)) / value_size;
+    deque->start = __sos(deque) + (cap / 2) * value_size;
     deque->finish = deque->start;
     //assert(__check_deque_state(deque));
 }
 
-c_deque_iterator_t c_deque_insert(c_deque_t* deque, c_deque_iterator_t pos, c_ref_t data)
+c_deque_iterator_t c_deque_insert(c_deque_t* deque, c_deque_iterator_t pos, c_ref_t value)
 {
-    return c_deque_insert_n(deque, pos, 1, data);
+    return c_deque_insert_n(deque, pos, 1, value);
 }
 
 c_deque_iterator_t c_deque_insert_n(
-    c_deque_t* deque, c_deque_iterator_t pos, size_t count, c_ref_t data)
+    c_deque_t* deque, c_deque_iterator_t pos, size_t count, c_ref_t value)
 {
-    if (!deque || !data) return pos;
+    if (!deque || !value) return pos;
 
     if (!__is_valid_pos(deque, pos.pos)) return c_deque_end(deque);
 
@@ -792,7 +792,7 @@ c_deque_iterator_t c_deque_insert_n(
         pos.pos = deque->start + diff;
     }
 
-    return __insert_aux(deque, pos, count, data);
+    return __insert_aux(deque, pos, count, value);
 }
 
 c_deque_iterator_t c_deque_insert_range(
@@ -821,10 +821,10 @@ c_deque_iterator_t c_deque_erase(c_deque_t* deque, c_deque_iterator_t pos)
     if (!__is_valid_pos(deque, pos.pos) || pos.pos == deque->finish)
         return c_deque_end(deque);
 
-    c_ref_t next_pos = pos.pos + deque->type_info->size();
-    deque->type_info->destroy(pos.pos);
+    c_ref_t next_pos = pos.pos + deque->value_type->size();
+    deque->value_type->destroy(pos.pos);
     memmove(pos.pos, next_pos, deque->finish - next_pos);
-    deque->finish -= deque->type_info->size();
+    deque->finish -= deque->value_type->size();
     //assert(__check_deque_state(deque));
 
     return pos;
@@ -851,48 +851,48 @@ c_deque_iterator_t c_deque_erase_range(
     return first;
 }
 
-void c_deque_push_back(c_deque_t* deque, c_ref_t data)
+void c_deque_push_back(c_deque_t* deque, c_ref_t value)
 {
-    if (!deque || !data) return;
+    if (!deque || !value) return;
 
     if (deque->finish == deque->end_of_storage) {
         if (__reallocate_and_move(deque, 1 * 2))
             return;
     }
 
-    deque->type_info->copy(deque->finish, data);
-    deque->finish += deque->type_info->size();
+    deque->value_type->copy(deque->finish, value);
+    deque->finish += deque->value_type->size();
     //assert(__check_deque_state(deque));
 }
 
 void c_deque_pop_back(c_deque_t* deque)
 {
     if (!c_deque_empty(deque)) {
-        deque->type_info->destroy(c_deque_back(deque));
-        deque->finish -= deque->type_info->size();
+        deque->value_type->destroy(c_deque_back(deque));
+        deque->finish -= deque->value_type->size();
         //assert(__check_deque_state(deque));
     }
 }
 
-void c_deque_push_front(c_deque_t* deque, c_ref_t data)
+void c_deque_push_front(c_deque_t* deque, c_ref_t value)
 {
-    if (!deque || !data) return;
+    if (!deque || !value) return;
 
     if (deque->start == deque->start_of_storage) {
         if (__reallocate_and_move(deque, 1 * 2))
             return;
     }
 
-    deque->start -= deque->type_info->size();
-    deque->type_info->copy(deque->start, data);
+    deque->start -= deque->value_type->size();
+    deque->value_type->copy(deque->start, value);
     //assert(__check_deque_state(deque));
 }
 
 void c_deque_pop_front(c_deque_t* deque)
 {
     if (!c_deque_empty(deque)) {
-        deque->type_info->destroy(c_deque_front(deque));
-        deque->start += deque->type_info->size();
+        deque->value_type->destroy(c_deque_front(deque));
+        deque->start += deque->value_type->size();
         //assert(__check_deque_state(deque));
     }
 }
@@ -902,11 +902,11 @@ void c_deque_resize(c_deque_t* deque, size_t count)
     c_deque_resize_with_value(deque, count, 0);
 }
 
-void c_deque_resize_with_value(c_deque_t* deque, size_t count, c_ref_t data)
+void c_deque_resize_with_value(c_deque_t* deque, size_t count, c_ref_t value)
 {
     if (!deque) return;
 
-    size_t data_size = deque->type_info->size();
+    size_t value_size = deque->value_type->size();
 
     if (count > c_deque_size(deque)) {
         count -= c_deque_size(deque);
@@ -915,11 +915,11 @@ void c_deque_resize_with_value(c_deque_t* deque, size_t count, c_ref_t data)
                 return;
         }
 
-        __insert_aux(deque, c_deque_end(deque), count, data);
+        __insert_aux(deque, c_deque_end(deque), count, value);
     }
     else {
-        c_ref_t pos = deque->start + count * data_size;
-        __destroy(__create_iterator(deque->type_info, pos), c_deque_end(deque));
+        c_ref_t pos = deque->start + count * value_size;
+        __destroy(__create_iterator(deque->value_type, pos), c_deque_end(deque));
         deque->finish = pos;
         //assert(__check_deque_state(deque));
     }
@@ -937,7 +937,7 @@ void c_deque_swap(c_deque_t* deque, c_deque_t* other)
 /**
  * backend
  */
-c_backend_container_t* c_deque_create_backend(c_containable_t* type_info)
+c_backend_container_t* c_deque_create_backend(c_containable_t* value_type)
 {
     static c_backend_operation_t backend_deque_ops = {
         .destroy = backend_destroy,
@@ -958,7 +958,7 @@ c_backend_container_t* c_deque_create_backend(c_containable_t* type_info)
     c_backend_deque_t* backend = (c_backend_deque_t*)malloc(sizeof(c_backend_deque_t));
     if (!backend) return 0;
 
-    backend->impl = c_deque_create(type_info);
+    backend->impl = c_deque_create(value_type);
     if (!backend->impl) {
         __c_free(backend);
         return 0;

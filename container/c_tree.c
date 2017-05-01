@@ -39,7 +39,9 @@ struct __c_tree_node {
 };
 
 struct __c_tree {
-    c_containable_t* type_info;
+    c_containable_t* key_type;
+    c_containable_t* value_type;
+    c_key_of_value key_of_value;
     c_compare key_comp;
     c_tree_node_t* header;
     size_t node_count;
@@ -48,8 +50,8 @@ struct __c_tree {
 static const __rb_tree_color_type s_rb_tree_color_red = false;
 static const __rb_tree_color_type s_rb_tree_color_black = true;
 
-__c_static c_tree_iterator_t __create_iterator(c_containable_t* type_info, c_tree_node_t* node);
-__c_static c_tree_iterator_t __create_reverse_iterator(c_containable_t* type_info, c_tree_node_t* node);
+__c_static c_tree_iterator_t __create_iterator(c_containable_t* value_type, c_tree_node_t* node);
+__c_static c_tree_iterator_t __create_reverse_iterator(c_containable_t* value_type, c_tree_node_t* node);
 
 __c_static __c_inline bool __is_header(c_tree_node_t* node)
 {
@@ -240,13 +242,13 @@ __c_static __c_inline c_tree_node_t* __create_node(c_tree_t* tree, c_ref_t value
 {
     assert(tree);
 
-    c_containable_t* type_info = tree->type_info;
-    assert(type_info);
+    c_containable_t* value_type = tree->value_type;
+    assert(value_type);
 
     c_tree_node_t* node = (c_tree_node_t*)malloc(sizeof(c_tree_node_t));
     if (!node) return 0;
 
-    node->value = malloc(type_info->size());
+    node->value = malloc(value_type->size());
     if (!node->value) {
         __c_free(node);
         return 0;
@@ -258,9 +260,9 @@ __c_static __c_inline c_tree_node_t* __create_node(c_tree_t* tree, c_ref_t value
     node->color  = s_rb_tree_color_red;
 
     if (value)
-        type_info->copy(node->value, value);
+        value_type->copy(node->value, value);
     else
-        type_info->create(node->value);
+        value_type->create(node->value);
 
     return node;
 }
@@ -270,7 +272,7 @@ __c_static __c_inline void __destroy_node(c_tree_t* tree, c_tree_node_t* node)
     assert(tree);
     assert(node);
 
-    tree->type_info->destroy(node->value);
+    tree->value_type->destroy(node->value);
     __c_free(node->value);
     __c_free(node);
 }
@@ -289,10 +291,10 @@ __c_static size_t __count(c_tree_t* tree, c_tree_node_t* node, c_ref_t key)
 {
     size_t n = 0;
     while (node) {
-        if (tree->key_comp(key, node->value))
+        if (tree->key_comp(key, tree->key_of_value(node->value)))
             node = node->left;
         else {
-            if (!tree->key_comp(node->value, key)) {
+            if (!tree->key_comp(tree->key_of_value(node->value), key)) {
                 n += __count(tree, node->left, key);
                 n += __count(tree, node->right, key);
                 return ++n;
@@ -548,8 +550,10 @@ __c_static __c_inline c_tree_node_t* __insert(
     if (!node) return 0;
 
     c_compare key_comp = tree->key_comp;
+    c_key_of_value key_of_value = tree->key_of_value;
     c_tree_node_t* header = __header(tree);
-    if (parent == __header(tree) || hint || key_comp(value, parent->value)) {
+    if (parent == __header(tree) || hint ||
+        key_comp(key_of_value(value), key_of_value(parent->value))) {
         parent->left = node;
 
         if (parent == header) {
@@ -731,7 +735,7 @@ __c_static ptrdiff_t iter_distance(c_iterator_t* first, c_iterator_t* last)
 {
     if (!is_tree_iterator(first) || !is_tree_iterator(last)) return 0;
 
-    c_tree_iterator_t x = __create_iterator(first->type_info, ((c_tree_iterator_t*)first)->node);
+    c_tree_iterator_t x = __create_iterator(first->value_type, ((c_tree_iterator_t*)first)->node);
 
     ptrdiff_t n = 0;
     while (!iter_equal((c_iterator_t*)(&x), last)) {
@@ -761,7 +765,7 @@ __c_static c_iterator_t* reverse_iter_assign(c_iterator_t* dst, c_iterator_t* sr
 __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 {
     if (is_tree_reverse_iterator(iter)) {
-        c_tree_iterator_t x = __create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
+        c_tree_iterator_t x = __create_iterator(iter->value_type, ((c_tree_iterator_t*)iter)->node);
         iter_decrement((c_iterator_t*)(&x));
         ((c_tree_iterator_t*)iter)->node = x.node;
     }
@@ -771,7 +775,7 @@ __c_static c_iterator_t* reverse_iter_increment(c_iterator_t* iter)
 __c_static c_iterator_t* reverse_iter_decrement(c_iterator_t* iter)
 {
     if (is_tree_reverse_iterator(iter)) {
-        c_tree_iterator_t x = __create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
+        c_tree_iterator_t x = __create_iterator(iter->value_type, ((c_tree_iterator_t*)iter)->node);
         iter_increment((c_iterator_t*)(&x));
         ((c_tree_iterator_t*)iter)->node = x.node;
     }
@@ -788,7 +792,7 @@ __c_static c_iterator_t* reverse_iter_post_increment(c_iterator_t* iter, c_itera
             assert(is_tree_reverse_iterator(*tmp));
             reverse_iter_assign(*tmp, iter);
         }
-        c_tree_iterator_t x = __create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
+        c_tree_iterator_t x = __create_iterator(iter->value_type, ((c_tree_iterator_t*)iter)->node);
         iter_decrement((c_iterator_t*)(&x));
         ((c_tree_iterator_t*)iter)->node = x.node;
     }
@@ -805,7 +809,7 @@ __c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_itera
             assert(is_tree_reverse_iterator(*tmp));
             reverse_iter_assign(*tmp, iter);
         }
-        c_tree_iterator_t x = __create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
+        c_tree_iterator_t x = __create_iterator(iter->value_type, ((c_tree_iterator_t*)iter)->node);
         iter_increment((c_iterator_t*)(&x));
         ((c_tree_iterator_t*)iter)->node = x.node;
     }
@@ -815,7 +819,7 @@ __c_static c_iterator_t* reverse_iter_post_decrement(c_iterator_t* iter, c_itera
 __c_static c_ref_t reverse_iter_dereference(c_iterator_t* iter)
 {
     if (is_tree_reverse_iterator(iter)) {
-        c_tree_iterator_t x = __create_iterator(iter->type_info, ((c_tree_iterator_t*)iter)->node);
+        c_tree_iterator_t x = __create_iterator(iter->value_type, ((c_tree_iterator_t*)iter)->node);
         iter_decrement((c_iterator_t*)(&x));
         return x.node->value;
     }
@@ -849,7 +853,7 @@ __c_static ptrdiff_t reverse_iter_distance(c_iterator_t* first, c_iterator_t* la
 {
     if (!is_tree_reverse_iterator(first) || !is_tree_reverse_iterator(last)) return 0;
 
-    c_tree_iterator_t x = __create_reverse_iterator(first->type_info, ((c_tree_iterator_t*)first)->node);
+    c_tree_iterator_t x = __create_reverse_iterator(first->value_type, ((c_tree_iterator_t*)first)->node);
 
     ptrdiff_t n = 0;
     while (!reverse_iter_equal((c_iterator_t*)(&x), last)) {
@@ -875,9 +879,9 @@ static c_iterator_operation_t s_iter_ops = {
 };
 
 __c_static __c_inline c_tree_iterator_t __create_iterator(
-    c_containable_t* type_info, c_tree_node_t* node)
+    c_containable_t* value_type, c_tree_node_t* node)
 {
-    assert(type_info);
+    assert(value_type);
     assert(node);
 
     c_tree_iterator_t iter = {
@@ -885,7 +889,7 @@ __c_static __c_inline c_tree_iterator_t __create_iterator(
             .iterator_category = C_ITER_CATE_BIDIRECTION,
             .iterator_type = C_ITER_TYPE_TREE,
             .iterator_ops = &s_iter_ops,
-            .type_info = type_info
+            .value_type = value_type
         },
         .node = node
     };
@@ -907,9 +911,9 @@ static c_iterator_operation_t s_reverse_iter_ops = {
 };
 
 __c_static __c_inline c_tree_iterator_t __create_reverse_iterator(
-    c_containable_t* type_info, c_tree_node_t* node)
+    c_containable_t* value_type, c_tree_node_t* node)
 {
-    assert(type_info);
+    assert(value_type);
     assert(node);
 
     c_tree_iterator_t iter = {
@@ -917,14 +921,17 @@ __c_static __c_inline c_tree_iterator_t __create_reverse_iterator(
             .iterator_category = C_ITER_CATE_BIDIRECTION,
             .iterator_type = C_ITER_TYPE_TREE_REVERSE,
             .iterator_ops = &s_reverse_iter_ops,
-            .type_info = type_info
+            .value_type = value_type
         },
         .node = node
     };
     return iter;
 }
 
-c_tree_t* c_tree_create(c_containable_t* type_info, c_compare comp)
+c_tree_t* c_tree_create(c_containable_t* key_type,
+                        c_containable_t* value_type,
+                        c_key_of_value key_of_value,
+                        c_compare key_comp)
 {
     c_tree_t* tree = (c_tree_t*)malloc(sizeof(c_tree_t));
     if (!tree) return 0;
@@ -941,8 +948,10 @@ c_tree_t* c_tree_create(c_containable_t* type_info, c_compare comp)
     tree->header->parent = 0;
     tree->header->value = 0;
 
-    tree->type_info = type_info;
-    tree->key_comp = comp;
+    tree->key_type = key_type;
+    tree->value_type = value_type;
+    tree->key_of_value = key_of_value;
+    tree->key_comp = key_comp;
     tree->node_count = 0;
 
     return tree;
@@ -957,25 +966,25 @@ void c_tree_destroy(c_tree_t* tree)
 c_tree_iterator_t c_tree_begin(c_tree_t* tree)
 {
     assert(tree);
-    return __create_iterator(tree->type_info, __leftmost(tree));
+    return __create_iterator(tree->value_type, __leftmost(tree));
 }
 
 c_tree_iterator_t c_tree_end(c_tree_t* tree)
 {
     assert(tree);
-    return __create_iterator(tree->type_info, __header(tree));
+    return __create_iterator(tree->value_type, __header(tree));
 }
 
 c_tree_iterator_t c_tree_rbegin(c_tree_t* tree)
 {
     assert(tree);
-    return __create_reverse_iterator(tree->type_info, __header(tree));
+    return __create_reverse_iterator(tree->value_type, __header(tree));
 }
 
 c_tree_iterator_t c_tree_rend(c_tree_t* tree)
 {
     assert(tree);
-    return __create_reverse_iterator(tree->type_info, __leftmost(tree));
+    return __create_reverse_iterator(tree->value_type, __leftmost(tree));
 }
 
 bool c_tree_empty(c_tree_t* tree)
@@ -1010,28 +1019,27 @@ c_tree_iterator_t c_tree_insert_unique_value(c_tree_t* tree, c_ref_t value)
     assert(tree);
     assert(value);
 
+    c_compare key_comp = tree->key_comp;
+    c_key_of_value key_of_value = tree->key_of_value;
     c_tree_node_t* y = __header(tree);
     c_tree_node_t* x = __root(tree);
     bool comp = true;
     while (x) {
         y = x;
-        comp = tree->key_comp(value, x->value);
+        comp = key_comp(key_of_value(value), key_of_value(x->value));
         x = comp ? x->left : x->right;
     }
 
-    c_tree_iterator_t z = __create_iterator(tree->type_info, y);
+    c_tree_iterator_t z = __create_iterator(tree->value_type, y);
     if (comp) {
-        if (z.node == __leftmost(tree)) {
-            return __create_iterator(tree->type_info, __insert(tree, 0, y, value));
-        }
-        else {
+        if (z.node == __leftmost(tree))
+            return __create_iterator(tree->value_type, __insert(tree, 0, y, value));
+        else
             C_ITER_DEC(&z);
-        }
     }
 
-    if (tree->key_comp(z.node->value, value)) {
-        return __create_iterator(tree->type_info, __insert(tree, 0, y, value));
-    }
+    if (key_comp(key_of_value(z.node->value), key_of_value(value)))
+        return __create_iterator(tree->value_type, __insert(tree, 0, y, value));
 
     return z;
 }
@@ -1041,28 +1049,30 @@ c_tree_iterator_t c_tree_insert_unique(c_tree_t* tree, c_tree_iterator_t hint, c
     assert(tree);
     assert(value);
 
+    c_compare key_comp = tree->key_comp;
+    c_key_of_value key_of_value = tree->key_of_value;
     if (hint.node == __leftmost(tree)) { // begin()
-        if (tree->node_count > 0 && tree->key_comp(value, hint.node->value))
+        if (tree->node_count > 0 && key_comp(key_of_value(value), key_of_value(hint.node->value)))
             // insert to the left
-            return __create_iterator(tree->type_info, __insert(tree, hint.node, hint.node, value));
+            return __create_iterator(tree->value_type, __insert(tree, hint.node, hint.node, value));
     }
     else if (hint.node == __header(tree)) { // end()
         // tree must be non-empty, otherwise go to the first if statement
-        if (tree->key_comp(__rightmost(tree)->value, value))
+        if (key_comp(key_of_value(__rightmost(tree)->value), key_of_value(value)))
             // insert to the right
-            return __create_iterator(tree->type_info, __insert(tree, 0, __rightmost(tree), value));
+            return __create_iterator(tree->value_type, __insert(tree, 0, __rightmost(tree), value));
     }
     else {
         c_tree_iterator_t before = hint;
         C_ITER_DEC(&before);
-        if (tree->key_comp(before.node->value, value) &&
-            tree->key_comp(value, hint.node->value)) {
+        if (key_comp(key_of_value(before.node->value), key_of_value(value)) &&
+            key_comp(key_of_value(value), key_of_value(hint.node->value))) {
             if (!__has_right(before.node))
                 // insert to before's right
-                return __create_iterator(tree->type_info, __insert(tree, 0, before.node, value));
+                return __create_iterator(tree->value_type, __insert(tree, 0, before.node, value));
             else
                 // insert to hint's left
-                return __create_iterator(tree->type_info, __insert(tree, hint.node, hint.node, value));
+                return __create_iterator(tree->value_type, __insert(tree, hint.node, hint.node, value));
         }
     }
 
@@ -1094,7 +1104,7 @@ void c_tree_insert_unique_from(c_tree_t* tree, c_ref_t first_value, c_ref_t last
     c_ref_t value = first_value;
     while (value != last_value) {
         c_tree_insert_unique_value(tree, value);
-        value += tree->type_info->size();
+        value += tree->value_type->size();
     }
 }
 
@@ -1106,12 +1116,14 @@ c_tree_iterator_t c_tree_insert_equal_value(c_tree_t* tree, c_ref_t value)
     c_tree_node_t* y = __header(tree);
     c_tree_node_t* x = __root(tree);
 
+    c_compare key_comp = tree->key_comp;
+    c_key_of_value key_of_value = tree->key_of_value;
     while (x) {
         y = x;
-        x = tree->key_comp(value, x->value) ? x->left : x->right;
+        x = key_comp(key_of_value(value), key_of_value(x->value)) ? x->left : x->right;
     }
 
-    return __create_iterator(tree->type_info, __insert(tree, 0, y, value));
+    return __create_iterator(tree->value_type, __insert(tree, 0, y, value));
 }
 
 c_tree_iterator_t c_tree_insert_equal(c_tree_t* tree, c_tree_iterator_t hint, c_ref_t value)
@@ -1119,28 +1131,30 @@ c_tree_iterator_t c_tree_insert_equal(c_tree_t* tree, c_tree_iterator_t hint, c_
     assert(tree);
     assert(value);
 
+    c_compare key_comp = tree->key_comp;
+    c_key_of_value key_of_value = tree->key_of_value;
     if (hint.node == __leftmost(tree)) { // begin()
-        if (tree->node_count > 0 && !tree->key_comp(hint.node->value, value))
+        if (tree->node_count > 0 && !key_comp(key_of_value(hint.node->value), key_of_value(value)))
             // insert to the left
-            return __create_iterator(tree->type_info, __insert(tree, hint.node, hint.node, value));
+            return __create_iterator(tree->value_type, __insert(tree, hint.node, hint.node, value));
     }
     else if (hint.node == __header(tree)) { // end()
         // tree must be non-empty, otherwise go to the first if statement
-        if (!tree->key_comp(value, __rightmost(tree)->value))
+        if (!key_comp(key_of_value(value), key_of_value(__rightmost(tree)->value)))
             // insert to the right
-            return __create_iterator(tree->type_info, __insert(tree, 0, __rightmost(tree), value));
+            return __create_iterator(tree->value_type, __insert(tree, 0, __rightmost(tree), value));
     }
     else {
         c_tree_iterator_t before = hint;
         C_ITER_DEC(&before);
-        if (!tree->key_comp(value, before.node->value) &&
-            !tree->key_comp(hint.node->value, value)) {
+        if (!key_comp(key_of_value(value), key_of_value(before.node->value)) &&
+            !key_comp(key_of_value(hint.node->value), key_of_value(value))) {
             if (!__has_right(before.node))
                 // insert to before's right
-                return __create_iterator(tree->type_info, __insert(tree, 0, before.node, value));
+                return __create_iterator(tree->value_type, __insert(tree, 0, before.node, value));
             else
                 // insert to hint's left
-                return __create_iterator(tree->type_info, __insert(tree, hint.node, hint.node, value));
+                return __create_iterator(tree->value_type, __insert(tree, hint.node, hint.node, value));
         }
     }
 
@@ -1172,7 +1186,7 @@ void c_tree_insert_equal_from(c_tree_t* tree, c_ref_t first_value, c_ref_t last_
     c_ref_t value = first_value;
     while (value != last_value) {
         c_tree_insert_equal_value(tree, value);
-        value += tree->type_info->size();
+        value += tree->value_type->size();
     }
 }
 
@@ -1222,7 +1236,7 @@ void c_tree_erase_from(c_tree_t* tree, c_ref_t first_key, c_ref_t last_key)
     c_ref_t key = first_key;
     while (key != last_key) {
         c_tree_erase_key(tree, key);
-        key += tree->type_info->size();
+        key += tree->value_type->size();
     }
 }
 
@@ -1239,12 +1253,14 @@ c_tree_iterator_t c_tree_find(c_tree_t* tree, c_ref_t key)
     if (c_tree_empty(tree) || !key) return c_tree_end(tree);
 
     c_tree_node_t* node = __root(tree);
+    c_compare key_comp = tree->key_comp;
+    c_key_of_value key_of_value = tree->key_of_value;
     while (node) {
-        if (tree->key_comp(key, node->value))
+        if (key_comp(key, key_of_value(node->value)))
             node = node->left;
         else {
-            if (!tree->key_comp(node->value, key))
-                return __create_iterator(tree->type_info, node);
+            if (!key_comp(key_of_value(node->value), key))
+                return __create_iterator(tree->value_type, node);
 
             node = node->right;
         }
@@ -1268,8 +1284,10 @@ c_tree_iterator_t c_tree_lower_bound(c_tree_t* tree, c_ref_t key)
     c_tree_node_t* y = __header(tree);
     c_tree_node_t* x = __root(tree);
 
+    c_compare key_comp = tree->key_comp;
+    c_key_of_value key_of_value = tree->key_of_value;
     while (x != 0) {
-        if (!tree->key_comp(x->value, key)) {
+        if (!key_comp(key_of_value(x->value), key)) {
             y = x;
             x = __left(x);
         }
@@ -1278,7 +1296,7 @@ c_tree_iterator_t c_tree_lower_bound(c_tree_t* tree, c_ref_t key)
     }
 
     // return last node which is not less than key
-    return __create_iterator(tree->type_info, y);
+    return __create_iterator(tree->value_type, y);
 }
 
 c_tree_iterator_t c_tree_upper_bound(c_tree_t* tree, c_ref_t key)
@@ -1289,8 +1307,10 @@ c_tree_iterator_t c_tree_upper_bound(c_tree_t* tree, c_ref_t key)
     c_tree_node_t* y = __header(tree);
     c_tree_node_t* x = __root(tree);
 
+    c_compare key_comp = tree->key_comp;
+    c_key_of_value key_of_value = tree->key_of_value;
     while (x != 0) {
-        if (tree->key_comp(key, x->value)) {
+        if (key_comp(key, key_of_value(x->value))) {
             y = x;
             x = __left(x);
         }
@@ -1299,7 +1319,7 @@ c_tree_iterator_t c_tree_upper_bound(c_tree_t* tree, c_ref_t key)
     }
 
     // return last node which is greater than key
-    return __create_iterator(tree->type_info, y);
+    return __create_iterator(tree->value_type, y);
 }
 
 void c_tree_equal_range(c_tree_t* tree, c_ref_t key,
@@ -1346,6 +1366,8 @@ bool c_tree_rb_verify(c_tree_t* tree)
     size_t black_num = __black_count(__leftmost(tree), __root(tree));
     c_tree_iterator_t first = c_tree_begin(tree);
     c_tree_iterator_t last = c_tree_end(tree);
+    c_compare key_comp = tree->key_comp;
+    c_key_of_value key_of_value = tree->key_of_value;
     assert(last.node);
     while (first.node != last.node) {
         assert(first.node);
@@ -1358,10 +1380,10 @@ bool c_tree_rb_verify(c_tree_t* tree)
             return false;
         }
 
-        if (left && tree->key_comp(first.node->value, left->value))
+        if (left && key_comp(key_of_value(first.node->value), key_of_value(left->value)))
             return false;
 
-        if (right && tree->key_comp(right->value, first.node->value))
+        if (right && key_comp(key_of_value(right->value), key_of_value(first.node->value)))
             return false;
 
         if (!left && !right && __black_count(first.node, __root(tree)) != black_num)
