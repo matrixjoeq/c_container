@@ -24,8 +24,9 @@
 
 #include <gtest/gtest.h>
 #include <stdlib.h>
+#include <algorithm>
 #include "c_internal.h"
-#include "c_list.h"
+#include "c_vector.h"
 #include "c_algorithm.h"
 
 namespace c_container {
@@ -39,50 +40,117 @@ bool greater(c_ref_t lhs, c_ref_t rhs)
     return (*(int*)lhs) > (*(int*)rhs);
 }
 
+void print_value(c_ref_t data)
+{
+    printf("%d ", C_DEREF_INT(data));
+}
+
+inline void print_newline(void)
+{
+    printf("\n");
+}
+
 #pragma GCC diagnostic ignored "-Weffc++"
 class CSortTest : public ::testing::Test
 {
 public:
-    CSortTest() : list(0) {}
+    CSortTest() : vector(0) {}
     ~CSortTest() { TearDown(); }
 
-    void SetupList(const int *datas, int length)
+    void SetupVector(const int *datas, int length)
     {
         for (int i = 0; i < length; ++i)
-            c_list_push_back(list, C_REF_T(&datas[i]));
-        first = c_list_begin(list);
-        last = c_list_end(list);
+            c_vector_push_back(vector, C_REF_T(&datas[i]));
+        first = c_vector_begin(vector);
+        last = c_vector_end(vector);
     }
 
     void SetUp()
     {
-        list = C_LIST_INT;
-        first = c_list_begin(list);
-        last = c_list_end(list);
+        vector = C_VECTOR_INT;
+        first = c_vector_begin(vector);
+        last = c_vector_end(vector);
         output = 0;
     }
 
     void TearDown()
     {
         __c_free(output);
-        c_list_destroy(list);
-        list = 0;
+        c_vector_destroy(vector);
+        vector = 0;
         output = 0;
     }
 
 protected:
-    c_list_t* list;
-    c_list_iterator_t first;
-    c_list_iterator_t last;
-    c_list_iterator_t* output;
+    c_vector_t* vector;
+    c_vector_iterator_t first;
+    c_vector_iterator_t last;
+    c_vector_iterator_t* output;
 };
 #pragma GCC diagnostic warning "-Weffc++"
 
 TEST_F(CSortTest, IsSorted)
 {
-    SetupList(default_data, default_length);
+    SetupVector(default_data, default_length);
     EXPECT_TRUE(c_algo_is_sorted(&first, &last));
     EXPECT_FALSE(c_algo_is_sorted_by(&first, &last, greater));
+}
+
+TEST_F(CSortTest, PartialSort)
+{
+    int numbers[] = { 5, 7, 4, 2, 8, 6, 1, 9, 0, 3 };
+    SetupVector(numbers, __array_length(numbers));
+    c_iterator_t* middle = 0;
+    __c_iter_move_copy(&middle, C_ITER_T(&first), 3);
+
+    c_algo_partial_sort(&first, middle, &last);
+    c_algo_for_each(&first, &last, print_value);
+    print_newline();
+    EXPECT_TRUE(c_algo_is_sorted(&first, middle));
+
+    __c_free(middle);
+}
+
+TEST_F(CSortTest, PartialSortCopy)
+{
+    int v0_numbers[] = { 4, 2, 5, 1, 3 };
+    int v1_numbers[] = { 10, 11, 12 };
+    int v2_numbers[] = { 10, 11, 12, 13, 14, 15, 16 };
+
+    c_vector_t* v0 = c_vector_create_from(c_get_int_type_info(), v0_numbers, __array_length(v0_numbers));
+    c_vector_t* v1 = c_vector_create_from(c_get_int_type_info(), v1_numbers, __array_length(v1_numbers));
+    c_vector_t* v2 = c_vector_create_from(c_get_int_type_info(), v2_numbers, __array_length(v2_numbers));
+
+    c_vector_iterator_t v0_first = c_vector_begin(v0);
+    c_vector_iterator_t v0_last = c_vector_end(v0);
+    c_vector_iterator_t v1_first = c_vector_begin(v1);
+    c_vector_iterator_t v1_last = c_vector_end(v1);
+    c_vector_iterator_t v2_first = c_vector_begin(v2);
+    c_vector_iterator_t v2_last = c_vector_end(v2);
+    c_vector_iterator_t* v_output = 0;
+
+    int e1_numbers[] = { 1, 2, 3 };
+    EXPECT_EQ(std::min(__array_length(v0_numbers), __array_length(v1_numbers)),
+              c_algo_partial_sort_copy(&v0_first, &v0_last, &v1_first, &v1_last, &v_output));
+    EXPECT_TRUE(C_ITER_EQ(&v1_last, v_output));
+    __array_foreach(e1_numbers, i) {
+        EXPECT_EQ(e1_numbers[i], C_DEREF_INT(C_ITER_DEREF(&v1_first)));
+        C_ITER_INC(&v1_first);
+    }
+
+    int e2_numbers[] = { 1, 2, 3, 4, 5, 15, 16 };
+    EXPECT_EQ(std::min(__array_length(v0_numbers), __array_length(v2_numbers)),
+              c_algo_partial_sort_copy(&v0_first, &v0_last, &v2_first, &v2_last, &v_output));
+    EXPECT_EQ(15, C_DEREF_INT(C_ITER_DEREF(v_output)));
+    __array_foreach(e2_numbers, i) {
+        EXPECT_EQ(e2_numbers[i], C_DEREF_INT(C_ITER_DEREF(&v2_first)));
+        C_ITER_INC(&v2_first);
+    }
+
+    __c_free(v_output);
+    c_vector_destroy(v0);
+    c_vector_destroy(v1);
+    c_vector_destroy(v2);
 }
 
 } // namespace

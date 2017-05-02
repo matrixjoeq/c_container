@@ -572,12 +572,40 @@ void algo_is_sorted_until_by(c_iterator_t* __c_forward_iterator first,
                              c_iterator_t** __c_forward_iterator until,
                              c_compare comp);
 
+// Rearranges elements such that the range [first, middle) contains the sorted middle - first smallest elements
+// in the range [first, last). The order of equal elements is not guaranteed to be preserved.
+// The order of the remaining elements in the range [middle, last) is unspecified.
+// Elements are compared using the given binary comparison function comp.
+void algo_partial_sort_by(c_iterator_t* __c_random_iterator first,
+                          c_iterator_t* __c_random_iterator middle,
+                          c_iterator_t* __c_random_iterator last,
+                          c_compare comp);
+
+// Sorts some of the elements in the range [first, last) in ascending order, storing the result in the range [d_first, d_last).
+// At most d_last - d_first of the elements are moved to the range [d_first, d_first + n) and then sorted.
+// n is the number of elements to sort (n = min(last - first, d_last - d_first)).
+// The order of equal elements is not guaranteed to be preserved.
+// Returns the number of elements copied.
+// Sets d_upper to the element defining the upper boundary of the sorted range, i.e. d_first + min(last - first, d_last - d_first).
+size_t algo_partial_sort_copy_by(c_iterator_t* __c_forward_iterator first,
+                                 c_iterator_t* __c_forward_iterator last,
+                                 c_iterator_t* __c_random_iterator d_first,
+                                 c_iterator_t* __c_random_iterator d_last,
+                                 c_iterator_t** __c_random_iterator d_upper,
+                                 c_compare comp);
+
 // sorting helpers
 #define c_algo_is_sorted_by(x, y, c)            algo_is_sorted_by(C_ITER_T(x), C_ITER_T(y), (c))
 #define c_algo_is_sorted_until_by(x, y, u, c)   algo_is_sorted_until_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(u), (c))
+#define c_algo_partial_sort_by(x, m, y, c)      algo_partial_sort_by(C_ITER_T(x), C_ITER_T(m), C_ITER_T(y), (c))
+#define c_algo_partial_sort_copy_by(x, y, df, dl, du, c) \
+    algo_partial_sort_copy_by(C_ITER_T(x), C_ITER_T(y), C_ITER_T(df), C_ITER_T(dl), C_ITER_PTR(du), (c))
 
 #define c_algo_is_sorted(x, y)                  c_algo_is_sorted_by((x), (y), __c_get_less(x))
 #define c_algo_is_sorted_until(x, y, u)         c_algo_is_sorted_until_by((x), (y), (u), __c_get_less(x))
+#define c_algo_partial_sort(x, m, y)            c_algo_partial_sort_by((x), (m), (y), __c_get_less(x))
+#define c_algo_partial_sort_copy(x, y, df, dl, du) \
+    c_algo_partial_sort_copy_by((x), (y), (df), (dl), (du), __c_get_less(x))
 
 /***********************************************/
 /* binary search operations (on sorted ranges) */
