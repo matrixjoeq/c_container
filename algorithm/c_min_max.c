@@ -184,3 +184,39 @@ c_ref_t algo_clamp_by(c_containable_t* value_type,
                        : algo_min_by(value_type, v, hi, comp);
 }
 
+bool algo_lexicographical_compare_by(c_iterator_t* __c_forward_iterator first1,
+                                     c_iterator_t* __c_forward_iterator last1,
+                                     c_iterator_t* __c_forward_iterator first2,
+                                     c_iterator_t* __c_forward_iterator last2,
+                                     c_compare comp)
+{
+    if (!first1 || !last1 || !first2 || !last2 || !comp) return false;
+    assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
+    assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
+    assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
+    assert(C_ITER_AT_LEAST(last2, C_ITER_CATE_FORWARD));
+
+    bool ret = false;
+
+    __C_ALGO_BEGIN_4(first1, last1, first2, last2)
+
+    while (C_ITER_NE(__first1, __last1) && C_ITER_NE(__first2, __last2)) {
+        if (comp(C_ITER_DEREF(__first1), C_ITER_DEREF(__first2))) {
+            ret = true;
+            break;
+        }
+        if (comp(C_ITER_DEREF(__first2), C_ITER_DEREF(__first1))) {
+            ret = false;
+            break;
+        }
+        C_ITER_INC(__first1);
+        C_ITER_INC(__first2);
+    }
+
+    if (C_ITER_EQ(__first1, __last1) && C_ITER_NE(__first2, __last2))
+        ret = true;
+
+    __C_ALGO_END_4(first1, last1, first2, last2)
+
+    return ret;
+}

@@ -83,5 +83,30 @@ TEST_F(CMinMaxTest, MinMax)
     __c_free(max);
 }
 
+TEST_F(CMinMaxTest, LexicographicalCompare)
+{
+    SetupList(default_data, default_length);
+
+    int smaller[] = { 0, 1, 2, 3 };
+    int bigger[] = { 1 };
+    c_list_t* l_smaller = c_list_create_from(c_get_int_type_info(), C_REF_T(smaller), __array_length(smaller));
+    c_list_t* l_bigger = c_list_create_from(c_get_int_type_info(), C_REF_T(bigger), __array_length(bigger));
+    c_list_t* l_equal = c_list_create_from(c_get_int_type_info(), C_REF_T(default_data), default_length);
+    c_list_iterator_t s_first = c_list_begin(l_smaller);
+    c_list_iterator_t s_last = c_list_end(l_smaller);
+    c_list_iterator_t b_first = c_list_begin(l_bigger);
+    c_list_iterator_t b_last = c_list_end(l_bigger);
+    c_list_iterator_t e_first = c_list_begin(l_equal);
+    c_list_iterator_t e_last = c_list_end(l_equal);
+
+    EXPECT_TRUE(c_algo_lexicographical_compare(&s_first, &s_last, &first, &last));
+    EXPECT_FALSE(c_algo_lexicographical_compare(&b_first, &b_last, &first, &last));
+    EXPECT_FALSE(c_algo_lexicographical_compare(&e_first, &e_last, &first, &last));
+
+    c_list_destroy(l_equal);
+    c_list_destroy(l_smaller);
+    c_list_destroy(l_bigger);
+}
+
 } // namespace
 } // namespace c_container

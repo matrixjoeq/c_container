@@ -878,6 +878,15 @@ c_ref_t algo_clamp_by(c_containable_t* type_info,
                       c_ref_t hi,
                       c_compare comp);
 
+// Checks if the first range [first1, last1) is lexicographically less than the second range [first2, last2).
+// Elements are compared using the given binary comparison function comp.
+// Returns true if the first range is lexicographically less than the second.
+bool algo_lexicographical_compare_by(c_iterator_t* __c_forward_iterator first1,
+                                     c_iterator_t* __c_forward_iterator last1,
+                                     c_iterator_t* __c_forward_iterator first2,
+                                     c_iterator_t* __c_forward_iterator last2,
+                                     c_compare comp);
+
 // min/max helpers
 #define c_algo_max_by(t, x, y, c)               algo_max_by((t), C_REF_T(x), C_REF_T(y), (c))
 #define c_algo_min_by(t, x, y, c)               algo_min_by((t), C_REF_T(x), C_REF_T(y), (c))
@@ -885,6 +894,8 @@ c_ref_t algo_clamp_by(c_containable_t* type_info,
 #define c_algo_min_element_by(x, y, m, c)       algo_min_element_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(m), (c))
 #define c_algo_minmax_element_by(x, y, s, g, c) algo_minmax_element_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(s), C_ITER_PTR(g), (c))
 #define c_algo_clamp_by(t, v, l, h, c)          algo_clamp_by((t), C_REF_T(v), C_REF_T(l), C_REF_T(h), (c))
+#define c_algo_lexicographical_compare_by(x1, y1, x2, y2, c) \
+    algo_lexicographical_compare_by(C_ITER_T(x1), C_ITER_T(y1), C_ITER_T(x2), C_ITER_T(y2), (c))
 
 #define c_algo_max(t, x, y)                     c_algo_max_by((t), (x), (y), (t)->less)
 #define c_algo_min(t, x, y)                     c_algo_min_by((t), (x), (y), (t)->less)
@@ -892,14 +903,8 @@ c_ref_t algo_clamp_by(c_containable_t* type_info,
 #define c_algo_min_element(x, y, m)             c_algo_min_element_by((x), (y), (m), __c_get_less(x))
 #define c_algo_minmax_element(x, y, s, g)       c_algo_minmax_element_by((x), (y), (s), (g), __c_get_less(x))
 #define c_algo_clamp(t, v, l, h)                c_algo_clamp_by((t), (v), (l), (h), (t)->less)
-
-/**********************/
-/* numeric operations */
-/**********************/
-
-/**************************************/
-/* operations on uninitialized memory */
-/**************************************/
+#define c_algo_lexicographical_compare(x1, y1, x2, y2) \
+    c_algo_lexicographical_compare_by((x1), (y1), (x2), (y2), __c_get_less(x1))
 
 #ifdef __cplusplus
 }
