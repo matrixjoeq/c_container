@@ -78,8 +78,8 @@ size_t algo_count_if(c_iterator_t* __c_input_iterator first,
 // Sets mismatch1 to the first mismatching positin in [first, last).
 // Sets mismatch2 to the first mismatching position in [first2, first2 + (last - first)).
 // If no mismatching, mismatch1 is set to last, mismatch2 is set to first2 + (last - first).
-bool algo_mismatch_by(c_iterator_t* __c_input_iterator first,
-                      c_iterator_t* __c_input_iterator last,
+bool algo_mismatch_by(c_iterator_t* __c_input_iterator first1,
+                      c_iterator_t* __c_input_iterator last1,
                       c_iterator_t* __c_input_iterator first2,
                       c_iterator_t** __c_input_iterator mismatch1,
                       c_iterator_t** __c_input_iterator mismatch2,
@@ -87,8 +87,8 @@ bool algo_mismatch_by(c_iterator_t* __c_input_iterator first,
 
 // Returns true if the range [first, last) is equal (which means predicate returns true)
 // to the range [first2, first2 + (last1 - first1)), and false otherwise
-bool algo_equal_by(c_iterator_t* __c_input_iterator first,
-                   c_iterator_t* __c_input_iterator last,
+bool algo_equal_by(c_iterator_t* __c_input_iterator first1,
+                   c_iterator_t* __c_input_iterator last1,
                    c_iterator_t* __c_input_iterator first2,
                    c_binary_predicate pred);
 
@@ -388,8 +388,8 @@ void algo_swap(c_containable_t* type_info,
 
 // Exchanges elements between range [first, last) and another range starting at first2.
 // Returns the number of elements swapped.
-size_t algo_swap_range(c_iterator_t* __c_forward_iterator first,
-                       c_iterator_t* __c_forward_iterator last,
+size_t algo_swap_range(c_iterator_t* __c_forward_iterator first1,
+                       c_iterator_t* __c_forward_iterator last1,
                        c_iterator_t* __c_forward_iterator first2);
 
 // Swaps the values of the elements the given iterators are pointing to.
@@ -649,6 +649,118 @@ void algo_equal_range_by(c_iterator_t* __c_forward_iterator first,
 /*************************************/
 /* set operations (on sorted ranges) */
 /*************************************/
+// Merges two sorted ranges [first1, last1) and [first2, last2) into one sorted range beginning at d_first.
+// Elements are compared using the given binary comparison function comp.
+// Returns the number of elements merged.
+// Sets d_last to the element past the last element copied.
+size_t algo_merge_by(c_iterator_t* __c_forward_iterator first1,
+                     c_iterator_t* __c_forward_iterator last1,
+                     c_iterator_t* __c_forward_iterator first2,
+                     c_iterator_t* __c_forward_iterator last2,
+                     c_iterator_t* __c_forward_iterator d_first,
+                     c_iterator_t** __c_forward_iterator d_last,
+                     c_compare comp);
+
+// Returns true if every element from the sorted range [first2, last2) is found within the sorted range [first1, last1).
+// Also returns true if [first2, last2) is empty.
+// Both ranges must be sorted with the given comparison function comp.
+bool algo_includes_by(c_iterator_t* __c_forward_iterator first1,
+                      c_iterator_t* __c_forward_iterator last1,
+                      c_iterator_t* __c_forward_iterator first2,
+                      c_iterator_t* __c_forward_iterator last2,
+                      c_compare comp);
+
+// Copies the elements from the sorted range [first1, last1) which are not found in the sorted range [first2, last2)
+// to the range beginning at d_first.
+// The resulting range is also sorted. Equivalent elements are treated individually, that is,
+// if some element is found m times in [first1, last1) and n times in [first2, last2), it will be copied to d_first
+// exactly max(m-n, 0) times. The resulting range cannot overlap with either of the input ranges.
+// Elements are compared using the given binary comparison function comp and the ranges must be sorted with respect to the same.
+// Returns the number of elements copied.
+// Sets d_last to past the end of the constructed range.
+size_t algo_set_difference_by(c_iterator_t* __c_forward_iterator first1,
+                              c_iterator_t* __c_forward_iterator last1,
+                              c_iterator_t* __c_forward_iterator first2,
+                              c_iterator_t* __c_forward_iterator last2,
+                              c_iterator_t* __c_forward_iterator d_first,
+                              c_iterator_t** __c_forward_iterator d_last,
+                              c_compare comp);
+
+// Constructs a sorted range beginning at d_first consisting of elements that are found in both sorted ranges [first1, last1)
+// and [first2, last2). If some element is found m times in [first1, last1) and n times in [first2, last2),
+// the first min(m, n) elements will be copied from the first range to the destination range.
+// The order of equivalent elements is preserved. The resulting range cannot overlap with either of the input ranges.
+// Elements are compared using the given binary comparison function comp and the ranges must be sorted with respect to the same.
+// Returns the number of elements copied.
+// Sets d_last to past the end of the constructed range.
+size_t algo_set_intersection_by(c_iterator_t* __c_forward_iterator first1,
+                                c_iterator_t* __c_forward_iterator last1,
+                                c_iterator_t* __c_forward_iterator first2,
+                                c_iterator_t* __c_forward_iterator last2,
+                                c_iterator_t* __c_forward_iterator d_first,
+                                c_iterator_t** __c_forward_iterator d_last,
+                                c_compare comp);
+
+// Computes symmetric difference of two sorted ranges: the elements that are found in either of the ranges,
+// but not in both of them are copied to the range beginning at d_first. The resulting range is also sorted.
+// If some element is found m times in [first1, last1) and n times in [first2, last2), it will be copied to d_first
+// exactly abs(m-n) times. If m>n, then the last m-n of those elements are copied from [first1,last1),
+// otherwise the last n-m elements are copied from [first2,last2).
+// The resulting range cannot overlap with either of the input ranges.
+// Elements are compared using the given binary comparison function comp and the ranges must be sorted with respect to the same.
+// Returns the number of elements copied.
+// Sets d_last to past the end of the constructed range.
+size_t algo_set_symmetric_difference_by(c_iterator_t* __c_forward_iterator first1,
+                                        c_iterator_t* __c_forward_iterator last1,
+                                        c_iterator_t* __c_forward_iterator first2,
+                                        c_iterator_t* __c_forward_iterator last2,
+                                        c_iterator_t* __c_forward_iterator d_first,
+                                        c_iterator_t** __c_forward_iterator d_last,
+                                        c_compare comp);
+
+// Constructs a sorted range beginning at d_first consisting of all elements present in one or both sorted ranges
+// [first1, last1) and [first2, last2). If some element is found m times in [first1, last1) and n times in [first2, last2),
+// then all m elements will be copied from [first1, last1) to d_first, preserving order, and then
+// exactly max(n - m, 0) elements will be copied from [first2, last2) to d_first, also preserving order.
+// The resulting range cannot overlap with either of the input ranges.
+// Elements are compared using the given binary comparison function comp and the ranges must be sorted with respect to the same.
+// Returns the number of elements copied.
+// Sets d_last to past the end of the constructed range.
+size_t algo_set_union_by(c_iterator_t* __c_forward_iterator first1,
+                         c_iterator_t* __c_forward_iterator last1,
+                         c_iterator_t* __c_forward_iterator first2,
+                         c_iterator_t* __c_forward_iterator last2,
+                         c_iterator_t* __c_forward_iterator d_first,
+                         c_iterator_t** __c_forward_iterator d_last,
+                         c_compare comp);
+
+// set helpers
+#define c_algo_merge_by(x1, y1, x2, y2, df, dl, c) \
+    algo_merge_by(C_ITER_T(x1), C_ITER_T(y1), C_ITER_T(x2), C_ITER_T(y2), C_ITER_T(df), C_ITER_PTR(dl), (c))
+#define c_algo_includes_by(x1, y1, x2, y2, c) \
+    algo_includes_by(C_ITER_T(x1), C_ITER_T(y1), C_ITER_T(x2), C_ITER_T(y2), (c))
+#define c_algo_set_difference_by(x1, y1, x2, y2, df, dl, c) \
+    algo_set_difference_by(C_ITER_T(x1), C_ITER_T(y1), C_ITER_T(x2), C_ITER_T(y2), C_ITER_T(df), C_ITER_PTR(dl), (c))
+#define c_algo_set_intersection_by(x1, y1, x2, y2, df, dl, c) \
+    algo_set_intersection_by(C_ITER_T(x1), C_ITER_T(y1), C_ITER_T(x2), C_ITER_T(y2), C_ITER_T(df), C_ITER_PTR(dl), (c))
+#define c_algo_set_symmetric_difference_by(x1, y1, x2, y2, df, dl, c) \
+    algo_set_symmetric_difference_by(C_ITER_T(x1), C_ITER_T(y1), C_ITER_T(x2), C_ITER_T(y2), C_ITER_T(df), C_ITER_PTR(dl), (c))
+#define c_algo_set_union_by(x1, y1, x2, y2, df, dl, c) \
+    algo_set_union_by(C_ITER_T(x1), C_ITER_T(y1), C_ITER_T(x2), C_ITER_T(y2), C_ITER_T(df), C_ITER_PTR(dl), (c))
+
+#define c_algo_merge(x1, y1, x2, y2, df, dl) \
+    c_algo_merge_by((x1), (y1), (x2), (y2), (df), (dl), __c_get_less(x1))
+#define c_algo_includes(x1, y1, x2, y2) \
+    c_algo_includes_by((x1), (y1), (x2), (y2), __c_get_less(x1))
+#define c_algo_set_difference(x1, y1, x2, y2, df, dl) \
+    c_algo_set_difference_by((x1), (y1), (x2), (y2), (df), (dl), __c_get_less(x1))
+#define c_algo_set_intersection(x1, y1, x2, y2, df, dl) \
+    c_algo_set_intersection_by((x1), (y1), (x2), (y2), (df), (dl), __c_get_less(x1))
+#define c_algo_set_symmetric_difference(x1, y1, x2, y2, df, dl) \
+    c_algo_set_symmetric_difference_by((x1), (y1), (x2), (y2), (df), (dl), __c_get_less(x1))
+#define c_algo_set_union(x1, y1, x2, y2, df, dl) \
+    c_algo_set_union_by((x1), (y1), (x2), (y2), (df), (dl), __c_get_less(x1))
+
 
 /*******************/
 /* heap operations */

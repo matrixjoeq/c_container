@@ -45,23 +45,26 @@ typedef enum __c_iterator_category {
 } c_iterator_category_t;
 
 typedef enum __c_iterator_type {
+    C_ITER_TYPE_MODIFIABLE,
     C_ITER_TYPE_FORWARD_LIST,
     C_ITER_TYPE_LIST,
     C_ITER_TYPE_LIST_REVERSE,
-    C_ITER_TYPE_TREE,
-    C_ITER_TYPE_TREE_REVERSE,
-    C_ITER_TYPE_SET = C_ITER_TYPE_TREE,
-    C_ITER_TYPE_SET_REVERSE = C_ITER_TYPE_TREE_REVERSE,
-    C_ITER_TYPE_MULTISET = C_ITER_TYPE_TREE,
-    C_ITER_TYPE_MULTISET_REVERSE = C_ITER_TYPE_TREE_REVERSE,
-    C_ITER_TYPE_MAP = C_ITER_TYPE_TREE,
-    C_ITER_TYPE_MAP_REVERSE = C_ITER_TYPE_TREE_REVERSE,
-    C_ITER_TYPE_MULTIMAP = C_ITER_TYPE_TREE,
-    C_ITER_TYPE_MULTIMAP_REVERSE = C_ITER_TYPE_TREE_REVERSE,
     C_ITER_TYPE_VECTOR,
     C_ITER_TYPE_VECTOR_REVERSE,
     C_ITER_TYPE_DEQUE,
     C_ITER_TYPE_DEQUE_REVERSE,
+
+    C_ITER_TYPE_NOT_MODIFIABLE,
+    C_ITER_TYPE_TREE,
+    C_ITER_TYPE_TREE_REVERSE,
+    C_ITER_TYPE_SET              = C_ITER_TYPE_TREE,
+    C_ITER_TYPE_SET_REVERSE      = C_ITER_TYPE_TREE_REVERSE,
+    C_ITER_TYPE_MULTISET         = C_ITER_TYPE_TREE,
+    C_ITER_TYPE_MULTISET_REVERSE = C_ITER_TYPE_TREE_REVERSE,
+    C_ITER_TYPE_MAP              = C_ITER_TYPE_TREE,
+    C_ITER_TYPE_MAP_REVERSE      = C_ITER_TYPE_TREE_REVERSE,
+    C_ITER_TYPE_MULTIMAP         = C_ITER_TYPE_TREE,
+    C_ITER_TYPE_MULTIMAP_REVERSE = C_ITER_TYPE_TREE_REVERSE,
 } c_iterator_type_t;
 
 typedef void* c_ref_t;
@@ -212,10 +215,19 @@ c_containable_t* c_get_char_type_info(void);
 c_containable_t* c_get_float_type_info(void);
 c_containable_t* c_get_double_type_info(void);
 
+typedef struct __c_pair {
+    c_ref_t first;
+    c_ref_t second;
+} c_pair_t;
+
 #ifdef __GNUC__
 inline c_ref_t __c_identity(c_ref_t value) __attribute__((always_inline));
+inline c_ref_t __c_select1st(c_pair_t pair) __attribute__((always_inline));
+inline c_ref_t __c_select2nd(c_pair_t pair) __attribute__((always_inline));
 #else
 inline c_ref_t __c_identity(c_ref_t value);
+inline c_ref_t __c_select1st(c_pair_t pair);
+inline c_ref_t __c_select2nd(c_pair_t pair);
 #endif
 
 #define C_REF_T(x)      ((c_ref_t)(x))
@@ -250,8 +262,10 @@ inline c_ref_t __c_identity(c_ref_t value);
 #define C_ITER_ADVANCE(x, n)    C_ITER_T(x)->iterator_ops->advance(C_ITER_T(x), (n))
 #define C_ITER_DISTANCE(x, y)   C_ITER_T(x)->iterator_ops->distance(C_ITER_T(x), C_ITER_T(y))
 
-#define C_ITER_AT_LEAST(x, c)   (C_ITER_T(x)->iterator_category >= (c_iterator_category_t)(c))
-#define C_ITER_EXACT(x, c)      (C_ITER_T(x)->iterator_category == (c_iterator_category_t)(c))
+#define C_ITER_AT_LEAST(x, c)       (C_ITER_T(x)->iterator_category >= (c_iterator_category_t)(c))
+#define C_ITER_EXACT(x, c)          (C_ITER_T(x)->iterator_category == (c_iterator_category_t)(c))
+#define C_ITER_MODIFIABLE(x)        (C_ITER_T(x)->iterator_type < C_ITER_TYPE_NOT_MODIFIABLE)
+#define C_ITER_NOT_MODIFIABLE(x)    (C_ITER_T(x)->iterator_type > C_ITER_TYPE_NOT_MODIFIABLE)
 
 #define C_ITER_V_ASSIGN_DEREF(v, x) C_ITER_T(x)->value_type->assign(C_REF_T(v), C_ITER_DEREF(C_ITER_T(x)))
 #define C_ITER_DEREF_ASSIGN_V(x, v) C_ITER_T(x)->value_type->assign(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))

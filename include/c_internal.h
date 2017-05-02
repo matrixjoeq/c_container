@@ -64,6 +64,16 @@ inline c_ref_t __c_identity(c_ref_t value)
     return value;
 }
 
+inline c_ref_t __c_select1st(c_pair_t pair)
+{
+    return pair.first;
+}
+
+inline c_ref_t __c_select2nd(c_pair_t pair)
+{
+    return pair.second;
+}
+
 // general macro
 #define __c_free(x) \
     do { \

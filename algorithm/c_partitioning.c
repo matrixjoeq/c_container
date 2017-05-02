@@ -66,6 +66,7 @@ void algo_partition(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !second_first || !pred) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
 
     __C_ALGO_BEGIN_2(first, last)
 
@@ -110,6 +111,8 @@ size_t algo_partition_copy(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first_true, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first_false, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(d_first_true));
+    assert(C_ITER_MODIFIABLE(d_first_false));
 
     size_t copied = 0;
 

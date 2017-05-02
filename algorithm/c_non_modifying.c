@@ -180,31 +180,31 @@ size_t algo_count_if(c_iterator_t* __c_input_iterator first,
     return count;
 }
 
-bool algo_mismatch_by(c_iterator_t* __c_input_iterator first,
-                      c_iterator_t* __c_input_iterator last,
+bool algo_mismatch_by(c_iterator_t* __c_input_iterator first1,
+                      c_iterator_t* __c_input_iterator last1,
                       c_iterator_t* __c_input_iterator first2,
                       c_iterator_t** __c_input_iterator mismatch1,
                       c_iterator_t** __c_input_iterator mismatch2,
                       c_binary_predicate pred)
 {
-    if (!first || !last || !first2 || !mismatch1 || !mismatch2 || !pred) return false;
-    assert(C_ITER_AT_LEAST(first, C_ITER_CATE_INPUT));
-    assert(C_ITER_AT_LEAST(last, C_ITER_CATE_INPUT));
+    if (!first1 || !last1 || !first2 || !mismatch1 || !mismatch2 || !pred) return false;
+    assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_INPUT));
+    assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_INPUT));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_INPUT));
 
     bool is_mismatch = false;
 
-    __C_ALGO_BEGIN_3(first, last, first2)
+    __C_ALGO_BEGIN_3(first1, last1, first2)
 
     c_iterator_t* __m1 = 0;
     c_iterator_t* __m2 = 0;
-    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first), C_ITER_DEREF(__first2))) {
-        C_ITER_INC(__first);
+    while (C_ITER_NE(__first1, __last1) && pred(C_ITER_DEREF(__first1), C_ITER_DEREF(__first2))) {
+        C_ITER_INC(__first1);
         C_ITER_INC(__first2);
     }
 
-    is_mismatch = C_ITER_NE(__first, __last);
-    C_ITER_COPY(&__m1, __first);
+    is_mismatch = C_ITER_NE(__first1, __last1);
+    C_ITER_COPY(&__m1, __first1);
     C_ITER_COPY(&__m2, __first2);
 
     if (*mismatch1 == 0)
@@ -219,32 +219,32 @@ bool algo_mismatch_by(c_iterator_t* __c_input_iterator first,
     __c_free(__m2);
     __c_free(__m1);
 
-    __C_ALGO_END_3(first, last, first2)
+    __C_ALGO_END_3(first1, last1, first2)
 
     return is_mismatch;
 }
 
-bool algo_equal_by(c_iterator_t* __c_input_iterator first,
-                   c_iterator_t* __c_input_iterator last,
+bool algo_equal_by(c_iterator_t* __c_input_iterator first1,
+                   c_iterator_t* __c_input_iterator last1,
                    c_iterator_t* __c_input_iterator first2,
                    c_binary_predicate pred)
 {
-    if (!first || !last || !first2 || !pred) return false;
-    assert(C_ITER_AT_LEAST(first, C_ITER_CATE_INPUT));
-    assert(C_ITER_AT_LEAST(last, C_ITER_CATE_INPUT));
+    if (!first1 || !last1 || !first2 || !pred) return false;
+    assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_INPUT));
+    assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_INPUT));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_INPUT));
 
     bool is_equal = false;
 
-    __C_ALGO_BEGIN_3(first, last, first2)
+    __C_ALGO_BEGIN_3(first1, last1, first2)
 
-    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first), C_ITER_DEREF(__first2))) {
-        C_ITER_INC(__first);
+    while (C_ITER_NE(__first1, __last1) && pred(C_ITER_DEREF(__first1), C_ITER_DEREF(__first2))) {
+        C_ITER_INC(__first1);
         C_ITER_INC(__first2);
     }
-    is_equal = C_ITER_EQ(__first, __last);
+    is_equal = C_ITER_EQ(__first1, __last1);
 
-    __C_ALGO_END_3(first, last, first2)
+    __C_ALGO_END_3(first1, last1, first2)
 
     return is_equal;
 }

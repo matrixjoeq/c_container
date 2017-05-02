@@ -63,6 +63,7 @@ size_t algo_copy(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(d_first));
 
     size_t copied = 0;
 
@@ -97,6 +98,7 @@ size_t algo_copy_if(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(d_first));
 
     size_t copied = 0;
 
@@ -132,6 +134,7 @@ size_t algo_copy_backward(c_iterator_t* __c_bidirection_iterator first,
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_BIDIRECTION));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_BIDIRECTION));
     assert(C_ITER_AT_LEAST(d_last, C_ITER_CATE_BIDIRECTION));
+    assert(C_ITER_MODIFIABLE(d_last));
 
     size_t copied = 0;
 
@@ -163,6 +166,7 @@ size_t algo_fill(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !value) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
 
     size_t filled = 0;
 
@@ -186,6 +190,7 @@ void algo_fill_n(c_iterator_t* __c_forward_iterator first,
 {
     if (!first || !value || !last) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
 
     __C_ALGO_BEGIN_1(first);
 
@@ -213,6 +218,7 @@ size_t algo_transform(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(d_first));
 
     size_t transformed = 0;
 
@@ -245,6 +251,7 @@ size_t algo_generate(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !gen) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
 
     size_t gened = 0;
 
@@ -276,6 +283,7 @@ void algo_generate_n(c_iterator_t* __c_forward_iterator first,
 {
     if (!first || !gen || !last) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
 
     size_t gened = 0;
 
@@ -316,6 +324,7 @@ size_t algo_remove(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !value || !new_last) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
 
     size_t removed = 0;
 
@@ -360,6 +369,7 @@ size_t algo_remove_if(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !pred || !new_last) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
 
     size_t removed = 0;
 
@@ -405,6 +415,7 @@ size_t algo_remove_copy(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(d_first));
 
     size_t copied = 0;
 
@@ -475,6 +486,7 @@ size_t algo_replace(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !old_value || !new_value) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
 
     size_t replaced = 0;
 
@@ -502,6 +514,7 @@ size_t algo_replace_if(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !pred || !new_value) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
 
     size_t replaced = 0;
 
@@ -532,6 +545,7 @@ size_t algo_replace_copy(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(d_first));
 
     size_t copied = 0;
 
@@ -570,6 +584,7 @@ size_t algo_replace_copy_if(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(d_first));
 
     size_t copied = 0;
 
@@ -612,27 +627,29 @@ void algo_swap(c_containable_t* value_type,
     __c_free(tmp);
 }
 
-size_t algo_swap_range(c_iterator_t* __c_forward_iterator first,
-                       c_iterator_t* __c_forward_iterator last,
+size_t algo_swap_range(c_iterator_t* __c_forward_iterator first1,
+                       c_iterator_t* __c_forward_iterator last1,
                        c_iterator_t* __c_forward_iterator first2)
 {
-    if (!first || !last || !first2) return 0;
-    assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
-    assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    if (!first1 || !last1 || !first2) return 0;
+    assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
+    assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first1));
+    assert(C_ITER_MODIFIABLE(first2));
 
     size_t swapped = 0;
 
-    __C_ALGO_BEGIN_3(first, last, first2);
+    __C_ALGO_BEGIN_3(first1, last1, first2);
 
-    while (C_ITER_NE(__first, __last)) {
-        algo_swap(__first->value_type, C_ITER_DEREF(__first), C_ITER_DEREF(__first2));
-        C_ITER_INC(__first);
+    while (C_ITER_NE(__first1, __last1)) {
+        algo_swap(__first1->value_type, C_ITER_DEREF(__first1), C_ITER_DEREF(__first2));
+        C_ITER_INC(__first1);
         C_ITER_INC(__first2);
         ++swapped;
     }
 
-    __C_ALGO_END_3(first, last, first2);
+    __C_ALGO_END_3(first1, last1, first2);
 
     return swapped;
 }
@@ -643,6 +660,8 @@ void algo_iter_swap(c_iterator_t* __c_forward_iterator x,
     if (!x || !y) return;
     assert(C_ITER_AT_LEAST(x, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(y, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(x));
+    assert(C_ITER_MODIFIABLE(y));
     algo_swap(x->value_type, C_ITER_DEREF(x), C_ITER_DEREF(y));
 }
 
@@ -652,6 +671,8 @@ size_t algo_reverse(c_iterator_t* __c_bidirection_iterator first,
     if (!first || !last) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_BIDIRECTION));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_BIDIRECTION));
+    assert(C_ITER_MODIFIABLE(first));
+    assert(C_ITER_MODIFIABLE(last));
 
     size_t reversed = 0;
 
@@ -681,6 +702,7 @@ size_t algo_reverse_copy(c_iterator_t* __c_bidirection_iterator first,
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_BIDIRECTION));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_BIDIRECTION));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(d_first));
 
     size_t reversed = 0;
 
@@ -714,6 +736,8 @@ void algo_rotate(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(n_first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
+    assert(C_ITER_MODIFIABLE(n_first));
 
     if (C_ITER_EQ(first, n_first)) {
         if (*rotate_point == 0)
@@ -779,6 +803,7 @@ size_t algo_rotate_copy(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(n_first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(d_first));
 
     size_t copied = 0;
 
@@ -812,6 +837,7 @@ void algo_random_shuffle_by(c_iterator_t* __c_random_iterator first,
     if (!first || !last || !r) return;
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
+    assert(C_ITER_MODIFIABLE(first));
 
     __C_ALGO_BEGIN_2(first, last)
 
@@ -839,6 +865,7 @@ size_t algo_unique_by(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !new_last || !pred) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(first));
 
     if (C_ITER_EQ(first, last)) {
         if (*new_last == 0)
@@ -890,6 +917,7 @@ size_t algo_unique_copy_by(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MODIFIABLE(d_first));
 
     if (C_ITER_EQ(first, last)) {
         if (*d_last == 0)
