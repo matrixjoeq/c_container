@@ -35,7 +35,7 @@ struct __c_vector {
     c_ref_t start;
     c_ref_t finish;
     c_storage_t end_of_storage;
-    c_containable_t* value_type;
+    c_type_info_t* value_type;
 };
 
 struct __c_backend_vector {
@@ -271,7 +271,7 @@ static c_iterator_operation_t s_iter_ops = {
 };
 
 __c_static __c_inline c_vector_iterator_t __create_iterator(
-    c_containable_t* value_type, c_ref_t pos)
+    c_type_info_t* value_type, c_ref_t pos)
 {
     assert(value_type);
     c_vector_iterator_t iter = {
@@ -301,7 +301,7 @@ static c_iterator_operation_t s_reverse_ops = {
 };
 
 __c_static __c_inline c_vector_iterator_t __create_reverse_iterator(
-    c_containable_t* value_type, c_ref_t pos)
+    c_type_info_t* value_type, c_ref_t pos)
 {
     assert(value_type);
     c_vector_iterator_t iter = {
@@ -492,7 +492,7 @@ __c_static __c_inline int __reallocate_and_move(c_vector_t* vector, size_t n)
 /**
  * constructor/destructor
  */
-c_vector_t* c_vector_create(c_containable_t* value_type)
+c_vector_t* c_vector_create(c_type_info_t* value_type)
 {
     if (!value_type) return 0;
 
@@ -507,7 +507,7 @@ c_vector_t* c_vector_create(c_containable_t* value_type)
     return vector;
 }
 
-c_vector_t* c_vector_create_from(c_containable_t* value_type, c_ref_t values, size_t length)
+c_vector_t* c_vector_create_from(c_type_info_t* value_type, c_ref_t values, size_t length)
 {
     if (!value_type || !values || length == 0) return 0;
 
@@ -816,7 +816,7 @@ void c_vector_swap(c_vector_t* vector, c_vector_t* other)
 /**
  * backend
  */
-c_backend_container_t* c_vector_create_backend(c_containable_t* value_type)
+c_backend_container_t* c_vector_create_backend(c_type_info_t* value_type)
 {
     static c_backend_operation_t backend_vector_ops = {
         .destroy = backend_destroy,

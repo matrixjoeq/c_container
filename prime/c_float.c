@@ -61,9 +61,9 @@ __c_static __c_inline bool c_float_equal(const c_ref_t lhs, const c_ref_t rhs)
     return (*(float*)lhs) == (*(float*)rhs);
 }
 
-c_containable_t* c_get_float_type_info(void)
+c_type_info_t* c_get_float_type_info(void)
 {
-    static c_containable_t type_info = {
+    static c_type_info_t type_info = {
         .size = c_float_size,
         .create = c_float_create,
         .copy = c_float_copy,

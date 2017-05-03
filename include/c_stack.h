@@ -40,7 +40,7 @@ typedef struct __c_stack c_stack_t;
 /**
  * constructor/destructor
  */
-c_stack_t* c_stack_create(c_containable_t* type_info, BackendContainerCreator creator);
+c_stack_t* c_stack_create(c_type_info_t* type_info, BackendContainerCreator creator);
 void c_stack_destroy(c_stack_t* stack);
 
 /**

@@ -29,7 +29,7 @@
 #include "c_set.h"
 
 /* set */
-c_set_t* c_set_create(c_containable_t* key_type, c_compare key_comp)
+c_set_t* c_set_create(c_type_info_t* key_type, c_compare key_comp)
 {
     return c_tree_create(key_type, key_type, __c_identity, key_comp);
 }
@@ -154,7 +154,7 @@ void c_set_equal_range(c_set_t* set, c_ref_t key,
 }
 
 /* multiset */
-c_multiset_t* c_multiset_create(c_containable_t* key_type, c_compare key_comp)
+c_multiset_t* c_multiset_create(c_type_info_t* key_type, c_compare key_comp)
 {
     return c_tree_create(key_type, key_type, __c_identity, key_comp);
 }

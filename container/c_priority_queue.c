@@ -36,7 +36,7 @@ struct __c_priority_queue {
  * constructor/destructor
  */
 c_priority_queue_t* c_priority_queue_create(
-    c_containable_t* value_type, BackendContainerCreator creator, c_compare comp)
+    c_type_info_t* value_type, BackendContainerCreator creator, c_compare comp)
 {
     c_priority_queue_t* queue = (c_priority_queue_t*)malloc(sizeof(c_priority_queue_t));
     if (!queue) return 0;

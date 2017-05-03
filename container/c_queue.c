@@ -33,7 +33,7 @@ struct __c_queue {
 /**
  * constructor/destructor
  */
-c_queue_t* c_queue_create(c_containable_t* value_type, BackendContainerCreator creator)
+c_queue_t* c_queue_create(c_type_info_t* value_type, BackendContainerCreator creator)
 {
     c_queue_t* queue = (c_queue_t*)malloc(sizeof(c_queue_t));
     if (!queue) return 0;

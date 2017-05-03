@@ -39,7 +39,7 @@ typedef c_tree_iterator_t c_set_iterator_t;
 /**
  * constructor/destructor
  */
-c_set_t* c_set_create(c_containable_t* key_type, c_compare key_comp);
+c_set_t* c_set_create(c_type_info_t* key_type, c_compare key_comp);
 void c_set_destroy(c_set_t* set);
 
 /**
@@ -106,7 +106,7 @@ typedef c_tree_iterator_t c_multiset_iterator_t;
 /**
  * constructor/destructor
  */
-c_multiset_t* c_multiset_create(c_containable_t* key_type, c_compare key_comp);
+c_multiset_t* c_multiset_create(c_type_info_t* key_type, c_compare key_comp);
 void c_multiset_destroy(c_multiset_t* multiset);
 
 /**

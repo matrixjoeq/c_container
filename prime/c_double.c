@@ -61,9 +61,9 @@ __c_static __c_inline bool c_double_equal(const c_ref_t lhs, const c_ref_t rhs)
     return (*(double*)lhs) == (*(double*)rhs);
 }
 
-c_containable_t* c_get_double_type_info(void)
+c_type_info_t* c_get_double_type_info(void)
 {
-    static c_containable_t type_info = {
+    static c_type_info_t type_info = {
         .size = c_double_size,
         .create = c_double_create,
         .copy = c_double_copy,

@@ -47,8 +47,8 @@ typedef struct __c_vector_iterator {
 /**
  * constructor/destructor
  */
-c_vector_t* c_vector_create(c_containable_t* type_info);
-c_vector_t* c_vector_create_from(c_containable_t* type_info, c_ref_t values, size_t length);
+c_vector_t* c_vector_create(c_type_info_t* type_info);
+c_vector_t* c_vector_create_from(c_type_info_t* type_info, c_ref_t values, size_t length);
 c_vector_t* c_vector_copy(c_vector_t* other);
 c_vector_t* c_vector_assign(c_vector_t* self, c_vector_t* other);
 void c_vector_destroy(c_vector_t* vector);
@@ -97,7 +97,7 @@ void c_vector_swap(c_vector_t* vector, c_vector_t* other);
 /**
  * backend
  */
-c_backend_container_t* c_vector_create_backend(c_containable_t* type_info);
+c_backend_container_t* c_vector_create_backend(c_type_info_t* type_info);
 
 /**
  * helpers

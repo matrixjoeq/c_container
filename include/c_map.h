@@ -33,15 +33,15 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef c_tree_t c_map_t;
+/* map */
+struct __c_map;
+typedef struct __c_map c_map_t;
 typedef c_tree_iterator_t c_map_iterator_t;
 
 /**
  * constructor/destructor
  */
-c_map_t* c_map_create(c_containable_t* key_type,
-                      c_containable_t* value_type,
-                      c_compare key_comp);
+c_map_t* c_map_create(c_type_info_t* key_type, c_type_info_t* value_type, c_compare key_comp);
 void c_map_destroy(c_map_t* map);
 
 /**
@@ -85,30 +85,17 @@ void c_map_equal_range(c_map_t* map, c_ref_t key, c_map_iterator_t** lower, c_ma
 /**
  * helpers
  */
-#define C_MAP(t)       c_map_create((t), (t)->less)
-#define C_MAP_INT      C_MAP(c_get_int_type_info())
-#define C_MAP_SINT     C_MAP(c_get_sint_type_info())
-#define C_MAP_UINT     C_MAP(c_get_uint_type_info())
-#define C_MAP_SHORT    C_MAP(c_get_short_type_info())
-#define C_MAP_SSHORT   C_MAP(c_get_sshort_type_info())
-#define C_MAP_USHORT   C_MAP(c_get_ushort_type_info())
-#define C_MAP_LONG     C_MAP(c_get_long_type_info())
-#define C_MAP_SLONG    C_MAP(c_get_slong_type_info())
-#define C_MAP_ULONG    C_MAP(c_get_ulong_type_info())
-#define C_MAP_CHAR     C_MAP(c_get_char_type_info())
-#define C_MAP_SCHAR    C_MAP(c_get_schar_type_info())
-#define C_MAP_UCHAR    C_MAP(c_get_uchar_type_info())
-#define C_MAP_FLOAT    C_MAP(c_get_float_type_info())
-#define C_MAP_DOUBLE   C_MAP(c_get_double_type_info())
+#define C_MAP(k, v)    c_map_create((k), (v), (k)->less)
 
-#if 0
-typedef c_tree_t c_multimap_t;
+/* multimap */
+struct __c_multimap;
+typedef struct __c_multimap c_multimap_t;
 typedef c_tree_iterator_t c_multimap_iterator_t;
 
 /**
  * constructor/destructor
  */
-c_multimap_t* c_multimap_create(c_containable_t* key_type, c_compare key_comp);
+c_multimap_t* c_multimap_create(c_type_info_t* key_type, c_type_info_t* value_type, c_compare key_comp);
 void c_multimap_destroy(c_multimap_t* multimap);
 
 /**
@@ -152,22 +139,7 @@ void c_multimap_equal_range(c_multimap_t* multimap, c_ref_t key, c_multimap_iter
 /**
  * helpers
  */
-#define C_MULTIMAP(t)       c_multimap_create((t), (t)->less)
-#define C_MULTIMAP_INT      C_MULTIMAP(c_get_int_type_info())
-#define C_MULTIMAP_SINT     C_MULTIMAP(c_get_sint_type_info())
-#define C_MULTIMAP_UINT     C_MULTIMAP(c_get_uint_type_info())
-#define C_MULTIMAP_SHORT    C_MULTIMAP(c_get_short_type_info())
-#define C_MULTIMAP_SSHORT   C_MULTIMAP(c_get_sshort_type_info())
-#define C_MULTIMAP_USHORT   C_MULTIMAP(c_get_ushort_type_info())
-#define C_MULTIMAP_LONG     C_MULTIMAP(c_get_long_type_info())
-#define C_MULTIMAP_SLONG    C_MULTIMAP(c_get_slong_type_info())
-#define C_MULTIMAP_ULONG    C_MULTIMAP(c_get_ulong_type_info())
-#define C_MULTIMAP_CHAR     C_MULTIMAP(c_get_char_type_info())
-#define C_MULTIMAP_SCHAR    C_MULTIMAP(c_get_schar_type_info())
-#define C_MULTIMAP_UCHAR    C_MULTIMAP(c_get_uchar_type_info())
-#define C_MULTIMAP_FLOAT    C_MULTIMAP(c_get_float_type_info())
-#define C_MULTIMAP_DOUBLE   C_MULTIMAP(c_get_double_type_info())
-#endif // 0
+#define C_MULTIMAP(k, v)    c_multimap_create((k), (v), (k)->less)
 
 #ifdef __cplusplus
 }

@@ -59,18 +59,20 @@ __c_inline c_iterator_t* __c_iter_move_copy(c_iterator_t** __c_random_iterator d
     return *dst;
 }
 
-inline c_ref_t __c_identity(c_ref_t value)
+__c_inline c_ref_t __c_identity(c_ref_t value)
 {
     return value;
 }
 
-inline c_ref_t __c_select1st(c_pair_t pair)
+__c_inline c_ref_t __c_select1st(c_pair_t* pair)
 {
+    assert(pair);
     return pair.first;
 }
 
-inline c_ref_t __c_select2nd(c_pair_t pair)
+__c_inline c_ref_t __c_select2nd(c_pair_t* pair)
 {
+    assert(pair);
     return pair.second;
 }
 

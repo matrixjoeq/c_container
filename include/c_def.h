@@ -88,7 +88,7 @@ typedef bool (*c_binary_predicate)(c_ref_t __c_in, c_ref_t __c_in);
 // return true if compare(lhs, rhs)
 typedef bool (*c_compare)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
 
-typedef struct __c_containable {
+typedef struct __c_type_info {
     // size information
     size_t (*size)(void);
     // default constructor
@@ -103,7 +103,7 @@ typedef struct __c_containable {
     bool (*less)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
     // operator==
     bool (*equal)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
-} c_containable_t;
+} c_type_info_t;
 
 struct __c_iterator;
 typedef struct __c_iterator_operation {
@@ -163,7 +163,7 @@ typedef struct __c_iterator {
     c_iterator_category_t iterator_category;
     c_iterator_type_t iterator_type;
     c_iterator_operation_t* iterator_ops;
-    c_containable_t* value_type;
+    c_type_info_t* value_type;
 } c_iterator_t;
 
 struct __c_backend_container;
@@ -198,37 +198,29 @@ typedef struct __c_backend_container {
     c_backend_operation_t* ops;
 } c_backend_container_t;
 
-typedef c_backend_container_t* (*BackendContainerCreator)(c_containable_t* value_type);
+typedef c_backend_container_t* (*BackendContainerCreator)(c_type_info_t* value_type);
 
-c_containable_t* c_get_sint_type_info(void);
-c_containable_t* c_get_uint_type_info(void);
-c_containable_t* c_get_int_type_info(void);
-c_containable_t* c_get_sshort_type_info(void);
-c_containable_t* c_get_ushort_type_info(void);
-c_containable_t* c_get_short_type_info(void);
-c_containable_t* c_get_slong_type_info(void);
-c_containable_t* c_get_ulong_type_info(void);
-c_containable_t* c_get_long_type_info(void);
-c_containable_t* c_get_schar_type_info(void);
-c_containable_t* c_get_uchar_type_info(void);
-c_containable_t* c_get_char_type_info(void);
-c_containable_t* c_get_float_type_info(void);
-c_containable_t* c_get_double_type_info(void);
+c_type_info_t* c_get_sint_type_info(void);
+c_type_info_t* c_get_uint_type_info(void);
+c_type_info_t* c_get_int_type_info(void);
+c_type_info_t* c_get_sshort_type_info(void);
+c_type_info_t* c_get_ushort_type_info(void);
+c_type_info_t* c_get_short_type_info(void);
+c_type_info_t* c_get_slong_type_info(void);
+c_type_info_t* c_get_ulong_type_info(void);
+c_type_info_t* c_get_long_type_info(void);
+c_type_info_t* c_get_schar_type_info(void);
+c_type_info_t* c_get_uchar_type_info(void);
+c_type_info_t* c_get_char_type_info(void);
+c_type_info_t* c_get_float_type_info(void);
+c_type_info_t* c_get_double_type_info(void);
 
 typedef struct __c_pair {
+    c_type_info_t* first_type;
     c_ref_t first;
+    c_type_info_t* second_type;
     c_ref_t second;
 } c_pair_t;
-
-#ifdef __GNUC__
-inline c_ref_t __c_identity(c_ref_t value) __attribute__((always_inline));
-inline c_ref_t __c_select1st(c_pair_t pair) __attribute__((always_inline));
-inline c_ref_t __c_select2nd(c_pair_t pair) __attribute__((always_inline));
-#else
-inline c_ref_t __c_identity(c_ref_t value);
-inline c_ref_t __c_select1st(c_pair_t pair);
-inline c_ref_t __c_select2nd(c_pair_t pair);
-#endif
 
 #define C_REF_T(x)      ((c_ref_t)(x))
 #define C_ITER_T(x)     ((c_iterator_t*)(x))
