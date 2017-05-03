@@ -67,13 +67,13 @@ __c_inline c_ref_t __c_identity(c_ref_t value)
 __c_inline c_ref_t __c_select1st(c_pair_t* pair)
 {
     assert(pair);
-    return pair.first;
+    return pair->first;
 }
 
 __c_inline c_ref_t __c_select2nd(c_pair_t* pair)
 {
     assert(pair);
-    return pair.second;
+    return pair->second;
 }
 
 // general macro
