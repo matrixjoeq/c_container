@@ -34,8 +34,7 @@ extern "C" {
 #endif // __cplusplus
 
 /* map */
-struct __c_map;
-typedef struct __c_map c_map_t;
+typedef c_tree_t c_map_t;
 typedef c_tree_iterator_t c_map_iterator_t;
 
 /**
@@ -88,8 +87,7 @@ void c_map_equal_range(c_map_t* map, c_ref_t key, c_map_iterator_t** lower, c_ma
 #define C_MAP(k, v)    c_map_create((k), (v), (k)->less)
 
 /* multimap */
-struct __c_multimap;
-typedef struct __c_multimap c_multimap_t;
+typedef c_tree_t c_multimap_t;
 typedef c_tree_iterator_t c_multimap_iterator_t;
 
 /**

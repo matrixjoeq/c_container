@@ -96,6 +96,17 @@ TEST_F(CSortTest, IsSorted)
     EXPECT_FALSE(c_algo_is_sorted_by(&first, &last, greater));
 }
 
+TEST_F(CSortTest, Sort)
+{
+    int numbers[] = { 5, 7, 4, 2, 8, 6, 1, 9, 0, 3 };
+    SetupVector(numbers, __array_length(numbers));
+
+    c_algo_sort(&first, &last);
+    c_algo_for_each(&first, &last, print_value);
+    print_newline();
+    EXPECT_TRUE(c_algo_is_sorted(&first, &last));
+}
+
 TEST_F(CSortTest, PartialSort)
 {
     int numbers[] = { 5, 7, 4, 2, 8, 6, 1, 9, 0, 3 };

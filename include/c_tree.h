@@ -49,6 +49,7 @@ typedef struct __c_tree_iterator {
  */
 c_tree_t* c_tree_create(c_type_info_t* key_type,
                         c_type_info_t* value_type,
+                        c_type_info_t* mapped_type,
                         c_key_of_value key_of_value,
                         c_compare key_comp);
 void c_tree_destroy(c_tree_t* tree);
@@ -103,9 +104,9 @@ bool c_tree_rb_verify(c_tree_t* tree);
 /**
  * helpers
  */
-#define C_TREE_BASE(k, v, kov, c)   c_tree_create((k), (v), (kov), (c))
+#define C_TREE_BASE(k, v, m, kov, c)   c_tree_create((k), (v), (m), (kov), (c))
 
-#define C_TREE(t)       C_TREE_BASE((t), (t), __c_identity, (t)->less)
+#define C_TREE(t)       C_TREE_BASE((t), (t), C_NULL_TYPE, __c_identity, (t)->less)
 #define C_TREE_INT      C_TREE(c_get_int_type_info())
 #define C_TREE_SINT     C_TREE(c_get_sint_type_info())
 #define C_TREE_UINT     C_TREE(c_get_uint_type_info())

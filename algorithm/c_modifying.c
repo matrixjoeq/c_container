@@ -130,7 +130,7 @@ size_t algo_copy_backward(c_iterator_t* __c_bidirection_iterator first,
                           c_iterator_t* __c_bidirection_iterator d_last,
                           c_iterator_t** __c_bidirection_iterator d_last_copied)
 {
-    if (!first || !last || !d_last || !d_last_copied) return 0;
+    if (!first || !last || !d_last) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_BIDIRECTION));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_BIDIRECTION));
     assert(C_ITER_AT_LEAST(d_last, C_ITER_CATE_BIDIRECTION));
@@ -147,11 +147,13 @@ size_t algo_copy_backward(c_iterator_t* __c_bidirection_iterator first,
         ++copied;
     }
 
-    if (*d_last_copied == 0)
-        C_ITER_COPY(d_last_copied, __d_last);
-    else {
-        assert(C_ITER_AT_LEAST(*d_last_copied, C_ITER_CATE_BIDIRECTION));
-        C_ITER_ASSIGN(*d_last_copied, __d_last);
+    if (d_last_copied) {
+        if (*d_last_copied == 0)
+            C_ITER_COPY(d_last_copied, __d_last);
+        else {
+            assert(C_ITER_AT_LEAST(*d_last_copied, C_ITER_CATE_BIDIRECTION));
+            C_ITER_ASSIGN(*d_last_copied, __d_last);
+        }
     }
 
     __C_ALGO_END_3(first, last, d_last);

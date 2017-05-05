@@ -214,13 +214,19 @@ c_type_info_t* c_get_uchar_type_info(void);
 c_type_info_t* c_get_char_type_info(void);
 c_type_info_t* c_get_float_type_info(void);
 c_type_info_t* c_get_double_type_info(void);
+c_type_info_t* c_get_pair_type_info(void);
 
 typedef struct __c_pair {
     c_type_info_t* first_type;
-    c_ref_t first;
     c_type_info_t* second_type;
+    c_ref_t first;
     c_ref_t second;
 } c_pair_t;
+
+c_pair_t c_make_pair(c_type_info_t* T1, c_type_info_t* T2, c_ref_t /* T1 */ x, c_ref_t /* T2 */ y);
+
+#define C_NULL_TYPE     0
+#define C_IGNORED       0
 
 #define C_REF_T(x)      ((c_ref_t)(x))
 #define C_ITER_T(x)     ((c_iterator_t*)(x))

@@ -572,6 +572,13 @@ void algo_is_sorted_until_by(c_iterator_t* __c_forward_iterator first,
                              c_iterator_t** __c_forward_iterator until,
                              c_compare comp);
 
+// Sorts the elements in the range [first, last) in ascending order.
+// The order of equal elements is not guaranteed to be preserved.
+// Elements are compared using the given binary comparison function comp.
+void algo_sort_by(c_iterator_t* __c_random_iterator first,
+                  c_iterator_t* __c_random_iterator last,
+                  c_compare comp);
+
 // Rearranges elements such that the range [first, middle) contains the sorted middle - first smallest elements
 // in the range [first, last). The order of equal elements is not guaranteed to be preserved.
 // The order of the remaining elements in the range [middle, last) is unspecified.
@@ -597,12 +604,14 @@ size_t algo_partial_sort_copy_by(c_iterator_t* __c_forward_iterator first,
 // sorting helpers
 #define c_algo_is_sorted_by(x, y, c)            algo_is_sorted_by(C_ITER_T(x), C_ITER_T(y), (c))
 #define c_algo_is_sorted_until_by(x, y, u, c)   algo_is_sorted_until_by(C_ITER_T(x), C_ITER_T(y), C_ITER_PTR(u), (c))
+#define c_algo_sort_by(x, y, c)                 algo_sort_by(C_ITER_T(x), C_ITER_T(y), (c))
 #define c_algo_partial_sort_by(x, m, y, c)      algo_partial_sort_by(C_ITER_T(x), C_ITER_T(m), C_ITER_T(y), (c))
 #define c_algo_partial_sort_copy_by(x, y, df, dl, du, c) \
     algo_partial_sort_copy_by(C_ITER_T(x), C_ITER_T(y), C_ITER_T(df), C_ITER_T(dl), C_ITER_PTR(du), (c))
 
 #define c_algo_is_sorted(x, y)                  c_algo_is_sorted_by((x), (y), __c_get_less(x))
 #define c_algo_is_sorted_until(x, y, u)         c_algo_is_sorted_until_by((x), (y), (u), __c_get_less(x))
+#define c_algo_sort(x, y)                       c_algo_sort_by((x), (y), __c_get_less(x))
 #define c_algo_partial_sort(x, m, y)            c_algo_partial_sort_by((x), (m), (y), __c_get_less(x))
 #define c_algo_partial_sort_copy(x, y, df, dl, du) \
     c_algo_partial_sort_copy_by((x), (y), (df), (dl), (du), __c_get_less(x))
