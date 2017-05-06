@@ -53,8 +53,10 @@ bool algo_is_heap_by(c_iterator_t* __c_random_iterator first,
     __C_ALGO_BEGIN_2(first, last)
 
     c_iterator_t* __until = 0;
+
     algo_is_heap_until_by(__first, __last, &__until, comp);
     bool is_heap = C_ITER_EQ(__until, __last);
+
     __c_free(__until);
 
     __C_ALGO_END_2(first, last);
@@ -70,6 +72,7 @@ void algo_is_heap_until_by(c_iterator_t* __c_random_iterator first,
     if (!first || !last || !until || !comp) return;
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
+    assert(*until == 0 || C_ITER_EXACT(*until, C_ITER_CATE_RANDOM));
 
     __C_ALGO_BEGIN_2(first, last);
 
@@ -81,6 +84,7 @@ void algo_is_heap_until_by(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __parent = 0;
     c_iterator_t* __left = 0;
     c_iterator_t* __right = 0;
+
     while (__left_index < __distance) {
         __c_iter_move_copy(&__parent, __first, __parent_index);
 
@@ -102,12 +106,7 @@ void algo_is_heap_until_by(c_iterator_t* __c_random_iterator first,
         __right_index = right(__parent_index);
     }
 
-    if (*until == 0)
-        C_ITER_COPY(until, __is_heap ? __last : __parent);
-    else {
-        assert(C_ITER_EXACT(*until, C_ITER_CATE_RANDOM));
-        C_ITER_ASSIGN(*until, __is_heap ? __last : __parent);
-    }
+    __c_iter_copy_or_assign(until, __is_heap ? __last : __parent);
 
     __c_free(__right);
     __c_free(__left);
@@ -134,7 +133,6 @@ void algo_push_heap_by(c_iterator_t* __c_random_iterator first,
     ptrdiff_t __parent_index = parent(__hole_index);
     c_iterator_t* __parent = 0;
     c_iterator_t* __hole = 0;
-
     c_ref_t __value = malloc(first->value_type->size());
     __first->value_type->copy(__value, C_ITER_DEREF(__last));
 

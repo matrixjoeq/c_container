@@ -63,10 +63,11 @@ void algo_partition(c_iterator_t* __c_forward_iterator first,
                     c_iterator_t** __c_forward_iterator second_first,
                     c_unary_predicate pred)
 {
-    if (!first || !last || !second_first || !pred) return;
+    if (!first || !last || !pred) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
-    assert(C_ITER_MODIFIABLE(first));
+    assert(second_first == 0 || *second_first == 0 || C_ITER_AT_LEAST(*second_first, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MUTABLE(first));
 
     __C_ALGO_BEGIN_2(first, last)
 
@@ -86,12 +87,7 @@ void algo_partition(c_iterator_t* __c_forward_iterator first,
         __c_free(__next);
     }
 
-    if (*second_first == 0)
-        C_ITER_COPY(second_first, __first);
-    else {
-        assert(C_ITER_AT_LEAST(*second_first, C_ITER_CATE_FORWARD));
-        C_ITER_ASSIGN(*second_first, __first);
-    }
+    __c_iter_copy_or_assign(second_first, __first);
 
     __C_ALGO_END_2(first, last)
 }
@@ -104,15 +100,16 @@ size_t algo_partition_copy(c_iterator_t* __c_forward_iterator first,
                            c_iterator_t** __c_forward_iterator d_last_false,
                            c_unary_predicate pred)
 {
-    if (!first || !last || !d_first_true || !d_first_false ||
-        !d_last_true || !d_last_false || !pred)
+    if (!first || !last || !d_first_true || !d_first_false || !pred)
         return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first_true, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first_false, C_ITER_CATE_FORWARD));
-    assert(C_ITER_MODIFIABLE(d_first_true));
-    assert(C_ITER_MODIFIABLE(d_first_false));
+    assert(d_last_true == 0 || *d_last_true == 0 || C_ITER_AT_LEAST(*d_last_true, C_ITER_CATE_FORWARD));
+    assert(d_last_false == 0 || *d_last_false == 0 || C_ITER_AT_LEAST(*d_last_false, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MUTABLE(d_first_true));
+    assert(C_ITER_MUTABLE(d_first_false));
 
     size_t copied = 0;
 
@@ -131,19 +128,8 @@ size_t algo_partition_copy(c_iterator_t* __c_forward_iterator first,
         ++copied;
     }
 
-    if (*d_last_true == 0)
-        C_ITER_COPY(d_last_true, __d_first_true);
-    else {
-        assert(C_ITER_AT_LEAST(*d_last_true, C_ITER_CATE_FORWARD));
-        C_ITER_COPY(*d_last_true, __d_first_true);
-    }
-
-    if (*d_last_false == 0)
-        C_ITER_COPY(d_last_false, __d_first_false);
-    else {
-        assert(C_ITER_AT_LEAST(*d_last_false, C_ITER_CATE_FORWARD));
-        C_ITER_COPY(*d_last_false, __d_first_false);
-    }
+    __c_iter_copy_or_assign(d_last_true, __d_first_true);
+    __c_iter_copy_or_assign(d_last_false, __d_first_false);
 
     __C_ALGO_END_4(first, last, d_first_true, d_first_false)
 
@@ -158,18 +144,14 @@ void algo_partition_point(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !first_last || !pred) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(*first_last == 0 || C_ITER_AT_LEAST(*first_last, C_ITER_CATE_FORWARD));
 
     __C_ALGO_BEGIN_2(first, last)
 
     while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first)))
         C_ITER_INC(__first);
 
-    if (*first_last == 0)
-        C_ITER_COPY(first_last, __first);
-    else {
-        assert(C_ITER_AT_LEAST(*first_last, C_ITER_CATE_FORWARD));
-        C_ITER_ASSIGN(*first_last, __first);
-    }
+    __c_iter_copy_or_assign(first_last, __first);
 
     __C_ALGO_END_2(first, last)
 }

@@ -23,7 +23,7 @@
  */
 
 #include <stdlib.h>
-
+#include <assert.h>
 #include "c_def.h"
 #include "c_internal.h"
 

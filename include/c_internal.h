@@ -29,7 +29,10 @@
 extern "C" {
 #endif // __cplusplus
 
-#include <assert.h>
+#include <time.h>
+#include <sys/time.h>
+#include <stdio.h>
+#include <stdint.h>
 #include "c_def.h"
 
 #define __c_static static
@@ -40,22 +43,48 @@ extern "C" {
 #define __c_inline inline
 #endif
 
-__c_inline c_iterator_t* __c_iter_move_copy(c_iterator_t** __c_random_iterator dst,
-                                            c_iterator_t* __c_random_iterator src,
-                                            ptrdiff_t n)
+__c_inline uint64_t __c_get_time_ms(void)
 {
-    if (!dst || !src) return 0;
-    assert(C_ITER_EXACT(src, C_ITER_CATE_RANDOM));
+    struct timeval tv;
 
-    if (*dst == 0)
-        C_ITER_COPY(dst, src);
-    else {
-        assert(C_ITER_EXACT(*dst, C_ITER_CATE_RANDOM));
-        C_ITER_ASSIGN(*dst, src);
+    gettimeofday(&tv, NULL);
+
+    uint64_t ret = tv.tv_usec;
+    /* Convert from micro seconds (10^-6) to milliseconds (10^-3) */
+    ret /= 1000;
+
+    /* Adds the seconds (10^0) after converting them to milliseconds (10^-3) */
+    ret += (tv.tv_sec * 1000);
+
+    return ret;
+}
+
+#ifndef C_MEASURE
+#define __c_measure(expr) expr
+#else
+#define __c_measure(expr) \
+    do { \
+        uint64_t __start = __c_get_time_ms(); \
+        expr; \
+        uint64_t __finish = __c_get_time_ms(); \
+        if (__finish != __start) printf("%s takes %lu ms to finish\n", #expr, __finish - __start); \
+    } while (0)
+#endif
+
+__c_inline void __c_iter_copy_or_assign(c_iterator_t** dst, c_iterator_t* src)
+{
+    if (dst) {
+        if (*dst == 0)
+            C_ITER_COPY(dst, src);
+        else
+            C_ITER_ASSIGN(*dst, src);
     }
+}
 
+__c_inline c_iterator_t* __c_iter_move_copy(c_iterator_t** dst, c_iterator_t* src, ptrdiff_t n)
+{
+    __c_iter_copy_or_assign(dst, src);
     C_ITER_ADVANCE(*dst, n);
-
     return *dst;
 }
 
@@ -66,13 +95,11 @@ __c_inline c_ref_t __c_identity(c_ref_t value)
 
 __c_inline c_ref_t __c_select1st(c_pair_t* pair)
 {
-    assert(pair);
     return pair->first;
 }
 
 __c_inline c_ref_t __c_select2nd(c_pair_t* pair)
 {
-    assert(pair);
     return pair->second;
 }
 
@@ -81,7 +108,7 @@ __c_inline c_ref_t __c_select2nd(c_pair_t* pair)
     do { \
         if ((x)) { \
             free((x)); \
-            (x) = NULL; \
+            (x) = 0; \
         } \
     } while (0)
 

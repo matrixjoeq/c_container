@@ -36,6 +36,7 @@ SET(CMAKE_CXX_COMPILER /usr/bin/g++)
 
 set(common_base_flags "${common_base_flags} -Wall -Wextra")
 set(common_base_flags "${common_base_flags} -Werror")
+#set(common_base_flags "${common_base_flags} -pg")
 
 set(c_base_flags "${common_base_flags}")
 set(c_base_flags "${c_base_flags} -std=gnu99")
@@ -66,6 +67,7 @@ function(add_library_ex name type flags libs)
         PROPERTIES
         COMPILE_FLAGS "${flags}"
         LINK_FLAGS "")
+        #LINK_FLAGS "-pg")
     target_link_libraries(${name} ${libs})
 endfunction()
 
@@ -130,6 +132,7 @@ function(add_executable_ex name flags libs)
     set_target_properties(${name}
         PROPERTIES
         COMPILE_FLAGS "${flags}")
+        #LINK_FLAGS "-pg")
     foreach(lib ${libs})
         get_target_property(prop ${lib} LINK_FLAGS)
         if(NOT prop)

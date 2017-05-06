@@ -24,13 +24,125 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <time.h>
+#include <sys/time.h>
 #include "c_internal.h"
 #include "c_algorithm.h"
 
+__c_static __c_inline uint64_t __get_time_ms(void)
+{
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+
+    uint64_t ret = tv.tv_usec;
+    /* Convert from micro seconds (10^-6) to milliseconds (10^-3) */
+    ret /= 1000;
+
+    /* Adds the seconds (10^0) after converting them to milliseconds (10^-3) */
+    ret += (tv.tv_sec * 1000);
+
+    return ret;
+}
+
+static const int __s_threshold = 16;
+
+__c_static __c_inline size_t __lg(size_t n)
+{
+    size_t k = 0;
+    for (k = 0; n > 1; n >>= 1) ++k;
+    return k;
+}
+
 __c_static __c_inline
-void __insertion_sort(c_iterator_t* __c_random_iterator first,
-                      c_iterator_t* __c_random_iterator last,
-                      c_compare comp)
+c_ref_t __median_of_three_by(c_ref_t x, c_ref_t y, c_ref_t z, c_compare comp)
+{
+    if (comp(x, y)) {
+        if (comp(y, z)) // x < y < z
+            return y;
+        else if (comp(z, x)) // z < x < y
+            return x;
+        else // x <= z <= y
+            return z;
+    }
+    else {
+        if (comp(x, z)) // y <= x < z
+            return x;
+        else if (comp(z, y)) // z < y <= x
+            return y;
+        else // y <= z <= x
+            return z;
+    }
+}
+
+__c_static __c_inline
+void __partition_by(c_iterator_t* __c_random_iterator first,
+                    c_iterator_t* __c_random_iterator last,
+                    c_iterator_t** __c_random_iterator second_first,
+                    c_ref_t pivot,
+                    c_compare comp)
+{
+    __C_ALGO_BEGIN_2(first, last)
+
+    while (true) {
+        while (comp(C_ITER_DEREF(__first), pivot)) C_ITER_INC(__first);
+        C_ITER_DEC(__last);
+        while (comp(pivot, C_ITER_DEREF(__last))) C_ITER_DEC(__last);
+        if (!C_ITER_LESS(__first, __last)) {
+            __c_iter_copy_or_assign(second_first, __first);
+            break;
+        }
+        algo_iter_swap(__first, __last);
+        C_ITER_INC(__first);
+    }
+
+    __C_ALGO_END_2(first, last)
+}
+
+__c_static void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
+                                        c_iterator_t* __c_random_iterator last,
+                                        size_t depth_limit,
+                                        c_compare comp)
+{
+    __C_ALGO_BEGIN_2(first, last)
+
+    c_iterator_t* __middle = 0;
+    c_iterator_t* __last_prev = 0;
+    c_iterator_t* __part = 0;
+
+    while (C_ITER_DISTANCE(__first, __last) > __s_threshold) { // leave small set unsorted for insertion sort
+        if (depth_limit == 0) { // partition is turning bad, prevent it from going to O(N^2)
+            __c_measure(algo_partial_sort_by(__first, __last, __last, comp));
+            break;
+        }
+
+        --depth_limit;
+        __c_iter_move_copy(&__middle, __first, C_ITER_DISTANCE(__first, __last) / 2);
+        __c_iter_move_copy(&__last_prev, __last, -1);
+
+        // __pivot is a reference to the median value, DO NOT free it
+        c_ref_t __pivot = __median_of_three_by(C_ITER_DEREF(__first),
+                                               C_ITER_DEREF(__middle),
+                                               C_ITER_DEREF(__last_prev),
+                                               comp);
+
+        __c_measure(__partition_by(__first, __last, &__part, __pivot, comp));
+        __c_measure(__introspective_sort_by(__part, __last, depth_limit, comp)); // introsort second half
+        C_ITER_ASSIGN(__last, __part); // introsort first half
+    }
+
+    __c_free(__part);
+    __c_free(__last_prev);
+    __c_free(__middle);
+
+    __C_ALGO_END_2(first, last)
+}
+
+__c_static __c_inline
+void __insertion_sort_by(c_iterator_t* __c_random_iterator first,
+                         c_iterator_t* __c_random_iterator last,
+                         c_compare comp)
 {
     if (C_ITER_EQ(first, last)) return;
 
@@ -39,12 +151,11 @@ void __insertion_sort(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __i = 0;
     c_iterator_t* __i_next = 0;
     c_iterator_t* __inner_last = 0;
+    c_ref_t __last_value = malloc(__first->value_type->size());
 
     __c_iter_move_copy(&__i, __first, 1);
     C_ITER_COPY(&__i_next, __i);
     C_ITER_COPY(&__inner_last, __i);
-
-    c_ref_t __last_value = malloc(__first->value_type->size());
     __first->value_type->create(__last_value);
 
     while (C_ITER_NE(__i, __last)) { // outer loop
@@ -58,7 +169,7 @@ void __insertion_sort(c_iterator_t* __c_random_iterator first,
             C_ITER_ASSIGN(__inner_last, __i);
             __c_iter_move_copy(&__i_next, __i, -1);
             while (comp(__last_value, C_ITER_DEREF(__i_next))) { // inner loop
-                C_ITER_DEREF_ASSIGN(__i_next, __inner_last);
+                C_ITER_DEREF_ASSIGN(__inner_last, __i_next);
                 C_ITER_ASSIGN(__inner_last, __i_next);
                 C_ITER_DEC(__i_next);
             }
@@ -86,8 +197,10 @@ bool algo_is_sorted_by(c_iterator_t* __c_forward_iterator first,
     __C_ALGO_BEGIN_2(first, last)
 
     c_iterator_t* __until = 0;
+
     algo_is_sorted_until_by(__first, __last, &__until, comp);
     bool is_sorted = C_ITER_EQ(__until, __last);
+
     __c_free(__until);
 
     __C_ALGO_END_2(first, last)
@@ -103,39 +216,33 @@ void algo_is_sorted_until_by(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !until || !comp) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(*until == 0 || C_ITER_AT_LEAST(*until, C_ITER_CATE_FORWARD));
 
     if (C_ITER_EQ(first, last)) {
-        if (*until == 0)
-            C_ITER_COPY(until, last);
-        else {
-            assert(C_ITER_AT_LEAST(*until, C_ITER_CATE_FORWARD));
-            C_ITER_ASSIGN(*until, last);
-        }
+        __c_iter_copy_or_assign(until, last);
         return;
     }
 
     __C_ALGO_BEGIN_2(first, last)
 
+    bool __is_sorted = true;
     c_iterator_t* __next = 0;
+
     C_ITER_COPY(&__next, __first);
     C_ITER_INC(__next);
 
-    bool is_sorted = true;
     while (C_ITER_NE(__next, __last)) {
-        if (!comp(C_ITER_DEREF(__first), C_ITER_DEREF(__next))) {
-            is_sorted = false;
+        if (comp(C_ITER_DEREF(__next), C_ITER_DEREF(__first))) {
+            __is_sorted = false;
             break;
         }
         C_ITER_INC(__first);
         C_ITER_INC(__next);
     }
 
-    if (*until == 0)
-        C_ITER_COPY(until, is_sorted ? __last : __first);
-    else {
-        assert(C_ITER_AT_LEAST(*until, C_ITER_CATE_FORWARD));
-        C_ITER_ASSIGN(*until, is_sorted ? __last : __first);
-    }
+    __c_iter_copy_or_assign(until, __is_sorted ? __last : __first);
+
+    __c_free(__next);
 
     __C_ALGO_END_2(first, last)
 }
@@ -147,11 +254,14 @@ void algo_sort_by(c_iterator_t* __c_random_iterator first,
     if (!first || !last || !comp) return;
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
-    assert(C_ITER_MODIFIABLE(first));
+    assert(C_ITER_MUTABLE(first));
+
+    if (C_ITER_EQ(first, last)) return;
 
     __C_ALGO_BEGIN_2(first, last)
 
-    __insertion_sort(__first, __last, comp);
+    __c_measure(__introspective_sort_by(__first, __last, __lg(C_ITER_DISTANCE(__first, __last)) * 2, comp));
+    __c_measure(__insertion_sort_by(__first, __last, comp));
 
     __C_ALGO_END_2(first, last)
 }
@@ -165,8 +275,8 @@ void algo_partial_sort_by(c_iterator_t* __c_random_iterator first,
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(middle, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
-    assert(C_ITER_MODIFIABLE(first));
-    assert(C_ITER_MODIFIABLE(middle));
+    assert(C_ITER_MUTABLE(first));
+    assert(C_ITER_MUTABLE(middle));
 
     if (C_ITER_EQ(first, middle)) return;
 
@@ -175,10 +285,8 @@ void algo_partial_sort_by(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __middle_prev = 0;
     c_iterator_t* __i = 0;
 
-    C_ITER_COPY(&__middle_prev, __middle);
     C_ITER_COPY(&__i, __middle);
-
-    C_ITER_DEC(__middle_prev);
+    __c_iter_move_copy(&__middle_prev, __middle, -1);
 
     c_algo_make_heap_by(__first, __middle, comp);
     while (C_ITER_NE(__i, __last)) {
@@ -205,21 +313,16 @@ size_t algo_partial_sort_copy_by(c_iterator_t* __c_forward_iterator first,
                                  c_iterator_t** __c_random_iterator d_upper,
                                  c_compare comp)
 {
-    if (!first || !last || !d_first || !d_last || !d_upper || !comp) return 0;
+    if (!first || !last || !d_first || !d_last || !comp) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_EXACT(d_first, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(d_last, C_ITER_CATE_RANDOM));
-    assert(C_ITER_MODIFIABLE(d_first));
+    assert(d_upper == 0 || *d_upper == 0 || C_ITER_EXACT(*d_upper, C_ITER_CATE_RANDOM));
+    assert(C_ITER_MUTABLE(d_first));
 
     if (C_ITER_EQ(first, last) || C_ITER_EQ(d_first, d_last)) {
-        if (*d_upper == 0)
-            C_ITER_COPY(d_upper, d_first);
-        else {
-            assert(C_ITER_EXACT(*d_upper, C_ITER_CATE_RANDOM));
-            C_ITER_ASSIGN(*d_upper, d_first);
-        }
-
+        __c_iter_copy_or_assign(d_upper, d_first);
         return 0;
     }
 
@@ -229,6 +332,8 @@ size_t algo_partial_sort_copy_by(c_iterator_t* __c_forward_iterator first,
 
     c_iterator_t* __i = 0;
     c_iterator_t* __d = 0;
+    c_iterator_t* __d_prev = 0;
+
     C_ITER_COPY(&__i, __first);
     C_ITER_COPY(&__d, __d_first);
 
@@ -239,9 +344,7 @@ size_t algo_partial_sort_copy_by(c_iterator_t* __c_forward_iterator first,
         ++n;
     }
 
-    c_iterator_t* __d_prev = 0;
-    C_ITER_COPY(&__d_prev, __d);
-    C_ITER_DEC(__d_prev);
+    __c_iter_move_copy(&__d_prev, __d, -1);
 
     c_algo_make_heap_by(__d_first, __d, comp);
     while (C_ITER_NE(__i, __last)) {
@@ -255,12 +358,7 @@ size_t algo_partial_sort_copy_by(c_iterator_t* __c_forward_iterator first,
 
     c_algo_sort_heap_by(__d_first, __d, comp);
 
-    if (*d_upper == 0)
-        C_ITER_COPY(d_upper, __d);
-    else {
-        assert(C_ITER_EXACT(*d_upper, C_ITER_CATE_RANDOM));
-        C_ITER_ASSIGN(*d_upper, __d);
-    }
+    __c_iter_copy_or_assign(d_upper, __d);
 
     __c_free(__d_prev);
     __c_free(__d);

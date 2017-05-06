@@ -160,6 +160,12 @@ __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
     return !iter_equal(x, y);
 }
 
+__c_static bool iter_less(c_iterator_t* x, c_iterator_t* y)
+{
+    if (!__is_deque_iterator(x) || !__is_deque_iterator(y)) return false;
+    return ((c_deque_iterator_t*)x)->pos < ((c_deque_iterator_t*)y)->pos;
+}
+
 __c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (!__is_deque_iterator(iter)) return;
@@ -253,6 +259,12 @@ __c_static bool reverse_iter_not_equal(c_iterator_t* x, c_iterator_t* y)
     return !reverse_iter_equal(x, y);
 }
 
+__c_static bool reverse_iter_less(c_iterator_t* x, c_iterator_t* y)
+{
+    if (!__is_deque_reverse_iterator(x) || !__is_deque_reverse_iterator(y)) return false;
+    return ((c_deque_iterator_t*)x)->pos > ((c_deque_iterator_t*)y)->pos;
+}
+
 __c_static void reverse_iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (!__is_deque_reverse_iterator(iter)) return;
@@ -275,6 +287,7 @@ static c_iterator_operation_t s_iter_ops = {
     .dereference = iter_dereference,
     .equal = iter_equal,
     .not_equal = iter_not_equal,
+    .less = iter_less,
     .advance = iter_advance,
     .distance = iter_distance
 };
@@ -306,6 +319,7 @@ static c_iterator_operation_t s_reverse_iter_ops = {
     .dereference = reverse_iter_dereference,
     .equal = reverse_iter_equal,
     .not_equal = reverse_iter_not_equal,
+    .less = reverse_iter_less,
     .advance = reverse_iter_advance,
     .distance = reverse_iter_distance
 };

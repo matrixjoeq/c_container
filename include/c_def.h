@@ -45,8 +45,8 @@ typedef enum __c_iterator_category {
 } c_iterator_category_t;
 
 typedef enum __c_iterator_type {
-    C_ITER_TYPE_MODIFIABLE,
-    C_ITER_TYPE_FORWARD_LIST,
+    C_ITER_TYPE_MUTABLE,
+    C_ITER_TYPE_FORWARD_LIST     = C_ITER_TYPE_MUTABLE,
     C_ITER_TYPE_LIST,
     C_ITER_TYPE_LIST_REVERSE,
     C_ITER_TYPE_VECTOR,
@@ -54,8 +54,8 @@ typedef enum __c_iterator_type {
     C_ITER_TYPE_DEQUE,
     C_ITER_TYPE_DEQUE_REVERSE,
 
-    C_ITER_TYPE_NOT_MODIFIABLE,
-    C_ITER_TYPE_TREE,
+    C_ITER_TYPE_NONMUTABLE,
+    C_ITER_TYPE_TREE             = C_ITER_TYPE_NONMUTABLE,
     C_ITER_TYPE_TREE_REVERSE,
     C_ITER_TYPE_SET              = C_ITER_TYPE_TREE,
     C_ITER_TYPE_SET_REVERSE      = C_ITER_TYPE_TREE_REVERSE,
@@ -91,16 +91,25 @@ typedef bool (*c_compare)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
 typedef struct __c_type_info {
     // size information
     size_t (*size)(void);
-    // default constructor
+
+    // default constructor, this is in place new.
+    // obj is allocated already.
     void (*create)(c_ref_t __c_out obj);
-    // copy constructor
+
+    // copy constructor, this is in place new.
+    // dst is allocated already.
     void (*copy)(c_ref_t __c_out dst, c_ref_t __c_in src);
+
     // destructor
+    // Do not free obj, it will be deallocated after destroy automatically.
     void (*destroy)(c_ref_t __c_in_out obj);
+
     // operator=
     c_ref_t (*assign)(c_ref_t __c_out dst, c_ref_t __c_in src);
+
     // operator<
     bool (*less)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
+
     // operator==
     bool (*equal)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
 } c_type_info_t;
@@ -115,7 +124,8 @@ typedef struct __c_iterator_operation {
     void (*alloc_and_copy)(struct __c_iterator** __c_out dst,
                            struct __c_iterator* __c_in src);
 
-    // assign
+    // operator=
+    // return self
     struct __c_iterator* (*assign)(struct __c_iterator* __c_in_out self,
                                    struct __c_iterator* __c_in other);
 
@@ -143,12 +153,16 @@ typedef struct __c_iterator_operation {
     c_ref_t (*dereference)(struct __c_iterator* __c_in self);
 
     // operator==
-    bool (*equal)(struct __c_iterator* __c_in self,
-                  struct __c_iterator* __c_in other);
+    bool (*equal)(struct __c_iterator* __c_in x,
+                  struct __c_iterator* __c_in y);
 
     // operator!=
-    bool (*not_equal)(struct __c_iterator* __c_in self,
-                      struct __c_iterator* __c_in other);
+    bool (*not_equal)(struct __c_iterator* __c_in x,
+                      struct __c_iterator* __c_in y);
+
+    // operator< (random only)
+    bool (*less)(struct __c_iterator* __c_in x,
+                 struct __c_iterator* __c_in y);
 
     // advance
     void (*advance)(struct __c_iterator* __c_in_out self,
@@ -257,13 +271,14 @@ c_pair_t c_make_pair(c_type_info_t* T1, c_type_info_t* T2, c_ref_t /* T1 */ x, c
 #define C_ITER_DEREF(x)         C_ITER_T(x)->iterator_ops->dereference(C_ITER_T(x))
 #define C_ITER_EQ(x, y)         C_ITER_T(x)->iterator_ops->equal(C_ITER_T(x), C_ITER_T(y))
 #define C_ITER_NE(x, y)         C_ITER_T(x)->iterator_ops->not_equal(C_ITER_T(x), C_ITER_T(y))
+#define C_ITER_LESS(x, y)       C_ITER_T(x)->iterator_ops->less(C_ITER_T(x), C_ITER_T(y))
 #define C_ITER_ADVANCE(x, n)    C_ITER_T(x)->iterator_ops->advance(C_ITER_T(x), (n))
 #define C_ITER_DISTANCE(x, y)   C_ITER_T(x)->iterator_ops->distance(C_ITER_T(x), C_ITER_T(y))
 
 #define C_ITER_AT_LEAST(x, c)       (C_ITER_T(x)->iterator_category >= (c_iterator_category_t)(c))
 #define C_ITER_EXACT(x, c)          (C_ITER_T(x)->iterator_category == (c_iterator_category_t)(c))
-#define C_ITER_MODIFIABLE(x)        (C_ITER_T(x)->iterator_type < C_ITER_TYPE_NOT_MODIFIABLE)
-#define C_ITER_NOT_MODIFIABLE(x)    (C_ITER_T(x)->iterator_type > C_ITER_TYPE_NOT_MODIFIABLE)
+#define C_ITER_MUTABLE(x)           (C_ITER_T(x)->iterator_type < C_ITER_TYPE_NONMUTABLE)
+#define C_ITER_NONMUTABLE(x)        (C_ITER_T(x)->iterator_type >= C_ITER_TYPE_NONMUTABLE)
 
 #define C_ITER_V_ASSIGN_DEREF(v, x) C_ITER_T(x)->value_type->assign(C_REF_T(v), C_ITER_DEREF(C_ITER_T(x)))
 #define C_ITER_DEREF_ASSIGN_V(x, v) C_ITER_T(x)->value_type->assign(C_ITER_DEREF(C_ITER_T(x)), C_REF_T(v))

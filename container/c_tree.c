@@ -880,6 +880,7 @@ static c_iterator_operation_t s_iter_ops = {
     .dereference = iter_dereference,
     .equal = iter_equal,
     .not_equal = iter_not_equal,
+    .less = 0,
     .advance = iter_advance,
     .distance = iter_distance
 };
@@ -912,6 +913,7 @@ static c_iterator_operation_t s_reverse_iter_ops = {
     .dereference = reverse_iter_dereference,
     .equal = reverse_iter_equal,
     .not_equal = reverse_iter_not_equal,
+    .less = 0,
     .advance = reverse_iter_advance,
     .distance = reverse_iter_distance
 };

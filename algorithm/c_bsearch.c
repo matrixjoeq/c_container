@@ -36,6 +36,7 @@ void algo_lower_bound_by(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !value || !bound || !comp) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(*bound == 0 || C_ITER_AT_LEAST(*bound, C_ITER_CATE_FORWARD));
 
     __C_ALGO_BEGIN_2(first, last)
 
@@ -57,12 +58,7 @@ void algo_lower_bound_by(c_iterator_t* __c_forward_iterator first,
             __count = __step;
     }
 
-    if (*bound == 0)
-        C_ITER_COPY(bound, __first);
-    else {
-        assert(C_ITER_AT_LEAST(*bound, C_ITER_CATE_FORWARD));
-        C_ITER_ASSIGN(*bound, __first);
-    }
+    __c_iter_copy_or_assign(bound, __first);
 
     __c_free(__it);
 
@@ -78,6 +74,7 @@ void algo_upper_bound_by(c_iterator_t* __c_forward_iterator first,
     if (!first || !last || !value || !bound || !comp) return;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
+    assert(*bound == 0 || C_ITER_AT_LEAST(*bound, C_ITER_CATE_FORWARD));
 
     __C_ALGO_BEGIN_2(first, last)
 
@@ -85,6 +82,7 @@ void algo_upper_bound_by(c_iterator_t* __c_forward_iterator first,
     ptrdiff_t __step = 0;
     c_iterator_t* __it = 0;
     C_ITER_COPY(&__it, __first);
+
     while (__count > 0) {
         C_ITER_ASSIGN(__it, __first);
         __step = __count / 2;
@@ -98,12 +96,7 @@ void algo_upper_bound_by(c_iterator_t* __c_forward_iterator first,
             __count = __step;
     }
 
-    if (*bound == 0)
-        C_ITER_COPY(bound, __first);
-    else {
-        assert(C_ITER_AT_LEAST(*bound, C_ITER_CATE_FORWARD));
-        C_ITER_ASSIGN(*bound, __first);
-    }
+    __c_iter_copy_or_assign(bound, __first);
 
     __c_free(__it);
 
@@ -122,8 +115,10 @@ bool algo_binary_search_by(c_iterator_t* __c_forward_iterator first,
     bool is_found = false;
 
     __C_ALGO_BEGIN_2(first, last)
+
     algo_lower_bound_by(__first, __last, value, &__first, comp);
     is_found = (C_ITER_NE(__first, __last) && !(comp(value, C_ITER_DEREF(__first))));
+
     __C_ALGO_END_2(first, last)
 
     return is_found;
@@ -141,7 +136,9 @@ void algo_equal_range_by(c_iterator_t* __c_forward_iterator first,
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
 
     __C_ALGO_BEGIN_2(first, last)
+
     algo_lower_bound_by(__first, __last, value, lower_bound, comp);
     algo_upper_bound_by(__first, __last, value, upper_bound, comp);
+
     __C_ALGO_END_2(first, last)
 }

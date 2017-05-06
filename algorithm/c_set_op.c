@@ -36,16 +36,18 @@ size_t algo_merge_by(c_iterator_t* __c_forward_iterator first1,
                      c_iterator_t** __c_forward_iterator d_last,
                      c_compare comp)
 {
-    if (!first1 || !last1 || !first2 || !last2 || !d_first || !d_last || !comp)
+    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp)
         return 0;
     assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last2, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
-    assert(C_ITER_MODIFIABLE(d_first));
+    assert(d_last == 0 || *d_last == 0 || C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MUTABLE(d_first));
 
     size_t n = 0;
+
     __C_ALGO_BEGIN_5(first1, last1, first2, last2, d_first)
 
     while (C_ITER_NE(__first1, __last1) && C_ITER_NE(__first2, __last2)) {
@@ -64,12 +66,7 @@ size_t algo_merge_by(c_iterator_t* __c_forward_iterator first1,
     n += c_algo_copy(__first1, __last1, __d_first, &__d_first);
     n += c_algo_copy(__first2, __last2, __d_first, &__d_first);
 
-    if (*d_last == 0)
-        C_ITER_COPY(d_last, __d_first);
-    else {
-        assert(C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
-        C_ITER_ASSIGN(*d_last, __d_first);
-    }
+    __c_iter_copy_or_assign(d_last, __d_first);
 
     __C_ALGO_END_5(first1, last1, first2, last2, d_first)
 
@@ -91,6 +88,7 @@ bool algo_includes_by(c_iterator_t* __c_forward_iterator first1,
     if (C_ITER_EQ(first2, last2)) return true;
 
     bool is_included = true;
+
     __C_ALGO_BEGIN_4(first1, last1, first2, last2)
 
     while (C_ITER_NE(__first1, __last1) && C_ITER_NE(__first2, __last2)) {
@@ -119,14 +117,15 @@ size_t algo_set_difference_by(c_iterator_t* __c_forward_iterator first1,
                               c_iterator_t** __c_forward_iterator d_last,
                               c_compare comp)
 {
-    if (!first1 || !last1 || !first2 || !last2 || !d_first || !d_last || !comp)
+    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp)
         return 0;
     assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last2, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
-    assert(C_ITER_MODIFIABLE(d_first));
+    assert(d_last == 0 || *d_last == 0 || C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MUTABLE(d_first));
 
     size_t n = 0;
 
@@ -147,12 +146,7 @@ size_t algo_set_difference_by(c_iterator_t* __c_forward_iterator first1,
 
     n += c_algo_copy(__first1, __last1, __d_first, &__d_first);
 
-    if (*d_last == 0)
-        C_ITER_COPY(d_last, __d_first);
-    else {
-        assert(C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
-        C_ITER_ASSIGN(*d_last, __d_first);
-    }
+    __c_iter_copy_or_assign(d_last, __d_first);
 
     __C_ALGO_END_5(first1, last1, first2, last2, d_first)
 
@@ -167,14 +161,15 @@ size_t algo_set_intersection_by(c_iterator_t* __c_forward_iterator first1,
                                 c_iterator_t** __c_forward_iterator d_last,
                                 c_compare comp)
 {
-    if (!first1 || !last1 || !first2 || !last2 || !d_first || !d_last || !comp)
+    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp)
         return 0;
     assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last2, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
-    assert(C_ITER_MODIFIABLE(d_first));
+    assert(d_last == 0 || *d_last == 0 || C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MUTABLE(d_first));
 
     size_t n = 0;
 
@@ -194,12 +189,7 @@ size_t algo_set_intersection_by(c_iterator_t* __c_forward_iterator first1,
         }
     }
 
-    if (*d_last == 0)
-        C_ITER_COPY(d_last, __d_first);
-    else {
-        assert(C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
-        C_ITER_ASSIGN(*d_last, __d_first);
-    }
+    __c_iter_copy_or_assign(d_last, __d_first);
 
     __C_ALGO_END_5(first1, last1, first2, last2, d_first)
 
@@ -214,14 +204,15 @@ size_t algo_set_symmetric_difference_by(c_iterator_t* __c_forward_iterator first
                                         c_iterator_t** __c_forward_iterator d_last,
                                         c_compare comp)
 {
-    if (!first1 || !last1 || !first2 || !last2 || !d_first || !d_last || !comp)
+    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp)
         return 0;
     assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last2, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
-    assert(C_ITER_MODIFIABLE(d_first));
+    assert(d_last == 0 || *d_last == 0 || C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MUTABLE(d_first));
 
     size_t n = 0;
 
@@ -249,12 +240,7 @@ size_t algo_set_symmetric_difference_by(c_iterator_t* __c_forward_iterator first
     n += c_algo_copy(__first1, __last1, __d_first, &__d_first);
     n += c_algo_copy(__first2, __last2, __d_first, &__d_first);
 
-    if (*d_last == 0)
-        C_ITER_COPY(d_last, __d_first);
-    else {
-        assert(C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
-        C_ITER_ASSIGN(*d_last, __d_first);
-    }
+    __c_iter_copy_or_assign(d_last, __d_first);
 
     __C_ALGO_END_5(first1, last1, first2, last2, d_first)
 
@@ -269,14 +255,15 @@ size_t algo_set_union_by(c_iterator_t* __c_forward_iterator first1,
                          c_iterator_t** __c_forward_iterator d_last,
                          c_compare comp)
 {
-    if (!first1 || !last1 || !first2 || !last2 || !d_first || !d_last || !comp)
+    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp)
         return 0;
     assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last2, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first, C_ITER_CATE_FORWARD));
-    assert(C_ITER_MODIFIABLE(d_first));
+    assert(d_last == 0 || *d_last == 0 || C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
+    assert(C_ITER_MUTABLE(d_first));
 
     size_t n = 0;
 
@@ -307,12 +294,7 @@ size_t algo_set_union_by(c_iterator_t* __c_forward_iterator first1,
     n += c_algo_copy(__first1, __last1, __d_first, &__d_first);
     n += c_algo_copy(__first2, __last2, __d_first, &__d_first);
 
-    if (*d_last == 0)
-        C_ITER_COPY(d_last, __d_first);
-    else {
-        assert(C_ITER_AT_LEAST(*d_last, C_ITER_CATE_FORWARD));
-        C_ITER_ASSIGN(*d_last, __d_first);
-    }
+    __c_iter_copy_or_assign(d_last, __d_first);
 
     __C_ALGO_END_5(first1, last1, first2, last2, d_first)
 

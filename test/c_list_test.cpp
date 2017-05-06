@@ -29,6 +29,7 @@
 #include "c_test_util.hpp"
 #include "c_internal.h"
 #include "c_list.h"
+#include "c_algorithm.h"
 
 namespace c_container {
 namespace {
@@ -469,6 +470,9 @@ TEST_F(CListTest, SortPerformance)
     c_list_sort(list);
     e_time = get_time_ms();
     printf("C takes %lu ms to sort\n", e_time - b_time);
+    c_list_iterator_t first = c_list_begin(list);
+    c_list_iterator_t last = c_list_end(list);
+    EXPECT_TRUE(c_algo_is_sorted(&first, &last));
 }
 
 TEST_F(CListTest, Reverse)

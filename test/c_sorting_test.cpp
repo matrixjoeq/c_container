@@ -25,6 +25,8 @@
 #include <gtest/gtest.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <vector>
+#include "c_test_util.hpp"
 #include "c_internal.h"
 #include "c_vector.h"
 #include "c_algorithm.h"
@@ -104,6 +106,31 @@ TEST_F(CSortTest, Sort)
     c_algo_sort(&first, &last);
     c_algo_for_each(&first, &last, print_value);
     print_newline();
+    EXPECT_TRUE(c_algo_is_sorted(&first, &last));
+}
+
+TEST_F(CSortTest, SortPerformance)
+{
+    std::vector<int> v(100000);
+    srandom(static_cast<unsigned int>(time(0)));
+    int data = 0;
+    for (std::vector<int>::iterator iter = v.begin(); iter != v.end(); ++iter) {
+        data = random() % INT32_MAX;
+        *iter = data;
+        c_vector_push_back(vector, C_REF_T(&data));
+    }
+    first = c_vector_begin(vector);
+    last = c_vector_end(vector);
+
+    uint64_t b_time = get_time_ms();
+    std::sort(v.begin(), v.end());
+    uint64_t e_time = get_time_ms();
+    printf("STL takes %lu ms to sort\n", e_time - b_time);
+
+    b_time = get_time_ms();
+    c_algo_sort(&first, &last);
+    e_time = get_time_ms();
+    printf("C takes %lu ms to sort\n", e_time - b_time);
     EXPECT_TRUE(c_algo_is_sorted(&first, &last));
 }
 
