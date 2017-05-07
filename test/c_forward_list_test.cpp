@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <forward_list>
-#include "c_test_util.hpp"
 #include "c_internal.h"
 #include "c_forward_list.h"
 #include "c_algorithm.h"
@@ -68,6 +67,20 @@ public:
         ExpectNotEmpty();
     }
 
+    void SetupPerformance(void)
+    {
+        std_list.clear();
+        std_list.resize(100000);
+        srandom(static_cast<unsigned int>(time(0)));
+        int data = 0;
+        c_slist_iterator_t before_begin = c_slist_before_begin(list);
+        for (auto iter = std_list.begin(); iter != std_list.end(); ++iter) {
+            data = random() % INT32_MAX;
+            *iter = data;
+            c_slist_insert_after(list, before_begin,C_REF_T(&data));
+        }
+    }
+
     void ExpectEqualToArray(const int* datas, int length)
     {
         c_slist_iterator_t first = c_slist_begin(list);
@@ -106,10 +119,13 @@ public:
         c_slist_destroy(list);
         list = 0;
         EXPECT_TRUE(c_slist_empty(list));
+
+        std_list.clear();
     }
 
 protected:
     c_slist_t* list;
+    std::forward_list<int> std_list;
 };
 #pragma GCC diagnostic warning "-Weffc++"
 
@@ -364,24 +380,11 @@ TEST_F(CForwardListTest, SortBy)
 
 TEST_F(CForwardListTest, SortPerformance)
 {
-    std::forward_list<int> fl(100000);
-    srandom(static_cast<unsigned int>(time(0)));
-    int data = 0;
-    for (std::forward_list<int>::iterator iter = fl.begin(); iter != fl.end(); ++iter) {
-        data = random() % INT32_MAX;
-        *iter = data;
-        c_slist_push_front(list, C_REF_T(&data));
-    }
+    SetupPerformance();
 
-    uint64_t b_time = get_time_ms();
-    fl.sort();
-    uint64_t e_time = get_time_ms();
-    printf("STL takes %lu ms to sort\n", e_time - b_time);
+    __c_measure(std_list.sort());
+    __c_measure(c_slist_sort(list));
 
-    b_time = get_time_ms();
-    c_slist_sort(list);
-    e_time = get_time_ms();
-    printf("C takes %lu ms to sort\n", e_time - b_time);
     c_slist_iterator_t first = c_slist_begin(list);
     c_slist_iterator_t last = c_slist_end(list);
     EXPECT_TRUE(c_algo_is_sorted(&first, &last));

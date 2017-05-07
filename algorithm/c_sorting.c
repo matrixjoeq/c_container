@@ -24,27 +24,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <time.h>
-#include <sys/time.h>
 #include "c_internal.h"
 #include "c_algorithm.h"
-
-__c_static __c_inline uint64_t __get_time_ms(void)
-{
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-
-    uint64_t ret = tv.tv_usec;
-    /* Convert from micro seconds (10^-6) to milliseconds (10^-3) */
-    ret /= 1000;
-
-    /* Adds the seconds (10^0) after converting them to milliseconds (10^-3) */
-    ret += (tv.tv_sec * 1000);
-
-    return ret;
-}
 
 static const int __s_threshold = 16;
 
@@ -99,7 +80,7 @@ void __partition_by(c_iterator_t* __c_random_iterator first,
 
     __C_ALGO_END_2(first, last)
 }
-
+#if 0
 __c_static void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
                                         c_iterator_t* __c_random_iterator last,
                                         size_t depth_limit,
@@ -113,7 +94,7 @@ __c_static void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
 
     while (C_ITER_DISTANCE(__first, __last) > __s_threshold) { // leave small set unsorted for insertion sort
         if (depth_limit == 0) { // partition is turning bad, prevent it from going to O(N^2)
-            __c_measure(algo_partial_sort_by(__first, __last, __last, comp));
+            algo_partial_sort_by(__first, __last, __last, comp);
             break;
         }
 
@@ -127,8 +108,8 @@ __c_static void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
                                                C_ITER_DEREF(__last_prev),
                                                comp);
 
-        __c_measure(__partition_by(__first, __last, &__part, __pivot, comp));
-        __c_measure(__introspective_sort_by(__part, __last, depth_limit, comp)); // introsort second half
+        __partition_by(__first, __last, &__part, __pivot, comp);
+        __introspective_sort_by(__part, __last, depth_limit, comp); // introsort second half
         C_ITER_ASSIGN(__last, __part); // introsort first half
     }
 
@@ -138,7 +119,7 @@ __c_static void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
 
     __C_ALGO_END_2(first, last)
 }
-
+#endif
 __c_static __c_inline
 void __insertion_sort_by(c_iterator_t* __c_random_iterator first,
                          c_iterator_t* __c_random_iterator last,
@@ -260,8 +241,9 @@ void algo_sort_by(c_iterator_t* __c_random_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    __c_measure(__introspective_sort_by(__first, __last, __lg(C_ITER_DISTANCE(__first, __last)) * 2, comp));
-    __c_measure(__insertion_sort_by(__first, __last, comp));
+    //__c_measure(__introspective_sort_by(__first, __last, __lg(C_ITER_DISTANCE(__first, __last)) * 2, comp));
+    //__c_measure(__insertion_sort_by(__first, __last, comp));
+    algo_partial_sort_by(__first, __last, __last, comp);
 
     __C_ALGO_END_2(first, last)
 }

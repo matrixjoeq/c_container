@@ -59,6 +59,8 @@ __c_inline uint64_t __c_get_time_ms(void)
     return ret;
 }
 
+#define C_MEASURE
+
 #ifndef C_MEASURE
 #define __c_measure(expr) expr
 #else

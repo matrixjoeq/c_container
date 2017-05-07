@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <vector>
-#include "c_test_util.hpp"
 #include "c_internal.h"
 #include "c_vector.h"
 #include "c_algorithm.h"
@@ -122,15 +121,9 @@ TEST_F(CSortTest, SortPerformance)
     first = c_vector_begin(vector);
     last = c_vector_end(vector);
 
-    uint64_t b_time = get_time_ms();
-    std::sort(v.begin(), v.end());
-    uint64_t e_time = get_time_ms();
-    printf("STL takes %lu ms to sort\n", e_time - b_time);
+    __c_measure(std::partial_sort(v.begin(), v.end(), v.end()));
+    __c_measure(c_algo_sort(&first, &last));
 
-    b_time = get_time_ms();
-    c_algo_sort(&first, &last);
-    e_time = get_time_ms();
-    printf("C takes %lu ms to sort\n", e_time - b_time);
     EXPECT_TRUE(c_algo_is_sorted(&first, &last));
 }
 

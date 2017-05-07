@@ -28,20 +28,9 @@
 #ifndef __C_TEST_UTIL_HPP__
 #define __C_TEST_UTIL_HPP__
 
-inline uint64_t get_time_ms(void)
-{
-    struct timeval tv;
+#define __TEST_TIME_MAX     (10)
+#define __TEST_LOOP     for (int __times = 0; __times < __TEST_TIME_MAX; ++__times)
 
-    gettimeofday(&tv, NULL);
-
-    uint64_t ret = tv.tv_usec;
-    /* Convert from micro seconds (10^-6) to milliseconds (10^-3) */
-    ret /= 1000;
-
-    /* Adds the seconds (10^0) after converting them to milliseconds (10^-3) */
-    ret += (tv.tv_sec * 1000);
-
-    return ret;
-}
+#define __PERF_SET_SIZE     (100000)
 
 #endif // __C_TEST_UTIL_HPP__

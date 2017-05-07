@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <list>
-#include "c_test_util.hpp"
 #include "c_internal.h"
 #include "c_list.h"
 #include "c_algorithm.h"
@@ -58,6 +57,19 @@ class CListTest : public ::testing::Test
 public:
     CListTest() : list(0) {}
     ~CListTest() { c_list_destroy(list); }
+
+    void SetupPerformance(void)
+    {
+        std_list.clear();
+        std_list.resize(100000);
+        srandom(static_cast<unsigned int>(time(0)));
+        int data = 0;
+        for (auto iter = std_list.begin(); iter != std_list.end(); ++iter) {
+            data = random() % INT32_MAX;
+            *iter = data;
+            c_list_push_back(list, C_REF_T(&data));
+        }
+    }
 
     void SetupList(const int *datas, int length)
     {
@@ -110,10 +122,13 @@ public:
         list = 0;
         EXPECT_TRUE(c_list_empty(list));
         EXPECT_EQ(0, c_list_size(list));
+
+        std_list.clear();
     }
 
 protected:
     c_list_t* list;
+    std::list<int> std_list;
 };
 #pragma GCC diagnostic warning "-Weffc++"
 
@@ -452,24 +467,11 @@ TEST_F(CListTest, SortBy)
 
 TEST_F(CListTest, SortPerformance)
 {
-    std::list<int> l(100000);
-    srandom(static_cast<unsigned int>(time(0)));
-    int data = 0;
-    for (std::list<int>::iterator iter = l.begin(); iter != l.end(); ++iter) {
-        data = random() % INT32_MAX;
-        *iter = data;
-        c_list_push_back(list, C_REF_T(&data));
-    }
+    SetupPerformance();
 
-    uint64_t b_time = get_time_ms();
-    l.sort();
-    uint64_t e_time = get_time_ms();
-    printf("STL takes %lu ms to sort\n", e_time - b_time);
+    __c_measure(std_list.sort());
+    __c_measure(c_list_sort(list));
 
-    b_time = get_time_ms();
-    c_list_sort(list);
-    e_time = get_time_ms();
-    printf("C takes %lu ms to sort\n", e_time - b_time);
     c_list_iterator_t first = c_list_begin(list);
     c_list_iterator_t last = c_list_end(list);
     EXPECT_TRUE(c_algo_is_sorted(&first, &last));
