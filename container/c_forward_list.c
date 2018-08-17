@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <string.h>
 #include "c_internal.h"
+#include "c_util.h"
 #include "c_forward_list.h"
 
 struct __c_slist_node {
@@ -186,7 +187,13 @@ __c_static __c_inline c_slist_node_t* __create_node(c_slist_t* list, c_ref_t val
     if (!node) return 0;
 
     node->next = 0;
-    node->value = malloc(list->value_type->size());
+    if (list->value_type->allocate) {
+        node->value = list->value_type->allocate();
+    }
+    else {
+        node->value = (c_ref_t)malloc(list->value_type->size());
+    }
+
     if (!node->value) {
         __c_free(node);
         return 0;
@@ -213,7 +220,12 @@ __c_static __c_inline c_slist_node_t* __pop_node_after(c_slist_t* list, c_slist_
 
     node->next = pos->next;
     list->value_type->destroy(pos->value);
-    __c_free(pos->value);
+    if (list->value_type->deallocate) {
+        list->value_type->deallocate(pos->value);
+    }
+    else {
+        __c_free(pos->value);
+    }
     __c_free(pos);
 
     return node->next;
@@ -239,6 +251,7 @@ __c_static __c_inline void __transfer(c_slist_node_t* pos, c_slist_node_t* first
 c_slist_t* c_slist_create(const c_type_info_t* value_type)
 {
     if (!value_type) return 0;
+    validate_type_info(value_type);
 
     c_slist_t* list = (c_slist_t*)malloc(sizeof(c_slist_t));
     if (!list) return 0;

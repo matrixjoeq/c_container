@@ -28,6 +28,7 @@
 #include <string.h>
 #include <math.h>
 #include "c_internal.h"
+#include "c_util.h"
 #include "c_algorithm.h"
 #include "c_vector.h"
 
@@ -509,6 +510,7 @@ __c_static __c_inline int __reallocate_and_move(c_vector_t* vector, size_t n)
 c_vector_t* c_vector_create(const c_type_info_t* value_type)
 {
     if (!value_type) return 0;
+    validate_type_info(value_type);
 
     c_vector_t* vector = (c_vector_t*)malloc(sizeof(c_vector_t));
     if (!vector) return 0;

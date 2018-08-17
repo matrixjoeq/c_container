@@ -28,6 +28,7 @@
 #include <string.h>
 #include <math.h>
 #include "c_internal.h"
+#include "c_util.h"
 #include "c_algorithm.h"
 #include "c_deque.h"
 
@@ -614,6 +615,7 @@ __c_static __c_inline int __reallocate_and_move(c_deque_t* deque, size_t n)
 c_deque_t* c_deque_create(const c_type_info_t* value_type)
 {
     if (!value_type) return 0;
+    validate_type_info(value_type);
 
     c_deque_t* deque = (c_deque_t*)malloc(sizeof(c_deque_t));
     if (!deque) return 0;

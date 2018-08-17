@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include "c_internal.h"
+#include "c_util.h"
 #include "c_queue.h"
 
 struct __c_queue {
@@ -35,6 +36,9 @@ struct __c_queue {
  */
 c_queue_t* c_queue_create(const c_type_info_t* value_type, BackendContainerCreator creator)
 {
+    if (!value_type || !creator) return 0;
+    validate_type_info(value_type);
+
     c_queue_t* queue = (c_queue_t*)malloc(sizeof(c_queue_t));
     if (!queue) return 0;
 

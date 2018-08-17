@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include "c_internal.h"
+#include "c_util.h"
 #include "c_stack.h"
 
 struct __c_stack {
@@ -35,6 +36,9 @@ struct __c_stack {
  */
 c_stack_t* c_stack_create(const c_type_info_t* value_type, BackendContainerCreator creator)
 {
+    if (!value_type || !creator) return 0;
+    validate_type_info(value_type);
+    
     c_stack_t* stack = (c_stack_t*)malloc(sizeof(c_stack_t));
     if (!stack) return 0;
 

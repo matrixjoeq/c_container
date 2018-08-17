@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <string.h>
 #include "c_internal.h"
+#include "c_util.h"
 #include "c_tree.h"
 
 typedef bool __rb_tree_color_type;
@@ -249,7 +250,13 @@ __c_static __c_inline c_tree_node_t* __create_node(c_tree_t* tree, c_ref_t value
     c_tree_node_t* node = (c_tree_node_t*)malloc(sizeof(c_tree_node_t));
     if (!node) return 0;
 
-    node->value = malloc(value_type->size());
+    if (value_type->allocate) {
+        node->value = value_type->allocate();
+    }
+    else {
+        node->value = (c_ref_t)malloc(value_type->size());
+    }
+
     if (!node->value) {
         __c_free(node);
         return 0;
@@ -279,7 +286,12 @@ __c_static __c_inline void __destroy_node(c_tree_t* tree, c_tree_node_t* node)
     assert(node);
 
     tree->value_type->destroy(node->value);
-    __c_free(node->value);
+    if (tree->value_type->deallocate) {
+        tree->value_type->deallocate(node->value);
+    }
+    else {
+        __c_free(node->value);
+    }
     __c_free(node);
 }
 
@@ -942,6 +954,10 @@ c_tree_t* c_tree_create(const c_type_info_t* key_type,
                         c_key_of_value key_of_value,
                         c_compare key_comp)
 {
+    if (!key_type || !value_type || !key_of_value || !key_comp) return 0;
+    validate_type_info_ex(key_type);
+    validate_type_info(value_type);
+
     c_tree_t* tree = (c_tree_t*)malloc(sizeof(c_tree_t));
     if (!tree) return 0;
 

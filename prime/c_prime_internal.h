@@ -66,8 +66,7 @@ __c_static __c_inline void __c_##__abbr##_destroy(c_ref_t obj) \
 #define __C_TYPE_DEALLOCATE(__abbr) \
 __c_static __c_inline void __c_##__abbr##_deallocate(c_ref_t obj) \
 { \
-    __c_assert(obj, "Object must be allocated before deallocate."); \
-    free(obj); \
+    __c_free(obj); \
 }
 
 #define __C_TYPE_ASSIGN(__type, __abbr) \

@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <string.h>
 #include "c_internal.h"
+#include "c_util.h"
 #include "c_list.h"
 
 struct __c_list_node {
@@ -367,7 +368,13 @@ __c_static __c_inline c_list_node_t* __create_node(c_list_t* list, c_ref_t value
     node->prev = 0;
     node->next = 0;
 
-    node->value = malloc(list->value_type->size());
+    if (list->value_type->allocate) {
+        node->value = list->value_type->allocate();
+    }
+    else {
+        node->value = (c_ref_t)malloc(list->value_type->size());
+    }
+
     if (!node->value) {
         __c_free(node);
         return 0;
@@ -395,7 +402,12 @@ __c_static __c_inline c_list_node_t* __pop_node(c_list_t* list, c_list_node_t* n
     next_node->prev = prev_node;
     prev_node->next = next_node;
     list->value_type->destroy(node->value);
-    __c_free(node->value);
+    if (list->value_type->deallocate) {
+        list->value_type->deallocate(node->value);
+    }
+    else {
+        __c_free(node->value);
+    }
     __c_free(node);
 
     return next_node;
@@ -540,6 +552,7 @@ __c_static void backend_swap(c_backend_container_t* c, c_backend_container_t* ot
 c_list_t* c_list_create(const c_type_info_t* value_type)
 {
     if (!value_type) return 0;
+    validate_type_info(value_type);
 
     c_list_t* list = (c_list_t*)malloc(sizeof(c_list_t));
     if (!list) return 0;

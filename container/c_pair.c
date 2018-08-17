@@ -46,12 +46,35 @@ __c_static __c_inline void c_pair_create(c_ref_t pair)
     assert(_pair->second == 0);
     assert(_pair->first_type);
     assert(_pair->second_type);
-    _pair->first = malloc(_pair->first_type->size());
-    _pair->second = malloc(_pair->second_type->size());
+
+    if (_pair->first_type->allocate) {
+        _pair->first = _pair->first_type->allocate();
+    }
+    else {
+        _pair->first = (c_ref_t)malloc(_pair->first_type->size());
+    }
+
+    if (_pair->second_type->allocate) {
+        _pair->second = _pair->second_type->allocate();
+    }
+    else {
+        _pair->second = (c_ref_t)malloc(_pair->second_type->size());
+    }
 
     if (!_pair->first || !_pair->second) {
-        __c_free(_pair->first);
-        __c_free(_pair->second);
+        if (_pair->first_type->deallocate) {
+            _pair->first_type->deallocate(_pair->first);
+        }
+        else {
+            __c_free(_pair->first);
+        }
+
+        if (_pair->second_type->deallocate) {
+            _pair->second_type->deallocate(_pair->second);
+        }
+        else {
+            __c_free(_pair->second);
+        }
         return;
     }
 
@@ -72,12 +95,35 @@ __c_static __c_inline void c_pair_copy(c_ref_t dst, const c_ref_t src)
     assert(_dst->second == 0);
     assert(_dst->first_type);
     assert(_dst->second_type);
-    _dst->first = malloc(_dst->first_type->size());
-    _dst->second = malloc(_dst->second_type->size());
+
+    if (_dst->first_type->allocate) {
+        _dst->first = _dst->first_type->allocate();
+    }
+    else {
+        _dst->first = (c_ref_t)malloc(_dst->first_type->size());
+    }
+
+    if (_dst->second_type->allocate) {
+        _dst->second = _dst->second_type->allocate();
+    }
+    else {
+        _dst->second = (c_ref_t)malloc(_dst->second_type->size());
+    }
 
     if (!_dst->first || !_dst->second) {
-        __c_free(_dst->first);
-        __c_free(_dst->second);
+       if (_dst->first_type->deallocate) {
+            _dst->first_type->deallocate(_dst->first);
+        }
+        else {
+            __c_free(_dst->first);
+        }
+
+        if (_dst->second_type->deallocate) {
+            _dst->second_type->deallocate(_dst->second);
+        }
+        else {
+            __c_free(_dst->second);
+        }
         return;
     }
 

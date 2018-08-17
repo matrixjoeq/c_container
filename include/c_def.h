@@ -35,6 +35,8 @@ extern "C" {
 #define __c_in
 #define __c_out
 #define __c_in_out
+#define __required
+#define __optional
 
 typedef enum __c_iterator_category {
     C_ITER_CATE_OUTPUT,
@@ -91,34 +93,34 @@ typedef bool (*c_compare)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
 typedef struct __c_type_info {
     // size information
     // return size of the object
-    size_t (*size)(void);
+    size_t (*size)(void) __required;
 
     // allocate an object with size();
-    c_ref_t (*allocate)(void);
+    c_ref_t (*allocate)(void) __optional;
 
     // default constructor, this is in place new.
     // obj is allocated already.
-    void (*create)(c_ref_t __c_out obj);
+    void (*create)(c_ref_t __c_out obj) __required;
 
     // copy constructor, this is in place new.
     // dst is allocated already.
-    void (*copy)(c_ref_t __c_out dst, c_ref_t __c_in src);
+    void (*copy)(c_ref_t __c_out dst, c_ref_t __c_in src) __required;
 
     // destructor
     // Do not free obj, it will be deallocated after destroy automatically.
-    void (*destroy)(c_ref_t __c_in_out obj);
+    void (*destroy)(c_ref_t __c_in_out obj) __required;
 
     // deallocate
-    void (*deallocate)(c_ref_t __c_in obj);
+    void (*deallocate)(c_ref_t __c_in obj) __optional;
 
     // operator=
-    c_ref_t (*assign)(c_ref_t __c_out dst, c_ref_t __c_in src);
+    c_ref_t (*assign)(c_ref_t __c_out dst, c_ref_t __c_in src) __required;
 
     // operator<
-    bool (*less)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
+    bool (*less)(c_ref_t __c_in lhs, c_ref_t __c_in rhs) __optional;
 
     // operator==
-    bool (*equal)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
+    bool (*equal)(c_ref_t __c_in lhs, c_ref_t __c_in rhs) __optional;
 } const c_type_info_t;
 
 struct __c_iterator;
