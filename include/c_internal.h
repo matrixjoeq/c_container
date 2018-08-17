@@ -29,6 +29,7 @@
 extern "C" {
 #endif // __cplusplus
 
+#include <assert.h>
 #include <time.h>
 #include <sys/time.h>
 #include <stdio.h>

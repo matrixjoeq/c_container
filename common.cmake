@@ -28,6 +28,8 @@ IF(NOT UNIX)
 ENDIF()
 
 enable_testing()
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
 
 cmake_policy(SET CMP0045 OLD)
 
@@ -39,7 +41,7 @@ set(common_base_flags "${common_base_flags} -Werror")
 #set(common_base_flags "${common_base_flags} -pg")
 
 set(c_base_flags "${common_base_flags}")
-set(c_base_flags "${c_base_flags} -std=gnu99")
+set(c_base_flags "${c_base_flags} -std=gnu11")
 
 set(cxx_base_flags "${common_base_flags}")
 set(cxx_base_flags "${cxx_base_flags} -std=gnu++11")
@@ -153,11 +155,11 @@ endfunction()
 
 # executable (gtest)
 function(cxx_gtest_executable name libs)
-    add_executable_ex(${name} "${gtest_flags}" "${libs};gtest_main;gtest;pthread" ${ARGN})
+    add_executable_ex(${name} "${gtest_flags}" "${libs};${GTEST_BOTH_LIBRARIES};pthread" ${ARGN})
 endfunction()
 
 # executable (gmock)
 function(cxx_gmock_executable name libs)
-    add_executable_ex(${name} "${gmock_flags}" "${libs};gmock_main;gmock;gtest;pthread" ${ARGN})
+    add_executable_ex(${name} "${gmock_flags}" "${libs};${GTEST_BOTH_LIBRARIES};pthread" ${ARGN})
 endfunction()
 

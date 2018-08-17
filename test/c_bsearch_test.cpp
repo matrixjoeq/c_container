@@ -56,10 +56,10 @@ public:
     {
         std_list_.clear();
         std_list_.resize(100000);
-        srandom(static_cast<unsigned int>(time(0)));
+        srand(static_cast<unsigned int>(time(0)));
         int data = 0;
         for (auto iter = std_list_.begin(); iter != std_list_.end(); ++iter) {
-            data = random() % INT32_MAX;
+            data = rand() % INT32_MAX;
             *iter = data;
             c_list_push_back(l_, C_REF_T(&data));
         }
@@ -150,7 +150,7 @@ TEST_F(CBinarySearchTest, BoundPerformance)
     SetupPerformance();
 
     __TEST_LOOP {
-        int x = random() % INT32_MAX;
+        int x = rand() % INT32_MAX;
         __c_measure(std::lower_bound(std_first_, std_last_, x));
         __c_measure(std::upper_bound(std_first_, std_last_, x));
         __c_measure(c_algo_lower_bound(&first_, &last_, &x, &output_));
@@ -194,7 +194,7 @@ TEST_F(CBinarySearchTest, BinarySearchPerformance)
     bool std_ret = false;
     bool c_ret = false;
     __TEST_LOOP {
-        int x = random() % INT32_MAX;
+        int x = rand() % INT32_MAX;
         __c_measure(std_ret = std::binary_search(std_first_, std_last_, x));
         __c_measure(c_ret = c_algo_binary_search(&first_, &last_, &x));
         EXPECT_EQ(std_ret, c_ret);

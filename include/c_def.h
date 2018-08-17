@@ -90,7 +90,11 @@ typedef bool (*c_compare)(c_ref_t __c_in lhs, c_ref_t __c_in rhs);
 
 typedef struct __c_type_info {
     // size information
+    // return size of the object
     size_t (*size)(void);
+
+    // allocate an object with size();
+    c_ref_t (*allocate)(void);
 
     // default constructor, this is in place new.
     // obj is allocated already.
@@ -103,6 +107,9 @@ typedef struct __c_type_info {
     // destructor
     // Do not free obj, it will be deallocated after destroy automatically.
     void (*destroy)(c_ref_t __c_in_out obj);
+
+    // deallocate
+    void (*deallocate)(c_ref_t __c_in obj);
 
     // operator=
     c_ref_t (*assign)(c_ref_t __c_out dst, c_ref_t __c_in src);

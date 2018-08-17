@@ -275,8 +275,9 @@ TEST_F(CTreeTest, Erase)
         ++index;
         next = c_tree_erase(__unique_tree, next);
         ExpectEqualToArray(__unique_tree, &(unique_data[index]), unique_length - index);
-        if (C_ITER_NE(&next, &__unique_last))
+        if (C_ITER_NE(&next, &__unique_last)) {
             EXPECT_EQ(unique_data[index], C_DEREF_INT(C_ITER_DEREF(&next)));
+        }
     }
     ExpectEmpty(__unique_tree);
 
@@ -286,8 +287,9 @@ TEST_F(CTreeTest, Erase)
         ++index;
         next = c_tree_erase(__equal_tree, next);
         ExpectEqualToArray(__equal_tree, &(equal_data[index]), equal_length - index);
-        if (C_ITER_NE(&next, &__equal_last))
+        if (C_ITER_NE(&next, &__equal_last)) {
             EXPECT_EQ(equal_data[index], C_DEREF_INT(C_ITER_DEREF(&next)));
+        }
     }
     ExpectEmpty(__equal_tree);
 }
@@ -413,16 +415,18 @@ TEST_F(CTreeTest, Bound)
         c_tree_iterator_t lower = c_tree_lower_bound(__unique_tree, C_REF_T(&unique_data[i]));
         c_tree_iterator_t upper = c_tree_upper_bound(__unique_tree, C_REF_T(&unique_data[i]));
         EXPECT_EQ(unique_data[i], C_DEREF_INT(C_ITER_DEREF(&lower)));
-        if (C_ITER_NE(&__unique_last, &upper))
+        if (C_ITER_NE(&__unique_last, &upper)) {
             EXPECT_TRUE(unique_data[i] < C_DEREF_INT(C_ITER_DEREF(&upper)));
+        }
     }
 
     __array_foreach(unique_data, i) {
         c_tree_iterator_t lower = c_tree_lower_bound(__equal_tree, C_REF_T(&unique_data[i]));
         c_tree_iterator_t upper = c_tree_upper_bound(__equal_tree, C_REF_T(&unique_data[i]));
         EXPECT_EQ(unique_data[i], C_DEREF_INT(C_ITER_DEREF(&lower)));
-        if (C_ITER_NE(&__equal_last, &upper))
+        if (C_ITER_NE(&__equal_last, &upper)) {
             EXPECT_TRUE(unique_data[i] < C_DEREF_INT(C_ITER_DEREF(&upper)));
+        }
     }
 }
 

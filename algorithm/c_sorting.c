@@ -27,8 +27,6 @@
 #include "c_internal.h"
 #include "c_algorithm.h"
 
-static const int __s_threshold = 16;
-
 __c_static __c_inline size_t __lg(size_t n)
 {
     size_t k = 0;
@@ -86,6 +84,7 @@ __c_static void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
                                         size_t depth_limit,
                                         c_compare comp)
 {
+    static const int __s_threshold = 16;
     __C_ALGO_BEGIN_2(first, last)
 
     c_iterator_t* __middle = 0;
