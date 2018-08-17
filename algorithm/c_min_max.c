@@ -27,7 +27,7 @@
 #include "c_internal.h"
 #include "c_algorithm.h"
 
-c_ref_t algo_max_by(c_type_info_t* value_type,
+c_ref_t algo_max_by(const c_type_info_t* value_type,
                     c_ref_t x,
                     c_ref_t y,
                     c_compare comp)
@@ -42,7 +42,7 @@ c_ref_t algo_max_by(c_type_info_t* value_type,
     return r;
 }
 
-c_ref_t algo_min_by(c_type_info_t* value_type,
+c_ref_t algo_min_by(const c_type_info_t* value_type,
                     c_ref_t x,
                     c_ref_t y,
                     c_compare comp)
@@ -156,7 +156,7 @@ void algo_minmax_element_by(c_iterator_t* __c_forward_iterator first,
     __C_ALGO_END_2(first, last)
 }
 
-c_ref_t algo_clamp_by(c_type_info_t* value_type,
+c_ref_t algo_clamp_by(const c_type_info_t* value_type,
                       c_ref_t v,
                       c_ref_t lo,
                       c_ref_t hi,

@@ -46,8 +46,8 @@ typedef struct __c_slist_iterator {
 /**
  * constructor/destructor
  */
-c_slist_t* c_slist_create(c_type_info_t* type_info);
-c_slist_t* c_slist_create_from(c_type_info_t* type_info, c_ref_t values, size_t length);
+c_slist_t* c_slist_create(const c_type_info_t* type_info);
+c_slist_t* c_slist_create_from(const c_type_info_t* type_info, c_ref_t values, size_t length);
 c_slist_t* c_slist_copy(c_slist_t* other);
 c_slist_t* c_slist_assign(c_slist_t* self, c_slist_t* other);
 void c_slist_destroy(c_slist_t* list);

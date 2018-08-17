@@ -39,9 +39,9 @@ struct __c_tree_node {
 };
 
 struct __c_tree {
-    c_type_info_t* key_type;
-    c_type_info_t* value_type;
-    c_type_info_t* mapped_type;
+    const c_type_info_t* key_type;
+    const c_type_info_t* value_type;
+    const c_type_info_t* mapped_type;
     c_key_of_value key_of_value;
     c_compare key_comp;
     c_tree_node_t* header;
@@ -51,8 +51,8 @@ struct __c_tree {
 static const __rb_tree_color_type s_rb_tree_color_red = false;
 static const __rb_tree_color_type s_rb_tree_color_black = true;
 
-__c_static c_tree_iterator_t __create_iterator(c_type_info_t* value_type, c_tree_node_t* node);
-__c_static c_tree_iterator_t __create_reverse_iterator(c_type_info_t* value_type, c_tree_node_t* node);
+__c_static c_tree_iterator_t __create_iterator(const c_type_info_t* value_type, c_tree_node_t* node);
+__c_static c_tree_iterator_t __create_reverse_iterator(const c_type_info_t* value_type, c_tree_node_t* node);
 
 __c_static __c_inline bool __is_header(c_tree_node_t* node)
 {
@@ -243,7 +243,7 @@ __c_static __c_inline c_tree_node_t* __create_node(c_tree_t* tree, c_ref_t value
 {
     assert(tree);
 
-    c_type_info_t* value_type = tree->value_type;
+    const c_type_info_t* value_type = tree->value_type;
     assert(value_type);
 
     c_tree_node_t* node = (c_tree_node_t*)malloc(sizeof(c_tree_node_t));
@@ -886,7 +886,7 @@ static c_iterator_operation_t s_iter_ops = {
 };
 
 __c_static __c_inline c_tree_iterator_t __create_iterator(
-    c_type_info_t* value_type, c_tree_node_t* node)
+    const c_type_info_t* value_type, c_tree_node_t* node)
 {
     assert(value_type);
     assert(node);
@@ -919,7 +919,7 @@ static c_iterator_operation_t s_reverse_iter_ops = {
 };
 
 __c_static __c_inline c_tree_iterator_t __create_reverse_iterator(
-    c_type_info_t* value_type, c_tree_node_t* node)
+    const c_type_info_t* value_type, c_tree_node_t* node)
 {
     assert(value_type);
     assert(node);
@@ -936,9 +936,9 @@ __c_static __c_inline c_tree_iterator_t __create_reverse_iterator(
     return iter;
 }
 
-c_tree_t* c_tree_create(c_type_info_t* key_type,
-                        c_type_info_t* value_type,
-                        c_type_info_t* mapped_type,
+c_tree_t* c_tree_create(const c_type_info_t* key_type,
+                        const c_type_info_t* value_type,
+                        const c_type_info_t* mapped_type,
                         c_key_of_value key_of_value,
                         c_compare key_comp)
 {

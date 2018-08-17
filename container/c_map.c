@@ -34,7 +34,7 @@ __c_static __c_inline c_ref_t __key_of_pair(c_ref_t pair)
 }
 
 /* map */
-c_map_t* c_map_create(c_type_info_t* key_type, c_type_info_t* value_type, c_compare key_comp)
+c_map_t* c_map_create(const c_type_info_t* key_type, const c_type_info_t* value_type, c_compare key_comp)
 {
     c_map_t* map = c_tree_create(key_type, c_get_pair_type_info(), value_type, __key_of_pair, key_comp);
     return map;
@@ -160,7 +160,7 @@ void c_map_equal_range(c_map_t* map, c_ref_t key,
 }
 
 /* multimap */
-c_multimap_t* c_multimap_create(c_type_info_t* key_type, c_type_info_t* value_type, c_compare key_comp)
+c_multimap_t* c_multimap_create(const c_type_info_t* key_type, const c_type_info_t* value_type, c_compare key_comp)
 {
     return c_tree_create(key_type, c_get_pair_type_info(), value_type, __key_of_pair, key_comp);
 }

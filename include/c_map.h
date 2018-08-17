@@ -40,7 +40,7 @@ typedef c_tree_iterator_t c_map_iterator_t;
 /**
  * constructor/destructor
  */
-c_map_t* c_map_create(c_type_info_t* key_type, c_type_info_t* value_type, c_compare key_comp);
+c_map_t* c_map_create(const c_type_info_t* key_type, const c_type_info_t* value_type, c_compare key_comp);
 void c_map_destroy(c_map_t* map);
 
 /**
@@ -93,7 +93,7 @@ typedef c_tree_iterator_t c_multimap_iterator_t;
 /**
  * constructor/destructor
  */
-c_multimap_t* c_multimap_create(c_type_info_t* key_type, c_type_info_t* value_type, c_compare key_comp);
+c_multimap_t* c_multimap_create(const c_type_info_t* key_type, const c_type_info_t* value_type, c_compare key_comp);
 void c_multimap_destroy(c_multimap_t* multimap);
 
 /**

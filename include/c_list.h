@@ -48,8 +48,8 @@ typedef struct __c_list_iterator {
 /**
  * constructor/destructor
  */
-c_list_t* c_list_create(c_type_info_t* type_info);
-c_list_t* c_list_create_from(c_type_info_t* type_info, c_ref_t values, size_t length);
+c_list_t* c_list_create(const c_type_info_t* type_info);
+c_list_t* c_list_create_from(const c_type_info_t* type_info, c_ref_t values, size_t length);
 c_list_t* c_list_copy(c_list_t* other);
 c_list_t* c_list_assign(c_list_t* self, c_list_t* other);
 void c_list_destroy(c_list_t* list);
@@ -109,7 +109,7 @@ void c_list_unique_if(c_list_t* list, c_binary_predicate pred);
 /**
  * backend
  */
-c_backend_container_t* c_list_create_backend(c_type_info_t* type_info);
+c_backend_container_t* c_list_create_backend(const c_type_info_t* type_info);
 
 /**
  * helpers

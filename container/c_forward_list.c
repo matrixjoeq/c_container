@@ -37,7 +37,7 @@ typedef struct __c_slist_node c_slist_node_t;
 struct __c_slist {
     c_slist_node_t* ancient; // before_begin() of list
     c_slist_node_t* node; // end() of list
-    c_type_info_t* value_type;
+    const c_type_info_t* value_type;
 };
 
 __c_static __c_inline bool __is_slist_iterator(c_iterator_t* iter)
@@ -143,7 +143,7 @@ static c_iterator_operation_t s_iter_ops = {
     .distance = iter_distance
 };
 
-__c_static __c_inline c_slist_iterator_t __create_iterator(c_type_info_t* value_type, c_slist_node_t* node)
+__c_static __c_inline c_slist_iterator_t __create_iterator(const c_type_info_t* value_type, c_slist_node_t* node)
 {
     assert(value_type);
     assert(node);
@@ -236,7 +236,7 @@ __c_static __c_inline void __transfer(c_slist_node_t* pos, c_slist_node_t* first
 /**
  * constructor/destructor
  */
-c_slist_t* c_slist_create(c_type_info_t* value_type)
+c_slist_t* c_slist_create(const c_type_info_t* value_type)
 {
     if (!value_type) return 0;
 
@@ -265,7 +265,7 @@ c_slist_t* c_slist_create(c_type_info_t* value_type)
     return list;
 }
 
-c_slist_t* c_slist_create_from(c_type_info_t* value_type, c_ref_t values, size_t length)
+c_slist_t* c_slist_create_from(const c_type_info_t* value_type, c_ref_t values, size_t length)
 {
     if (!value_type || !values || length == 0) return 0;
 

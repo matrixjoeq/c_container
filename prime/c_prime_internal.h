@@ -109,9 +109,9 @@ __C_TYPE_LESS(__type, __abbr) \
 __C_TYPE_EQUAL(__type, __abbr)
 
 #define __C_GET_TYPE_INFO(__abbr) \
-c_type_info_t* c_get_##__abbr##_type_info(void) \
+const c_type_info_t* c_get_##__abbr##_type_info(void) \
 { \
-    static c_type_info_t type_info = { \
+    static const c_type_info_t type_info = { \
         .size = __c_##__abbr##_size, \
         .allocate = __c_##__abbr##_allocate, \
         .create = __c_##__abbr##_create, \

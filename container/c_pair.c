@@ -130,9 +130,9 @@ __c_static __c_inline bool c_pair_equal(const c_ref_t x, const c_ref_t y)
     return (_x->first_type->equal(_x->first, _y->first) && _x->second_type->equal(_x->second, _y->second));
 }
 
-c_type_info_t* c_get_pair_type_info(void)
+const c_type_info_t* c_get_pair_type_info(void)
 {
-    static c_type_info_t type_info = {
+    static const c_type_info_t type_info = {
         .size = c_pair_size,
         .create = c_pair_create,
         .copy = c_pair_copy,
@@ -145,7 +145,7 @@ c_type_info_t* c_get_pair_type_info(void)
     return &type_info;
 }
 
-c_pair_t c_make_pair(c_type_info_t* T1, c_type_info_t* T2, c_ref_t x, c_ref_t y)
+c_pair_t c_make_pair(const c_type_info_t* T1, const c_type_info_t* T2, c_ref_t x, c_ref_t y)
 {
     c_pair_t pair = {
         .first_type = T1,

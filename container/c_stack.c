@@ -33,7 +33,7 @@ struct __c_stack {
 /**
  * constructor/destructor
  */
-c_stack_t* c_stack_create(c_type_info_t* value_type, BackendContainerCreator creator)
+c_stack_t* c_stack_create(const c_type_info_t* value_type, BackendContainerCreator creator)
 {
     c_stack_t* stack = (c_stack_t*)malloc(sizeof(c_stack_t));
     if (!stack) return 0;

@@ -47,9 +47,9 @@ typedef struct __c_tree_iterator {
 /**
  * constructor/destructor
  */
-c_tree_t* c_tree_create(c_type_info_t* key_type,
-                        c_type_info_t* value_type,
-                        c_type_info_t* mapped_type,
+c_tree_t* c_tree_create(const c_type_info_t* key_type,
+                        const c_type_info_t* value_type,
+                        const c_type_info_t* mapped_type,
                         c_key_of_value key_of_value,
                         c_compare key_comp);
 void c_tree_destroy(c_tree_t* tree);

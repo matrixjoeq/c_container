@@ -382,7 +382,7 @@ size_t algo_replace_copy_if(c_iterator_t* __c_forward_iterator first,
                             c_iterator_t** __c_forward_iterator d_last);
 
 // Exchanges the given values.
-void algo_swap(c_type_info_t* type_info,
+void algo_swap(const c_type_info_t* type_info,
                c_ref_t x,
                c_ref_t y);
 
@@ -865,7 +865,7 @@ void algo_sort_heap_by(c_iterator_t* __c_random_iterator first,
 // Returns the greater of the given values.
 // The return value is a copy of the greater one which allocated on the heap.
 // It must be deallocated after use.
-c_ref_t algo_max_by(c_type_info_t* type_info,
+c_ref_t algo_max_by(const c_type_info_t* type_info,
                     c_ref_t x,
                     c_ref_t y,
                     c_compare comp);
@@ -873,7 +873,7 @@ c_ref_t algo_max_by(c_type_info_t* type_info,
 // Returns the smaller of the given values.
 // The return value is a copy of the smaller one which allocated on the heap.
 // It must be deallocated after use.
-c_ref_t algo_min_by(c_type_info_t* type_info,
+c_ref_t algo_min_by(const c_type_info_t* type_info,
                     c_ref_t x,
                     c_ref_t y,
                     c_compare comp);
@@ -909,7 +909,7 @@ void algo_minmax_element_by(c_iterator_t* __c_forward_iterator first,
 // The behavior is undefined if the value of lo is greater than hi.
 // The return value is a copy of the chosen one which allocated on the heap.
 // It must be deallocated after use.
-c_ref_t algo_clamp_by(c_type_info_t* type_info,
+c_ref_t algo_clamp_by(const c_type_info_t* type_info,
                       c_ref_t v,
                       c_ref_t lo,
                       c_ref_t hi,

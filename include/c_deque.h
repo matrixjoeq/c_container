@@ -47,8 +47,8 @@ typedef struct __c_deque_iterator {
 /**
  * constructor/destructor
  */
-c_deque_t* c_deque_create(c_type_info_t* type_info);
-c_deque_t* c_deque_create_from(c_type_info_t* type_info, c_ref_t values, size_t length);
+c_deque_t* c_deque_create(const c_type_info_t* type_info);
+c_deque_t* c_deque_create_from(const c_type_info_t* type_info, c_ref_t values, size_t length);
 c_deque_t* c_deque_copy(c_deque_t* other);
 c_deque_t* c_deque_assign(c_deque_t* self, c_deque_t* other);
 void c_deque_destroy(c_deque_t* deque);
@@ -96,7 +96,7 @@ void c_deque_swap(c_deque_t* deque, c_deque_t* other);
 /**
  * backend
  */
-c_backend_container_t* c_deque_create_backend(c_type_info_t* type_info);
+c_backend_container_t* c_deque_create_backend(const c_type_info_t* type_info);
 
 /**
  * helpers

@@ -37,7 +37,7 @@ typedef struct __c_list_node c_list_node_t;
 
 struct __c_list {
     c_list_node_t* node; // __end() of list
-    c_type_info_t* value_type;
+    const c_type_info_t* value_type;
 };
 
 struct __c_backend_list {
@@ -295,7 +295,7 @@ static c_iterator_operation_t s_iter_ops = {
 };
 
 __c_static __c_inline c_list_iterator_t __create_iterator(
-    c_type_info_t* value_type, c_list_node_t* node)
+    const c_type_info_t* value_type, c_list_node_t* node)
 {
     assert(value_type);
     assert(node);
@@ -328,7 +328,7 @@ static c_iterator_operation_t s_reverse_iter_ops = {
 };
 
 __c_static __c_inline c_list_iterator_t __create_reverse_iterator(
-    c_type_info_t* value_type, c_list_node_t* node)
+    const c_type_info_t* value_type, c_list_node_t* node)
 {
     assert(value_type);
     assert(node);
@@ -537,7 +537,7 @@ __c_static void backend_swap(c_backend_container_t* c, c_backend_container_t* ot
 /**
  * constructor/destructor
  */
-c_list_t* c_list_create(c_type_info_t* value_type)
+c_list_t* c_list_create(const c_type_info_t* value_type)
 {
     if (!value_type) return 0;
 
@@ -558,7 +558,7 @@ c_list_t* c_list_create(c_type_info_t* value_type)
     return list;
 }
 
-c_list_t* c_list_create_from(c_type_info_t* value_type, c_ref_t values, size_t length)
+c_list_t* c_list_create_from(const c_type_info_t* value_type, c_ref_t values, size_t length)
 {
     if (!value_type || !values || length == 0) return 0;
 
@@ -974,7 +974,7 @@ void c_list_unique_if(c_list_t* list, c_binary_predicate pred)
 /**
  * backend
  */
-c_backend_container_t* c_list_create_backend(c_type_info_t* value_type)
+c_backend_container_t* c_list_create_backend(const c_type_info_t* value_type)
 {
     static c_backend_operation_t backend_list_ops = {
         .destroy = backend_destroy,

@@ -40,7 +40,7 @@ typedef struct __c_queue c_queue_t;
 /**
  * constructor/destructor
  */
-c_queue_t* c_queue_create(c_type_info_t* type_info, BackendContainerCreator creator);
+c_queue_t* c_queue_create(const c_type_info_t* type_info, BackendContainerCreator creator);
 void c_queue_destroy(c_queue_t* queue);
 
 /**

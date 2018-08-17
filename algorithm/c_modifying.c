@@ -564,7 +564,7 @@ size_t algo_replace_copy_if(c_iterator_t* __c_forward_iterator first,
     return n_copied;
 }
 
-void algo_swap(c_type_info_t* value_type,
+void algo_swap(const c_type_info_t* value_type,
                c_ref_t x,
                c_ref_t y)
 {

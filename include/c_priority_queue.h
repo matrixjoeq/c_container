@@ -40,7 +40,7 @@ typedef struct __c_priority_queue c_priority_queue_t;
 /**
  * constructor/destructor
  */
-c_priority_queue_t* c_priority_queue_create(c_type_info_t* type_info, BackendContainerCreator creator, c_compare comp);
+c_priority_queue_t* c_priority_queue_create(const c_type_info_t* type_info, BackendContainerCreator creator, c_compare comp);
 void c_priority_queue_destroy(c_priority_queue_t* queue);
 
 /**
