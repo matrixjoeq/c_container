@@ -38,7 +38,7 @@ c_stack_t* c_stack_create(const c_type_info_t* value_type, BackendContainerCreat
 {
     if (!value_type || !creator) return 0;
     validate_type_info(value_type);
-    
+
     c_stack_t* stack = (c_stack_t*)malloc(sizeof(c_stack_t));
     if (!stack) return 0;
 
