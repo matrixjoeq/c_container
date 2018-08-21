@@ -70,7 +70,7 @@ __c_inline uint64_t __c_get_time_ms(void)
         uint64_t __start = __c_get_time_ms(); \
         expr; \
         uint64_t __finish = __c_get_time_ms(); \
-        if (__finish != __start) printf("%s takes %lu ms to finish\n", #expr, __finish - __start); \
+        printf("%s takes %lu ms to finish\n", #expr, __finish - __start); \
     } while (0)
 #endif
 
@@ -84,7 +84,7 @@ __c_inline void __c_iter_copy_or_assign(c_iterator_t** dst, c_iterator_t* src)
     }
 }
 
-__c_inline c_iterator_t* __c_iter_move_copy(c_iterator_t** dst, c_iterator_t* src, ptrdiff_t n)
+__c_inline c_iterator_t* __c_iter_copy_and_move(c_iterator_t** dst, c_iterator_t* src, ptrdiff_t n)
 {
     __c_iter_copy_or_assign(dst, src);
     C_ITER_ADVANCE(*dst, n);
@@ -116,7 +116,12 @@ __c_inline c_ref_t __c_select2nd(c_pair_t* pair)
     } while (0)
 
 #define __c_unuse(x) (void)(x)
+
+#ifdef NDEBUG
+#define __c_assert(cond, msg) { (void)(cond); (void)(msg); }
+#else
 #define __c_assert(cond, msg) assert((cond) && (msg))
+#endif // NDEBUG
 #define __c_static_assert(cond) { char static_assertion[(cond) ? 1 : -1]; (void)static_assertion; }
 #define __array_length(__array) sizeof(__array) / sizeof(__array[0])
 #define __array_foreach(__array, __index) for (unsigned int __index = 0; __index < __array_length(__array); ++__index)

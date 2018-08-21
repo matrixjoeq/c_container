@@ -132,7 +132,7 @@ TEST_F(CSortTest, PartialSort)
     int numbers[] = { 5, 7, 4, 2, 8, 6, 1, 9, 0, 3 };
     SetupVector(numbers, __array_length(numbers));
     c_iterator_t* middle = 0;
-    __c_iter_move_copy(&middle, C_ITER_T(&first), 3);
+    __c_iter_copy_and_move(&middle, C_ITER_T(&first), 3);
 
     c_algo_partial_sort(&first, middle, &last);
     c_algo_for_each(&first, &last, print_value);

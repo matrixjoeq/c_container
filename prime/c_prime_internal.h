@@ -32,7 +32,8 @@
 #define __C_TYPE_SIZE(__type, __abbr) \
 __c_static __c_inline size_t __c_##__abbr##_size(void) \
 { \
-    return sizeof(__type); \
+    static size_t s = sizeof(__type); \
+    return s; \
 }
 
 #define __C_TYPE_ALLOCATE(__type, __abbr) \
