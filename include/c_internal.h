@@ -70,7 +70,7 @@ __c_inline uint64_t __c_get_time_ms(void)
         uint64_t __start = __c_get_time_ms(); \
         expr; \
         uint64_t __finish = __c_get_time_ms(); \
-        printf("%s takes %lu ms to finish\n", #expr, __finish - __start); \
+        printf("%s takes %llu ms to finish\n", #expr, __finish - __start); \
     } while (0)
 #endif
 

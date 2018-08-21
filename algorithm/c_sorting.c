@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include "c_internal.h"
 #include "c_algorithm.h"
-
+#if 0
 __c_static __c_inline size_t __lg(size_t n)
 {
     size_t k = 0;
@@ -78,7 +78,7 @@ void __partition_by(c_iterator_t* __c_random_iterator first,
 
     __C_ALGO_END_2(first, last)
 }
-#if 0
+
 __c_static void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
                                         c_iterator_t* __c_random_iterator last,
                                         size_t depth_limit,
@@ -118,7 +118,7 @@ __c_static void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
 
     __C_ALGO_END_2(first, last)
 }
-#endif
+
 __c_static __c_inline
 void __insertion_sort_by(c_iterator_t* __c_random_iterator first,
                          c_iterator_t* __c_random_iterator last,
@@ -165,7 +165,7 @@ void __insertion_sort_by(c_iterator_t* __c_random_iterator first,
 
     __C_ALGO_END_2(first, last)
 }
-
+#endif
 bool algo_is_sorted_by(c_iterator_t* __c_forward_iterator first,
                        c_iterator_t* __c_forward_iterator last,
                        c_compare comp)

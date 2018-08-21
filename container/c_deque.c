@@ -45,6 +45,7 @@ struct __c_backend_deque {
     c_deque_t* impl;
 };
 
+#ifdef ENABLE_CHECK_DEQUE_STATE
 __c_static __c_inline bool __check_deque_state(c_deque_t* deque)
 {
     return ((deque) &&
@@ -52,6 +53,13 @@ __c_static __c_inline bool __check_deque_state(c_deque_t* deque)
             (deque->finish >= deque->start) &&
             (deque->start >= deque->start_of_storage));
 }
+#else
+__c_static __c_inline bool __check_deque_state(c_deque_t* deque)
+{
+    __c_unuse(deque);
+    return true;
+}
+#endif /* ENABLE_CHECK_DEQUE_STATE */
 
 __c_static __c_inline bool __is_valid_pos(c_deque_t* deque, c_ref_t pos)
 {
@@ -555,7 +563,7 @@ __c_static __c_inline c_deque_iterator_t __insert_aux(
         memmove(pos.pos + shift_size, pos.pos, deque->finish - pos.pos);
         __fill(pos, n, value);
         deque->finish += shift_size;
-        //assert(__check_deque_state(deque));
+        assert(__check_deque_state(deque));
     }
     else if (n <= __available_start(deque)) {
         shift_size = n * value_size;
@@ -563,7 +571,7 @@ __c_static __c_inline c_deque_iterator_t __insert_aux(
         deque->start -= shift_size;
         pos.pos -= shift_size;
         __fill(pos, n, value);
-        //assert(__check_deque_state(deque));
+        assert(__check_deque_state(deque));
     }
     else {
         size_t first_half_size = pos.pos - deque->start;
@@ -577,7 +585,7 @@ __c_static __c_inline c_deque_iterator_t __insert_aux(
         __fill(pos, n, value);
 
         deque->finish = pos.pos + n * value_size + second_half_size;
-        //assert(__check_deque_state(deque));
+        assert(__check_deque_state(deque));
     }
 
     return pos;
@@ -604,7 +612,7 @@ __c_static __c_inline int __reallocate_and_move(c_deque_t* deque, size_t n)
     deque->start = start;
     deque->finish = start + size * value_size;
     deque->end_of_storage = start_of_storage + cap * value_size;
-    //assert(__check_deque_state(deque));
+    assert(__check_deque_state(deque));
 
     return 0;
 }
@@ -770,7 +778,7 @@ void c_deque_shrink_to_fit(c_deque_t* deque)
     deque->start = deque->start_of_storage;
     deque->finish = deque->start + size;
     deque->end_of_storage = deque->finish;
-    //assert(__check_deque_state(deque));
+    assert(__check_deque_state(deque));
 }
 
 /**
@@ -785,7 +793,7 @@ void c_deque_clear(c_deque_t* deque)
     size_t cap = (__eos(deque) - __sos(deque)) / value_size;
     deque->start = __sos(deque) + (cap / 2) * value_size;
     deque->finish = deque->start;
-    //assert(__check_deque_state(deque));
+    assert(__check_deque_state(deque));
 }
 
 c_deque_iterator_t c_deque_insert(c_deque_t* deque, c_deque_iterator_t pos, c_ref_t value)
@@ -841,7 +849,7 @@ c_deque_iterator_t c_deque_erase(c_deque_t* deque, c_deque_iterator_t pos)
     deque->value_type->destroy(pos.pos);
     memmove(pos.pos, next_pos, deque->finish - next_pos);
     deque->finish -= deque->value_type->size();
-    //assert(__check_deque_state(deque));
+    assert(__check_deque_state(deque));
 
     return pos;
 }
@@ -862,7 +870,7 @@ c_deque_iterator_t c_deque_erase_range(
     size_t size = deque->finish - last.pos;
     memmove(first.pos, last.pos, size);
     deque->finish -= (last.pos - first.pos);
-    //assert(__check_deque_state(deque));
+    assert(__check_deque_state(deque));
 
     return first;
 }
@@ -878,7 +886,7 @@ void c_deque_push_back(c_deque_t* deque, c_ref_t value)
 
     deque->value_type->copy(deque->finish, value);
     deque->finish += deque->value_type->size();
-    //assert(__check_deque_state(deque));
+    assert(__check_deque_state(deque));
 }
 
 void c_deque_pop_back(c_deque_t* deque)
@@ -886,7 +894,7 @@ void c_deque_pop_back(c_deque_t* deque)
     if (!c_deque_empty(deque)) {
         deque->value_type->destroy(c_deque_back(deque));
         deque->finish -= deque->value_type->size();
-        //assert(__check_deque_state(deque));
+        assert(__check_deque_state(deque));
     }
 }
 
@@ -901,7 +909,7 @@ void c_deque_push_front(c_deque_t* deque, c_ref_t value)
 
     deque->start -= deque->value_type->size();
     deque->value_type->copy(deque->start, value);
-    //assert(__check_deque_state(deque));
+    assert(__check_deque_state(deque));
 }
 
 void c_deque_pop_front(c_deque_t* deque)
@@ -909,7 +917,7 @@ void c_deque_pop_front(c_deque_t* deque)
     if (!c_deque_empty(deque)) {
         deque->value_type->destroy(c_deque_front(deque));
         deque->start += deque->value_type->size();
-        //assert(__check_deque_state(deque));
+        assert(__check_deque_state(deque));
     }
 }
 
@@ -937,7 +945,7 @@ void c_deque_resize_with_value(c_deque_t* deque, size_t count, c_ref_t value)
         c_ref_t pos = deque->start + count * value_size;
         __destroy(__create_iterator(deque->value_type, pos), c_deque_end(deque));
         deque->finish = pos;
-        //assert(__check_deque_state(deque));
+        assert(__check_deque_state(deque));
     }
 }
 

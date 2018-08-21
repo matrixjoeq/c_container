@@ -60,13 +60,13 @@ __c_static __c_inline bool __is_header(c_tree_node_t* node)
     return (node ? (node->parent->parent == node &&
                     node->color == s_rb_tree_color_red) : false);
 }
-
+/* unused function
 __c_static __c_inline bool __is_root(c_tree_node_t* node)
 {
     return (node ? (node->parent->parent == node &&
                     node->color == s_rb_tree_color_black) : false);
 }
-
+*/
 __c_static __c_inline bool __is_left(c_tree_node_t* node)
 {
     return (node ? node->parent->left == node : false);
@@ -122,7 +122,7 @@ __c_static __c_inline c_tree_node_t* __uncle(c_tree_node_t* node)
     return (__is_left(__parent(node)) ? __right(__grand_parent(node))
                                       : __left(__grand_parent(node)));
 }
-
+/* unused functions
 __c_static __c_inline c_tree_node_t* __sibling(c_tree_node_t* node)
 {
     return (__is_left(node) ? __right(__parent(node))
@@ -138,7 +138,7 @@ __c_static __c_inline c_ref_t __value(c_tree_node_t* node)
 {
     return node->value;
 }
-
+*/
 __c_static __c_inline c_tree_node_t* __header(c_tree_t* tree)
 {
     return tree->header;
