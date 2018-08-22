@@ -36,8 +36,7 @@ size_t algo_merge_by(c_iterator_t* __c_forward_iterator first1,
                      c_iterator_t** __c_forward_iterator d_last,
                      c_compare comp)
 {
-    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp)
-        return 0;
+    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp) return 0;
     assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
@@ -92,10 +91,12 @@ bool algo_includes_by(c_iterator_t* __c_forward_iterator first1,
     __C_ALGO_BEGIN_4(first1, last1, first2, last2)
 
     while (C_ITER_NE(__first1, __last1) && C_ITER_NE(__first2, __last2)) {
-        if (comp(C_ITER_DEREF(__first2), C_ITER_DEREF(__first1)))
+        if (comp(C_ITER_DEREF(__first2), C_ITER_DEREF(__first1))) {
             break;
-        else if (comp(C_ITER_DEREF(__first1), C_ITER_DEREF(__first2)))
+        }
+        else if (comp(C_ITER_DEREF(__first1), C_ITER_DEREF(__first2))) {
             C_ITER_INC(__first1);
+        }
         else {
             C_ITER_INC(__first1);
             C_ITER_INC(__first2);
@@ -117,8 +118,7 @@ size_t algo_set_difference_by(c_iterator_t* __c_forward_iterator first1,
                               c_iterator_t** __c_forward_iterator d_last,
                               c_compare comp)
 {
-    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp)
-        return 0;
+    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp) return 0;
     assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
@@ -161,8 +161,7 @@ size_t algo_set_intersection_by(c_iterator_t* __c_forward_iterator first1,
                                 c_iterator_t** __c_forward_iterator d_last,
                                 c_compare comp)
 {
-    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp)
-        return 0;
+    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp) return 0;
     assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
@@ -176,10 +175,12 @@ size_t algo_set_intersection_by(c_iterator_t* __c_forward_iterator first1,
     __C_ALGO_BEGIN_5(first1, last1, first2, last2, d_first)
 
     while (C_ITER_NE(__first1, __last1) && C_ITER_NE(__first2, __last2)) {
-        if (comp(C_ITER_DEREF(__first1), C_ITER_DEREF(__first2)))
+        if (comp(C_ITER_DEREF(__first1), C_ITER_DEREF(__first2))) {
             C_ITER_INC(__first1);
-        else if (comp(C_ITER_DEREF(__first2), C_ITER_DEREF(__first1)))
+        }
+        else if (comp(C_ITER_DEREF(__first2), C_ITER_DEREF(__first1))) {
             C_ITER_INC(__first2);
+        }
         else {
             C_ITER_DEREF_ASSIGN(__d_first, __first1);
             C_ITER_INC(__d_first);
@@ -204,8 +205,7 @@ size_t algo_set_symmetric_difference_by(c_iterator_t* __c_forward_iterator first
                                         c_iterator_t** __c_forward_iterator d_last,
                                         c_compare comp)
 {
-    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp)
-        return 0;
+    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp) return 0;
     assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));
@@ -255,8 +255,7 @@ size_t algo_set_union_by(c_iterator_t* __c_forward_iterator first1,
                          c_iterator_t** __c_forward_iterator d_last,
                          c_compare comp)
 {
-    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp)
-        return 0;
+    if (!first1 || !last1 || !first2 || !last2 || !d_first || !comp) return 0;
     assert(C_ITER_AT_LEAST(first1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last1, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(first2, C_ITER_CATE_FORWARD));

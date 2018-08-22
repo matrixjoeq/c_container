@@ -54,8 +54,9 @@ void algo_lower_bound_by(c_iterator_t* __c_forward_iterator first,
             C_ITER_ASSIGN(__first, __it);
             __count -= __step + 1;
         }
-        else
+        else {
             __count = __step;
+        }
     }
 
     __c_iter_copy_or_assign(bound, __first);
@@ -92,8 +93,9 @@ void algo_upper_bound_by(c_iterator_t* __c_forward_iterator first,
             C_ITER_ASSIGN(__first, __it);
             __count -= __step + 1;
         }
-        else
+        else {
             __count = __step;
+        }
     }
 
     __c_iter_copy_or_assign(bound, __first);

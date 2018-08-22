@@ -76,8 +76,9 @@ __c_static c_iterator_t* iter_post_increment(c_iterator_t* iter, c_iterator_t** 
 {
     assert(tmp);
     if (__is_slist_iterator(iter)) {
-        if (*tmp == 0)
+        if (*tmp == 0) {
             iter_alloc_and_copy(tmp, iter);
+        }
         else {
             assert(__is_slist_iterator(*tmp));
             iter_assign(*tmp, iter);
@@ -109,8 +110,9 @@ __c_static bool iter_not_equal(c_iterator_t* x, c_iterator_t* y)
 __c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
     if (__is_slist_iterator(iter)) {
-        while (n-- > 0)
+        while (n-- > 0) {
             ((c_slist_iterator_t*)iter)->node = ((c_slist_iterator_t*)iter)->node->next;
+        }
     }
 }
 
@@ -199,10 +201,12 @@ __c_static __c_inline c_slist_node_t* __create_node(c_slist_t* list, c_ref_t val
         return 0;
     }
 
-    if (value)
+    if (value) {
         list->value_type->copy(node->value, value);
-    else
+    }
+    else {
         list->value_type->create(node->value);
+    }
 
     return node;
 }
@@ -211,12 +215,10 @@ __c_static __c_inline c_slist_node_t* __pop_node_after(c_slist_t* list, c_slist_
 {
     assert(list);
 
-    if (!node || node == list->node)
-        return list->node;
+    if (!node || node == list->node) return list->node;
 
     c_slist_node_t* pos = node->next;
-    if (!pos || pos == list->node || pos == list->ancient)
-        return list->node;
+    if (!pos || pos == list->node || pos == list->ancient) return list->node;
 
     node->next = pos->next;
     list->value_type->destroy(pos->value);
@@ -236,8 +238,9 @@ __c_static __c_inline void __transfer(c_slist_node_t* pos, c_slist_node_t* first
 {
     if (pos != first && first != last && first->next != last) {
         c_slist_node_t* last_prev = first->next;
-        while (last_prev->next != last)
+        while (last_prev->next != last) {
             last_prev = last_prev->next;
+        }
 
         last_prev->next = pos->next;
         pos->next = first->next;
@@ -303,8 +306,9 @@ c_slist_t* c_slist_copy(c_slist_t* other)
     if (!list) return 0;
 
     c_slist_iterator_t iter = c_slist_before_begin(list);
-    for (c_slist_node_t* node = __begin(other); node != __end(other); node = node->next)
+    for (c_slist_node_t* node = __begin(other); node != __end(other); node = node->next) {
         iter = c_slist_insert_after(list, iter, node->value);
+    }
 
     return list;
 }
@@ -317,8 +321,9 @@ c_slist_t* c_slist_assign(c_slist_t* self, c_slist_t* other)
         c_slist_clear(self);
         self->value_type = other->value_type;
         c_slist_iterator_t iter = c_slist_before_begin(self);
-        for (c_slist_node_t* node = __begin(other); node != __end(other); node = node->next)
+        for (c_slist_node_t* node = __begin(other); node != __end(other); node = node->next) {
             iter = c_slist_insert_after(self, iter, node->value);
+        }
     }
 
     return self;
@@ -427,8 +432,7 @@ c_slist_iterator_t c_slist_erase_after_range(c_slist_t* list, c_slist_iterator_t
 
 void c_slist_push_front(c_slist_t* list, c_ref_t value)
 {
-    if (!list || !value)
-        return;
+    if (!list || !value) return;
 
     c_slist_node_t* node = __create_node(list, value);
     if (!node) return;
@@ -439,8 +443,7 @@ void c_slist_push_front(c_slist_t* list, c_ref_t value)
 
 void c_slist_pop_front(c_slist_t* list)
 {
-    if (!c_slist_empty(list))
-        __pop_node_after(list, list->ancient);
+    if (!c_slist_empty(list)) __pop_node_after(list, list->ancient);
 }
 
 void c_slist_resize(c_slist_t* list, size_t count)
@@ -497,60 +500,58 @@ void c_slist_merge(c_slist_t* list, c_slist_t* other)
 
 void c_slist_merge_by(c_slist_t* list, c_slist_t* other, c_compare comp)
 {
-    if (!list || c_slist_empty(other) || !comp ||
-        !__c_is_same(list->value_type, other->value_type))
-        return;
+    if (!list || c_slist_empty(other) || !comp || !__c_is_same(list->value_type, other->value_type)) return;
 
     c_slist_node_t* node = __before_begin(list);
     c_slist_node_t* last = __end(list);
     c_slist_node_t* other_node = __before_begin(other);
     c_slist_node_t* other_last = __end(other);
     while (node->next != last && other_node->next != other_last) {
-        if (comp(other_node->next->value, node->next->value))
+        if (comp(other_node->next->value, node->next->value)) {
             __transfer(node, other_node, other_node->next->next);
-        else
+        }
+        else {
             node = node->next;
+        }
     }
 
-    if (other_node->next != other_last)
+    if (other_node->next != other_last) {
         __transfer(node, other_node, other_last);
+    }
 }
 
 void c_slist_splice_after(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* other)
 {
-    if (!list || c_slist_empty(other) || !__c_is_same(list->value_type, other->value_type))
-        return;
+    if (!list || c_slist_empty(other) || !__c_is_same(list->value_type, other->value_type)) return;
 
     __transfer(pos.node, __before_begin(other), __end(other));
 }
 
 void c_slist_splice_after_from(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* other, c_slist_iterator_t from)
 {
-    if (!list || c_slist_empty(other) || !__c_is_same(list->value_type, other->value_type))
-        return;
+    if (!list || c_slist_empty(other) || !__c_is_same(list->value_type, other->value_type)) return;
 
     __transfer(pos.node, from.node, __end(other));
 }
 
 void c_slist_splice_after_range(c_slist_t* list, c_slist_iterator_t pos, c_slist_t* other, c_slist_iterator_t first, c_slist_iterator_t last)
 {
-    if (!list || c_slist_empty(other) || !__c_is_same(list->value_type, other->value_type))
-        return;
+    if (!list || c_slist_empty(other) || !__c_is_same(list->value_type, other->value_type)) return;
 
     __transfer(pos.node, first.node, last.node);
 }
 
 void c_slist_remove(c_slist_t* list, c_ref_t value)
 {
-    if (c_slist_empty(list) || !value)
-        return;
+    if (c_slist_empty(list) || !value) return;
 
     c_slist_node_t* prev = __before_begin(list);
     c_slist_node_t* node = prev->next;
     c_slist_node_t* last = __end(list);
     while (node != last && prev != last) {
-        if (list->value_type->equal(node->value, value))
+        if (list->value_type->equal(node->value, value)) {
             node = __pop_node_after(list, prev);
+        }
         else {
             prev = prev->next;
             node = prev->next;
@@ -560,15 +561,15 @@ void c_slist_remove(c_slist_t* list, c_ref_t value)
 
 void c_slist_remove_if(c_slist_t* list, c_unary_predicate pred)
 {
-    if (c_slist_empty(list) || !pred)
-        return;
+    if (c_slist_empty(list) || !pred) return;
 
     c_slist_node_t* prev = __before_begin(list);
     c_slist_node_t* node = prev->next;
     c_slist_node_t* last = __end(list);
     while (node != last && prev != last) {
-        if (pred(node->value))
+        if (pred(node->value)) {
             node = __pop_node_after(list, prev);
+        }
         else {
             prev = prev->next;
             node = prev->next;
@@ -607,8 +608,9 @@ void c_slist_sort_by(c_slist_t* list, c_compare comp)
         if (i == fill) ++fill;
     }
 
-    for (int i = 1; i < fill; ++i)
+    for (int i = 1; i < fill; ++i) {
         c_slist_merge_by(counter[i], counter[i - 1], comp);
+    }
     c_slist_swap(list, counter[fill - 1]);
 
 out:

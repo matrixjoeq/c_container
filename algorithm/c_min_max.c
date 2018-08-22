@@ -75,8 +75,9 @@ void algo_max_element_by(c_iterator_t* __c_forward_iterator first,
     while (C_ITER_NE(__first, __last)) {
         C_ITER_INC(__first);
         if (C_ITER_NE(__first, __last)) {
-            if (comp(C_ITER_DEREF(__max), C_ITER_DEREF(__first)))
+            if (comp(C_ITER_DEREF(__max), C_ITER_DEREF(__first))) {
                 C_ITER_ASSIGN(__max, __first);
+            }
         }
     }
 
@@ -105,8 +106,9 @@ void algo_min_element_by(c_iterator_t* __c_forward_iterator first,
     while (C_ITER_NE(__first, __last)) {
         C_ITER_INC(__first);
         if (C_ITER_NE(__first, __last)) {
-            if (comp(C_ITER_DEREF(__first), C_ITER_DEREF(__min)))
+            if (comp(C_ITER_DEREF(__first), C_ITER_DEREF(__min))) {
                 C_ITER_ASSIGN(__min, __first);
+            }
         }
     }
 
@@ -139,11 +141,13 @@ void algo_minmax_element_by(c_iterator_t* __c_forward_iterator first,
     while (C_ITER_NE(__first, __last)) {
         C_ITER_INC(__first);
         if (C_ITER_NE(__first, __last)) {
-            if (comp(C_ITER_DEREF(__first), C_ITER_DEREF(__min)))
+            if (comp(C_ITER_DEREF(__first), C_ITER_DEREF(__min))) {
                 C_ITER_ASSIGN(__min, __first);
+            }
 
-            if (comp(C_ITER_DEREF(__max), C_ITER_DEREF(__first)))
+            if (comp(C_ITER_DEREF(__max), C_ITER_DEREF(__first))) {
                 C_ITER_ASSIGN(__max, __first);
+            }
         }
     }
 
@@ -198,8 +202,9 @@ bool algo_lexicographical_compare_by(c_iterator_t* __c_forward_iterator first1,
         C_ITER_INC(__first2);
     }
 
-    if (C_ITER_EQ(__first1, __last1) && C_ITER_NE(__first2, __last2))
+    if (C_ITER_EQ(__first1, __last1) && C_ITER_NE(__first2, __last2)) {
         ret = true;
+    }
 
     __C_ALGO_END_4(first1, last1, first2, last2)
 

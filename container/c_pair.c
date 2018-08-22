@@ -111,7 +111,7 @@ __c_static __c_inline void c_pair_copy(c_ref_t dst, const c_ref_t src)
     }
 
     if (!_dst->first || !_dst->second) {
-       if (_dst->first_type->deallocate) {
+        if (_dst->first_type->deallocate) {
             _dst->first_type->deallocate(_dst->first);
         }
         else {

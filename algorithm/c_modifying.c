@@ -319,8 +319,9 @@ size_t algo_remove(c_iterator_t* __c_forward_iterator first,
                 C_ITER_DEREF_ASSIGN(__first, __i);
                 C_ITER_INC(__first);
             }
-            else
+            else {
                 ++n_removed;
+            }
 
             C_ITER_INC(__i);
         }
@@ -359,8 +360,9 @@ size_t algo_remove_if(c_iterator_t* __c_forward_iterator first,
                 C_ITER_DEREF_ASSIGN(__first, __i);
                 C_ITER_INC(__first);
             }
-            else
+            else {
                 ++n_removed;
+            }
             C_ITER_INC(__i);
         }
         __c_free(__i);
@@ -513,10 +515,12 @@ size_t algo_replace_copy(c_iterator_t* __c_forward_iterator first,
     __C_ALGO_BEGIN_3(first, last, d_first)
 
     while (C_ITER_NE(__first, __last)) {
-        if (C_ITER_DEREF_EQUAL_V(__first, old_value))
+        if (C_ITER_DEREF_EQUAL_V(__first, old_value)) {
             C_ITER_DEREF_ASSIGN_V(__d_first, new_value);
-        else
+        }
+        else {
             C_ITER_DEREF_ASSIGN(__d_first, __first);
+        }
         C_ITER_INC(__d_first);
         C_ITER_INC(__first);
         ++n_copied;
@@ -548,10 +552,12 @@ size_t algo_replace_copy_if(c_iterator_t* __c_forward_iterator first,
     __C_ALGO_BEGIN_3(first, last, d_first)
 
     while (C_ITER_NE(__first, __last)) {
-        if (pred(C_ITER_DEREF(__first)))
+        if (pred(C_ITER_DEREF(__first))) {
             C_ITER_DEREF_ASSIGN_V(__d_first, new_value);
-        else
+        }
+        else {
             C_ITER_DEREF_ASSIGN(__d_first, __first);
+        }
         C_ITER_INC(__d_first);
         C_ITER_INC(__first);
         ++n_copied;

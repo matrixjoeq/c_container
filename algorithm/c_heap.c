@@ -144,8 +144,9 @@ void algo_push_heap_by(c_iterator_t* __c_random_iterator first,
             __hole_index = __parent_index;
             __parent_index = parent(__hole_index);
         }
-        else
+        else {
             break;
+        }
     }
     __c_iter_copy_and_move(&__hole, __first, __hole_index);
     C_ITER_DEREF_ASSIGN_V(__hole, __value);
@@ -192,16 +193,18 @@ void algo_pop_heap_by(c_iterator_t* __c_random_iterator first,
                     algo_iter_swap(__hole, __right);
                     __hole_index = __right_index;
                 }
-                else
+                else {
                     break;
+                }
             }
             else {
                 if (comp(C_ITER_DEREF(__hole), C_ITER_DEREF(__left))) {
                     algo_iter_swap(__hole, __left);
                     __hole_index = __left_index;
                 }
-                else
+                else {
                     break;
+                }
             }
         }
         else {
@@ -209,8 +212,9 @@ void algo_pop_heap_by(c_iterator_t* __c_random_iterator first,
                 algo_iter_swap(__hole, __left);
                 __hole_index = __left_index;
             }
-            else
+            else {
                 break;
+            }
         }
 
         __left_index = left(__hole_index);

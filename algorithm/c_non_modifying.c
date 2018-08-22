@@ -39,8 +39,9 @@ bool algo_all_of(c_iterator_t* __c_input_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first)))
+    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first))) {
         C_ITER_INC(__first);
+    }
     ret = C_ITER_EQ(__first, __last);
 
     __C_ALGO_END_2(first, last)
@@ -60,8 +61,9 @@ bool algo_any_of(c_iterator_t* __c_input_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first)))
+    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first))) {
         C_ITER_INC(__first);
+    }
     ret = C_ITER_NE(__first, __last);
 
     __C_ALGO_END_2(first, last)
@@ -81,8 +83,9 @@ bool algo_none_of(c_iterator_t* __c_input_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first)))
+    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first))) {
         C_ITER_INC(__first);
+    }
     ret = C_ITER_EQ(__first, __last);
 
     __C_ALGO_END_2(first, last)
@@ -259,8 +262,9 @@ bool algo_find_by(c_iterator_t* __c_input_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first), value))
+    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first), value)) {
         C_ITER_INC(__first);
+    }
     is_found = C_ITER_NE(__first, __last);
 
     __c_iter_copy_or_assign(found, __first);
@@ -284,8 +288,9 @@ bool algo_find_if(c_iterator_t* __c_input_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first)))
+    while (C_ITER_NE(__first, __last) && !pred(C_ITER_DEREF(__first))) {
         C_ITER_INC(__first);
+    }
     is_found = C_ITER_NE(__first, __last);
 
     __c_iter_copy_or_assign(found, __first);
@@ -309,8 +314,9 @@ bool algo_find_if_not(c_iterator_t* __c_input_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first)))
+    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first))) {
         C_ITER_INC(__first);
+    }
     is_found = C_ITER_NE(__first, __last);
 
     __c_iter_copy_or_assign(found, __first);

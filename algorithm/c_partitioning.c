@@ -42,8 +42,9 @@ bool algo_is_partitioned(c_iterator_t* __c_forward_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first)))
+    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first))) {
         C_ITER_INC(__first);
+    }
 
     while (C_ITER_NE(__first, __last)) {
         if (pred(C_ITER_DEREF(__first))) {
@@ -100,8 +101,7 @@ size_t algo_partition_copy(c_iterator_t* __c_forward_iterator first,
                            c_iterator_t** __c_forward_iterator d_last_false,
                            c_unary_predicate pred)
 {
-    if (!first || !last || !d_first_true || !d_first_false || !pred)
-        return 0;
+    if (!first || !last || !d_first_true || !d_first_false || !pred) return 0;
     assert(C_ITER_AT_LEAST(first, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(last, C_ITER_CATE_FORWARD));
     assert(C_ITER_AT_LEAST(d_first_true, C_ITER_CATE_FORWARD));
@@ -148,8 +148,9 @@ void algo_partition_point(c_iterator_t* __c_forward_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first)))
+    while (C_ITER_NE(__first, __last) && pred(C_ITER_DEREF(__first))) {
         C_ITER_INC(__first);
+    }
 
     __c_iter_copy_or_assign(first_last, __first);
 
