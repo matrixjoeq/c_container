@@ -28,7 +28,7 @@
 #ifndef __C_TEST_UTIL_HPP__
 #define __C_TEST_UTIL_HPP__
 
-#define __TEST_TIME_MAX     (10)
+#define __TEST_TIME_MAX     (1) // (10)
 #define __TEST_LOOP     for (int __times = 0; __times < __TEST_TIME_MAX; ++__times)
 
 #define __PERF_SET_SIZE     (100000)

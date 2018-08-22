@@ -151,6 +151,8 @@ TEST_F(CHeapTest, MakeHeap)
     SetupVector(default_data, default_length);
     c_algo_make_heap(&v_first_, &v_last_);
     EXPECT_TRUE(c_algo_is_heap(&v_first_, &v_last_));
+    c_algo_for_each(&v_first_, &v_last_, print_value);
+    printf("\n");
 }
 
 TEST_F(CHeapTest, SortHeap)
