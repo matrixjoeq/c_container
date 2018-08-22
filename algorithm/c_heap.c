@@ -86,15 +86,15 @@ void algo_is_heap_until_by(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __right = 0;
 
     while (__left_index < __distance) {
-        __c_iter_move_copy(&__parent, __first, __parent_index);
+        __c_iter_copy_and_move(&__parent, __first, __parent_index);
 
-        __c_iter_move_copy(&__left, __first, __left_index);
+        __c_iter_copy_and_move(&__left, __first, __left_index);
         if (comp(C_ITER_DEREF(__parent), C_ITER_DEREF(__left))) {
             __is_heap = false;
             break;
         }
 
-        __c_iter_move_copy(&__right, __first, __right_index);
+        __c_iter_copy_and_move(&__right, __first, __right_index);
         if ((__right_index < __distance) &&
             (comp(C_ITER_DEREF(__parent), C_ITER_DEREF(__right)))) {
             __is_heap = false;
@@ -137,8 +137,8 @@ void algo_push_heap_by(c_iterator_t* __c_random_iterator first,
     __first->value_type->copy(__value, C_ITER_DEREF(__last));
 
     while (__hole_index > __top_index) {
-        __c_iter_move_copy(&__parent, __first, __parent_index);
-        __c_iter_move_copy(&__hole, __first, __hole_index);
+        __c_iter_copy_and_move(&__parent, __first, __parent_index);
+        __c_iter_copy_and_move(&__hole, __first, __hole_index);
         if (comp(C_ITER_DEREF(__parent), __value)) {
             C_ITER_DEREF_ASSIGN(__hole, __parent);
             __hole_index = __parent_index;
@@ -147,7 +147,7 @@ void algo_push_heap_by(c_iterator_t* __c_random_iterator first,
         else
             break;
     }
-    __c_iter_move_copy(&__hole, __first, __hole_index);
+    __c_iter_copy_and_move(&__hole, __first, __hole_index);
     C_ITER_DEREF_ASSIGN_V(__hole, __value);
 
     __c_free(__value);
@@ -182,11 +182,11 @@ void algo_pop_heap_by(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __right = 0;
 
     while (__left_index < __last_index) {
-        __c_iter_move_copy(&__hole, __first, __hole_index);
-        __c_iter_move_copy(&__left, __first, __left_index);
+        __c_iter_copy_and_move(&__hole, __first, __hole_index);
+        __c_iter_copy_and_move(&__left, __first, __left_index);
 
         if (__right_index < __last_index) {
-            __c_iter_move_copy(&__right, __first, __right_index);
+            __c_iter_copy_and_move(&__right, __first, __right_index);
             if (comp(C_ITER_DEREF(__left), C_ITER_DEREF(__right))) {
                 if (comp(C_ITER_DEREF(__hole), C_ITER_DEREF(__right))) {
                     algo_iter_swap(__hole, __right);
@@ -237,7 +237,7 @@ void algo_make_heap_by(c_iterator_t* __c_random_iterator first,
     __C_ALGO_BEGIN_2(first, last)
 
     c_iterator_t* __heap_last = 0;
-    __c_iter_move_copy(&__heap_last, __first, 2);
+    __c_iter_copy_and_move(&__heap_last, __first, 2);
 
     do {
         algo_push_heap_by(__first, __heap_last, comp);

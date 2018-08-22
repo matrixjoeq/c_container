@@ -177,7 +177,7 @@ __c_static bool iter_less(c_iterator_t* x, c_iterator_t* y)
 
 __c_static void iter_advance(c_iterator_t* iter, ptrdiff_t n)
 {
-    if (!__is_deque_iterator(iter)) return;
+    if (!__is_deque_iterator(iter) || n == 0) return;
     ((c_deque_iterator_t*)iter)->pos += (n * iter->value_type->size());
 }
 

@@ -98,8 +98,8 @@ __c_static void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
         }
 
         --depth_limit;
-        __c_iter_move_copy(&__middle, __first, C_ITER_DISTANCE(__first, __last) / 2);
-        __c_iter_move_copy(&__last_prev, __last, -1);
+        __c_iter_copy_and_move(&__middle, __first, C_ITER_DISTANCE(__first, __last) / 2);
+        __c_iter_copy_and_move(&__last_prev, __last, -1);
 
         // __pivot is a reference to the median value, DO NOT free it
         c_ref_t __pivot = __median_of_three_by(C_ITER_DEREF(__first),
@@ -133,7 +133,7 @@ void __insertion_sort_by(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __inner_last = 0;
     c_ref_t __last_value = malloc(__first->value_type->size());
 
-    __c_iter_move_copy(&__i, __first, 1);
+    __c_iter_copy_and_move(&__i, __first, 1);
     C_ITER_COPY(&__i_next, __i);
     C_ITER_COPY(&__inner_last, __i);
     __first->value_type->create(__last_value);
@@ -141,13 +141,13 @@ void __insertion_sort_by(c_iterator_t* __c_random_iterator first,
     while (C_ITER_NE(__i, __last)) { // outer loop
         C_ITER_V_ASSIGN_DEREF(__last_value, __i);
         if (comp(__last_value, C_ITER_DEREF(__first))) {
-            __c_iter_move_copy(&__i_next, __i, 1);
+            __c_iter_copy_and_move(&__i_next, __i, 1);
             algo_copy_backward(__first, __i, __i_next, C_IGNORED);
             C_ITER_DEREF_ASSIGN_V(__first, __last_value);
         }
         else {
             C_ITER_ASSIGN(__inner_last, __i);
-            __c_iter_move_copy(&__i_next, __i, -1);
+            __c_iter_copy_and_move(&__i_next, __i, -1);
             while (comp(__last_value, C_ITER_DEREF(__i_next))) { // inner loop
                 C_ITER_DEREF_ASSIGN(__inner_last, __i_next);
                 C_ITER_ASSIGN(__inner_last, __i_next);
@@ -267,7 +267,7 @@ void algo_partial_sort_by(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __i = 0;
 
     C_ITER_COPY(&__i, __middle);
-    __c_iter_move_copy(&__middle_prev, __middle, -1);
+    __c_iter_copy_and_move(&__middle_prev, __middle, -1);
 
     c_algo_make_heap_by(__first, __middle, comp);
     while (C_ITER_NE(__i, __last)) {
@@ -325,7 +325,7 @@ size_t algo_partial_sort_copy_by(c_iterator_t* __c_forward_iterator first,
         ++n;
     }
 
-    __c_iter_move_copy(&__d_prev, __d, -1);
+    __c_iter_copy_and_move(&__d_prev, __d, -1);
 
     c_algo_make_heap_by(__d_first, __d, comp);
     while (C_ITER_NE(__i, __last)) {
