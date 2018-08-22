@@ -35,7 +35,6 @@ namespace c_container {
 namespace {
 
 const int default_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-//const int default_data[] = { 5, 9, 2, 7, 4, 0, 6, 3, 8, 1, 10 };
 const int default_length = __array_length(default_data);
 
 void print_value(c_ref_t data)
@@ -157,12 +156,10 @@ TEST_F(CHeapTest, MakeHeap)
 TEST_F(CHeapTest, SortHeap)
 {
     SetupVector(default_data, default_length);
-    ///*
     c_algo_make_heap(&v_first_, &v_last_);
     EXPECT_TRUE(c_algo_is_heap(&v_first_, &v_last_));
     c_algo_for_each(&v_first_, &v_last_, print_value);
     printf("\n");
-    //*/
 
     c_algo_sort_heap(&v_first_, &v_last_);
     c_algo_for_each(&v_first_, &v_last_, print_value);
@@ -174,7 +171,7 @@ TEST_F(CHeapTest, HeapPerformance)
 {
     bool std_ret = false;
     bool c_ret = false;
-    //__TEST_LOOP {
+    __TEST_LOOP {
         SetupPerformance();
         __c_measure(std_ret = std::is_heap(std_first_, std_last_));
         __c_measure(c_ret = c_algo_is_heap(&v_first_, &v_last_));
@@ -193,7 +190,7 @@ TEST_F(CHeapTest, HeapPerformance)
         __c_measure(std_ret = std::is_heap(std_first_, std_last_));
         __c_measure(c_ret = c_algo_is_heap(&v_first_, &v_last_));
         EXPECT_EQ(std_ret, c_ret);
-    //}
+    }
 }
 
 } // namespace

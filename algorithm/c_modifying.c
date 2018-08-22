@@ -313,7 +313,7 @@ size_t algo_remove(c_iterator_t* __c_forward_iterator first,
     if (C_ITER_NE(__first, __last)) {
         ++n_removed;
         c_iterator_t* __i = 0;
-        __c_iter_copy_and_move(&__i, __first, 1);
+        __c_iter_move_copy(&__i, __first, 1);
         while (C_ITER_NE(__i, __last)) {
             if (!(C_ITER_DEREF_EQUAL_V(__i, value))) {
                 C_ITER_DEREF_ASSIGN(__first, __i);
@@ -353,7 +353,7 @@ size_t algo_remove_if(c_iterator_t* __c_forward_iterator first,
     if (C_ITER_NE(__first, __last)) {
         ++n_removed;
         c_iterator_t* __i = 0;
-        __c_iter_copy_and_move(&__i, __first, 1);
+        __c_iter_move_copy(&__i, __first, 1);
         while (C_ITER_NE(__i, __last)) {
             if (!pred(C_ITER_DEREF(__i))) {
                 C_ITER_DEREF_ASSIGN(__first, __i);
@@ -775,8 +775,8 @@ void algo_random_shuffle_by(c_iterator_t* __c_random_iterator first,
     c_iterator_t* __y = 0;
 
     for (ptrdiff_t __i = __n - 1; __i > 0; --__i) {
-        __c_iter_copy_and_move(&__x, __first, __i);
-        __c_iter_copy_and_move(&__y, __first, (ptrdiff_t)(r(__i + 1)));
+        __c_iter_move_copy(&__x, __first, __i);
+        __c_iter_move_copy(&__y, __first, (ptrdiff_t)(r(__i + 1)));
         algo_iter_swap(__x, __y);
     }
 
@@ -808,7 +808,7 @@ size_t algo_unique_by(c_iterator_t* __c_forward_iterator first,
 
     c_iterator_t* __next = 0;
 
-    __c_iter_copy_and_move(&__next, __first, 1);
+    __c_iter_move_copy(&__next, __first, 1);
     while (C_ITER_NE(__next, __last)) {
         if (!pred(C_ITER_DEREF(__first), C_ITER_DEREF(__next))) {
             C_ITER_INC(__first);

@@ -416,7 +416,7 @@ bool algo_adjacent_find_by(c_iterator_t* __c_forward_iterator first,
     c_iterator_t* __next = 0;
 
     C_ITER_COPY(&__found, __last);
-    __c_iter_copy_and_move(&__next, __first, 1);
+    __c_iter_move_copy(&__next, __first, 1);
     while (C_ITER_NE(__next, __last) && !pred(C_ITER_DEREF(__first), C_ITER_DEREF(__next))) {
         C_ITER_ASSIGN(__first, __next);
         C_ITER_INC(__next);
