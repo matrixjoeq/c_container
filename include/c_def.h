@@ -121,7 +121,7 @@ typedef struct __c_type_info {
 
     // operator==
     bool (*equal)(c_ref_t __c_in lhs, c_ref_t __c_in rhs) __optional;
-} const c_type_info_t;
+} c_type_info_t;
 
 struct __c_iterator;
 typedef struct __c_iterator_operation {

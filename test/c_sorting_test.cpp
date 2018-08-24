@@ -110,19 +110,22 @@ TEST_F(CSortTest, Sort)
 
 TEST_F(CSortTest, SortPerformance)
 {
-    std::vector<int> v(100000);
+    //std::vector<int> v(100000);
+    std::vector<int> v(20);
     srandom(static_cast<unsigned int>(time(0)));
     int data = 0;
     for (std::vector<int>::iterator iter = v.begin(); iter != v.end(); ++iter) {
-        data = random() % INT32_MAX;
+        data = random() % 100;//INT32_MAX;
         *iter = data;
         c_vector_push_back(vector, C_REF_T(&data));
     }
     first = c_vector_begin(vector);
     last = c_vector_end(vector);
 
-    __c_measure(std::partial_sort(v.begin(), v.end(), v.end()));
+    __c_measure(std::sort(v.begin(), v.end()));
     __c_measure(c_algo_sort(&first, &last));
+    c_algo_for_each(&first, &last, print_value);
+    print_newline();
 
     EXPECT_TRUE(c_algo_is_sorted(&first, &last));
 }

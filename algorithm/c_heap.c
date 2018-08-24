@@ -321,9 +321,11 @@ void algo_sort_heap_by(c_iterator_t* __c_random_iterator first,
     assert(C_ITER_EXACT(first, C_ITER_CATE_RANDOM));
     assert(C_ITER_EXACT(last, C_ITER_CATE_RANDOM));
 
+    if (C_ITER_DISTANCE(first, last) < 2) return;
+
     __C_ALGO_BEGIN_2(first, last)
 
-    while (C_ITER_DISTANCE(__first, __last) > 1) {
+    while (C_ITER_NE(__first, __last)) {
         algo_pop_heap_by(__first, __last, comp);
         C_ITER_DEC(__last);
     }
