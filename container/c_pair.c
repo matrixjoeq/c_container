@@ -41,7 +41,6 @@ __c_static __c_inline void c_pair_create(c_ref_t pair)
 {
     c_pair_t* _pair = (c_pair_t*)pair;
 
-    // TODO: make allocation in type's creator
     assert(_pair->first == 0);
     assert(_pair->second == 0);
     assert(_pair->first_type);
@@ -90,7 +89,6 @@ __c_static __c_inline void c_pair_copy(c_ref_t dst, const c_ref_t src)
     _dst->first_type = _src->first_type;
     _dst->second_type = _src->second_type;
 
-    // TODO: make allocation in type's creator
     assert(_dst->first == 0);
     assert(_dst->second == 0);
     assert(_dst->first_type);
@@ -135,14 +133,23 @@ __c_static __c_inline void c_pair_destroy(c_ref_t pair)
 {
     c_pair_t* _pair = (c_pair_t*)pair;
 
-    // TODO: make deallocation in type's destructor
     assert(_pair->first_type);
     _pair->first_type->destroy(_pair->first);
-    __c_free(_pair->first);
+    if (_pair->first_type->deallocate) {
+        _pair->first_type->deallocate(_pair->first);
+    }
+    else {
+        __c_free(_pair->first);
+    }
 
     assert(_pair->second_type);
     _pair->second_type->destroy(_pair->second);
-    __c_free(_pair->second);
+    if (_pair->second_type->deallocate) {
+        _pair->second_type->deallocate(_pair->second);
+    }
+    else {
+        __c_free(_pair->second);
+    }
 }
 
 __c_static __c_inline c_ref_t c_pair_assign(c_ref_t dst, const c_ref_t src)

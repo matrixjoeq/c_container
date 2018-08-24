@@ -99,7 +99,7 @@ void c_priority_queue_push(c_priority_queue_t* queue, c_ref_t value)
     queue->backend->ops->push_back(queue->backend, value);
     queue->backend->ops->begin(queue->backend, &first);
     queue->backend->ops->end(queue->backend, &last);
-    c_algo_push_heap_by(first, last, queue->comp);
+    algo_push_heap_by(first, last, queue->comp);
 
     __c_free(first);
     __c_free(last);
@@ -114,7 +114,7 @@ void c_priority_queue_pop(c_priority_queue_t* queue)
     queue->backend->ops->begin(queue->backend, &first);
     queue->backend->ops->end(queue->backend, &last);
 
-    c_algo_pop_heap_by(first, last, queue->comp);
+    algo_pop_heap_by(first, last, queue->comp);
     queue->backend->ops->pop_back(queue->backend);
 
     __c_free(first);

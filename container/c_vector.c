@@ -529,7 +529,7 @@ c_vector_t* c_vector_create(const c_type_info_t* value_type)
 
 c_vector_t* c_vector_create_from(const c_type_info_t* value_type, c_ref_t values, size_t length)
 {
-    if (!value_type || !values || length == 0) return 0;
+    if (!values || length == 0) return 0;
 
     c_vector_t* vector = c_vector_create(value_type);
     if (!vector) return 0;

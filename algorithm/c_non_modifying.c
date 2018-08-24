@@ -384,7 +384,7 @@ bool algo_find_last_of_by(c_iterator_t* __c_input_iterator first,
     c_iterator_t* __found = 0;
 
     C_ITER_COPY(&__found, __last);
-    while (c_algo_find_first_of_by(__first, __last, s_first, s_last, &__first, pred)) {
+    while (algo_find_first_of_by(__first, __last, s_first, s_last, &__first, pred)) {
         is_found = true;
         C_ITER_ASSIGN(__found, __first);
         C_ITER_INC(__first);
@@ -517,7 +517,7 @@ bool algo_search_last_by(c_iterator_t* __c_forward_iterator first,
     c_iterator_t* __found = 0;
 
     C_ITER_COPY(&__found, __last);
-    while (c_algo_search_by(__first, __last, __s_first, __s_last, &__first, pred)) {
+    while (algo_search_by(__first, __last, __s_first, __s_last, &__first, pred)) {
         is_found = true;
         C_ITER_ASSIGN(__found, __first);
         C_ITER_INC(__first);
@@ -608,7 +608,7 @@ bool algo_search_last_n_by(c_iterator_t* __c_forward_iterator first,
     c_iterator_t* __found = 0;
 
     C_ITER_COPY(&__found, __last);
-    while (c_algo_search_n_by(__first, __last, n, value, &__first, pred)) {
+    while (algo_search_n_by(__first, __last, n, value, &__first, pred)) {
         is_found = true;
         C_ITER_ASSIGN(__found, __first);
         C_ITER_INC(__first);

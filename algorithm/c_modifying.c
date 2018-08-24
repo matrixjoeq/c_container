@@ -350,7 +350,7 @@ size_t algo_remove_if(c_iterator_t* __c_forward_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    c_algo_find_if(__first, __last, &__first, pred);
+    algo_find_if(__first, __last, &__first, pred);
     if (C_ITER_NE(__first, __last)) {
         ++n_removed;
         c_iterator_t* __i = 0;
@@ -482,7 +482,7 @@ size_t algo_replace_if(c_iterator_t* __c_forward_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    c_algo_find_if(__first, __last, &__first, pred);
+    algo_find_if(__first, __last, &__first, pred);
     while (C_ITER_NE(__first, __last)) {
         if (pred(C_ITER_DEREF(__first))) {
             C_ITER_DEREF_ASSIGN_V(__first, new_value);

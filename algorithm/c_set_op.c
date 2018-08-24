@@ -62,8 +62,8 @@ size_t algo_merge_by(c_iterator_t* __c_forward_iterator first1,
         C_ITER_INC(__d_first);
     }
 
-    n += c_algo_copy(__first1, __last1, __d_first, &__d_first);
-    n += c_algo_copy(__first2, __last2, __d_first, &__d_first);
+    n += algo_copy(__first1, __last1, __d_first, &__d_first);
+    n += algo_copy(__first2, __last2, __d_first, &__d_first);
 
     __c_iter_copy_or_assign(d_last, __d_first);
 
@@ -144,7 +144,7 @@ size_t algo_set_difference_by(c_iterator_t* __c_forward_iterator first1,
         }
     }
 
-    n += c_algo_copy(__first1, __last1, __d_first, &__d_first);
+    n += algo_copy(__first1, __last1, __d_first, &__d_first);
 
     __c_iter_copy_or_assign(d_last, __d_first);
 
@@ -237,8 +237,8 @@ size_t algo_set_symmetric_difference_by(c_iterator_t* __c_forward_iterator first
         }
     }
 
-    n += c_algo_copy(__first1, __last1, __d_first, &__d_first);
-    n += c_algo_copy(__first2, __last2, __d_first, &__d_first);
+    n += algo_copy(__first1, __last1, __d_first, &__d_first);
+    n += algo_copy(__first2, __last2, __d_first, &__d_first);
 
     __c_iter_copy_or_assign(d_last, __d_first);
 
@@ -290,8 +290,8 @@ size_t algo_set_union_by(c_iterator_t* __c_forward_iterator first1,
         }
     }
 
-    n += c_algo_copy(__first1, __last1, __d_first, &__d_first);
-    n += c_algo_copy(__first2, __last2, __d_first, &__d_first);
+    n += algo_copy(__first1, __last1, __d_first, &__d_first);
+    n += algo_copy(__first2, __last2, __d_first, &__d_first);
 
     __c_iter_copy_or_assign(d_last, __d_first);
 

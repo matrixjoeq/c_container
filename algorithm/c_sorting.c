@@ -269,17 +269,17 @@ void algo_partial_sort_by(c_iterator_t* __c_random_iterator first,
     C_ITER_COPY(&__i, __middle);
     __c_iter_copy_and_move(&__middle_prev, __middle, -1);
 
-    c_algo_make_heap_by(__first, __middle, comp);
+    algo_make_heap_by(__first, __middle, comp);
     while (C_ITER_NE(__i, __last)) {
         if (comp(C_ITER_DEREF(__i), C_ITER_DEREF(__first))) {
-            c_algo_pop_heap_by(__first, __middle, comp);
-            c_algo_iter_swap(__middle_prev, __i);
-            c_algo_push_heap_by(__first, __middle, comp);
+            algo_pop_heap_by(__first, __middle, comp);
+            algo_iter_swap(__middle_prev, __i);
+            algo_push_heap_by(__first, __middle, comp);
         }
         C_ITER_INC(__i);
     }
 
-    c_algo_sort_heap_by(__first, __middle, comp);
+    algo_sort_heap_by(__first, __middle, comp);
 
     __c_free(__i);
     __c_free(__middle_prev);
@@ -327,17 +327,17 @@ size_t algo_partial_sort_copy_by(c_iterator_t* __c_forward_iterator first,
 
     __c_iter_copy_and_move(&__d_prev, __d, -1);
 
-    c_algo_make_heap_by(__d_first, __d, comp);
+    algo_make_heap_by(__d_first, __d, comp);
     while (C_ITER_NE(__i, __last)) {
         if (comp(C_ITER_DEREF(__i), C_ITER_DEREF(__d_first))) {
-            c_algo_pop_heap_by(__d_first, __d, comp);
+            algo_pop_heap_by(__d_first, __d, comp);
             C_ITER_DEREF_ASSIGN(__d_prev, __i);
-            c_algo_push_heap_by(__d_first, __d, comp);
+            algo_push_heap_by(__d_first, __d, comp);
         }
         C_ITER_INC(__i);
     }
 
-    c_algo_sort_heap_by(__d_first, __d, comp);
+    algo_sort_heap_by(__d_first, __d, comp);
 
     __c_iter_copy_or_assign(d_upper, __d);
 
