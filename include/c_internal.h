@@ -33,6 +33,7 @@ extern "C" {
 #include <time.h>
 #include <sys/time.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include "c_def.h"
 
@@ -202,6 +203,28 @@ __c_inline c_ref_t __c_select2nd(c_pair_t* pair)
     __c_iter_put_shadow(u) \
     __c_iter_put_shadow(v) \
     __c_iter_put_shadow(w) \
+
+__c_inline c_ref_t __c_allocate(const c_type_info_t* type)
+{
+    assert(type);
+    if (type->allocate) {
+        return type->allocate();
+    }
+
+    assert(type->size);
+    return (c_ref_t)malloc(type->size());
+}
+
+__c_inline void __c_deallocate(const c_type_info_t* type, c_ref_t value)
+{
+    assert(type);
+    if (type->deallocate) {
+        type->deallocate(value);
+    }
+    else {
+        __c_free(value);
+    }
+}
 
 #ifdef __cplusplus
 }

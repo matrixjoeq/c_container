@@ -260,12 +260,7 @@ __c_static __c_inline c_tree_node_t* __create_node(c_tree_t* tree, c_ref_t value
     c_tree_node_t* node = (c_tree_node_t*)malloc(sizeof(c_tree_node_t));
     if (!node) return 0;
 
-    if (value_type->allocate) {
-        node->value = value_type->allocate();
-    }
-    else {
-        node->value = (c_ref_t)malloc(value_type->size());
-    }
+    node->value = __c_allocate(value_type);
 
     if (!node->value) {
         __c_free(node);
@@ -297,12 +292,7 @@ __c_static __c_inline void __destroy_node(c_tree_t* tree, c_tree_node_t* node)
     assert(node);
 
     tree->value_type->destroy(node->value);
-    if (tree->value_type->deallocate) {
-        tree->value_type->deallocate(node->value);
-    }
-    else {
-        __c_free(node->value);
-    }
+    __c_deallocate(tree->value_type, node->value);
     __c_free(node);
 }
 

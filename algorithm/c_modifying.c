@@ -209,9 +209,10 @@ size_t algo_transform(c_iterator_t* __c_forward_iterator first,
 
     __C_ALGO_BEGIN_3(first, last, d_first)
 
-    c_ref_t __value = malloc(__first->value_type->size());
+    const c_type_info_t* value_type = __first->value_type;
+    c_ref_t __value = __c_allocate(value_type);
 
-    __first->value_type->create(__value);
+    value_type->create(__value);
 
     while (C_ITER_NE(__first, __last)) {
         C_ITER_V_ASSIGN_DEREF(__value, __first);
@@ -222,7 +223,8 @@ size_t algo_transform(c_iterator_t* __c_forward_iterator first,
         ++n_transformed;
     }
 
-    __c_free(__value);
+    value_type->destroy(__value);
+    __c_deallocate(value_type, __value);
 
     __C_ALGO_END_3(first, last, d_first);
 
@@ -242,8 +244,10 @@ size_t algo_generate(c_iterator_t* __c_forward_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
+    const c_type_info_t* value_type = __first->value_type;
+
     size_t __size = __first->value_type->size();
-    c_ref_t __value = malloc(__size);
+    c_ref_t __value = __c_allocate(value_type);
 
     while (C_ITER_NE(__first, __last)) {
         memset(__value, 0, __size);
@@ -253,7 +257,8 @@ size_t algo_generate(c_iterator_t* __c_forward_iterator first,
         ++n_gened;
     }
 
-    __c_free(__value);
+    value_type->destroy(__value);
+    __c_deallocate(value_type, __value);
 
     __C_ALGO_END_2(first, last)
 
@@ -277,8 +282,9 @@ void algo_generate_n(c_iterator_t* __c_forward_iterator first,
 
     __C_ALGO_BEGIN_1(first)
 
+    const c_type_info_t* value_type = __first->value_type;
     size_t __size = __first->value_type->size();
-    c_ref_t __value = malloc(__size);
+    c_ref_t __value = __c_allocate(value_type);
 
     while (n--) {
         memset(__value, 0, __size);
@@ -289,7 +295,8 @@ void algo_generate_n(c_iterator_t* __c_forward_iterator first,
 
     __c_iter_copy_or_assign(last, __first);
 
-    __c_free(__value);
+    value_type->destroy(__value);
+    __c_deallocate(value_type, __value);
 
     __C_ALGO_END_1(first)
 }
@@ -576,11 +583,12 @@ void algo_swap(const c_type_info_t* value_type,
 {
     if (!value_type || !x || !y) return;
 
-    c_ref_t tmp = malloc(value_type->size());
+    c_ref_t tmp = __c_allocate(value_type);
     value_type->copy(tmp, x);
     value_type->assign(x, y);
     value_type->assign(y, tmp);
-    __c_free(tmp);
+    value_type->destroy(tmp);
+    __c_deallocate(value_type, tmp);
 }
 
 size_t algo_swap_range(c_iterator_t* __c_forward_iterator first1,
@@ -618,6 +626,7 @@ void algo_iter_swap(c_iterator_t* __c_forward_iterator x,
     assert(C_ITER_AT_LEAST(y, C_ITER_CATE_FORWARD));
     assert(C_ITER_MUTABLE(x));
     assert(C_ITER_MUTABLE(y));
+    assert(x->value_type == y->value_type);
     algo_swap(x->value_type, C_ITER_DEREF(x), C_ITER_DEREF(y));
 }
 

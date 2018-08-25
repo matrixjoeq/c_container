@@ -189,12 +189,7 @@ __c_static __c_inline c_slist_node_t* __create_node(c_slist_t* list, c_ref_t val
     if (!node) return 0;
 
     node->next = 0;
-    if (list->value_type->allocate) {
-        node->value = list->value_type->allocate();
-    }
-    else {
-        node->value = (c_ref_t)malloc(list->value_type->size());
-    }
+    node->value = __c_allocate(list->value_type);
 
     if (!node->value) {
         __c_free(node);
@@ -222,12 +217,7 @@ __c_static __c_inline c_slist_node_t* __pop_node_after(c_slist_t* list, c_slist_
 
     node->next = pos->next;
     list->value_type->destroy(pos->value);
-    if (list->value_type->deallocate) {
-        list->value_type->deallocate(pos->value);
-    }
-    else {
-        __c_free(pos->value);
-    }
+    __c_deallocate(list->value_type, pos->value);
     __c_free(pos);
 
     return node->next;

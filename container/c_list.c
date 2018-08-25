@@ -371,13 +371,7 @@ __c_static __c_inline c_list_node_t* __create_node(c_list_t* list, c_ref_t value
 
     node->prev = 0;
     node->next = 0;
-
-    if (list->value_type->allocate) {
-        node->value = list->value_type->allocate();
-    }
-    else {
-        node->value = (c_ref_t)malloc(list->value_type->size());
-    }
+    node->value = __c_allocate(list->value_type);
 
     if (!node->value) {
         __c_free(node);
@@ -407,12 +401,7 @@ __c_static __c_inline c_list_node_t* __pop_node(c_list_t* list, c_list_node_t* n
     next_node->prev = prev_node;
     prev_node->next = next_node;
     list->value_type->destroy(node->value);
-    if (list->value_type->deallocate) {
-        list->value_type->deallocate(node->value);
-    }
-    else {
-        __c_free(node->value);
-    }
+    __c_deallocate(list->value_type, node->value);
     __c_free(node);
 
     return next_node;

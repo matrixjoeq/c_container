@@ -27,7 +27,7 @@
 #include "c_internal.h"
 #include "c_algorithm.h"
 
-static const ptrdiff_t __s_threshold = 1;
+static const ptrdiff_t __s_threshold = 512;
 
 __c_static __c_inline
 size_t __lg(size_t n)
@@ -38,55 +38,63 @@ size_t __lg(size_t n)
 }
 
 __c_static __c_inline
-c_ref_t __median_of_three_by(c_ref_t x, c_ref_t y, c_ref_t z, c_compare comp)
+c_ref_t __median_of_three_by(const c_type_info_t* value_type, c_ref_t x, c_ref_t y, c_ref_t z, c_compare comp)
 {
+    c_ref_t r = __c_allocate(value_type);
+
     if (comp(x, y)) {
         if (comp(y, z)) {
             /* x < y < z */
-            return y;
+            value_type->copy(r, y);
         }
         else if (comp(x, z)) {
             /* x < y, z <= y, x < z */
-            return z;
+            value_type->copy(r, z);
         }
         else {
             /* z <= x < y*/
-            return x;
+            value_type->copy(r, x);
         }
     }
     else if (comp(x, z)) {
         /* y <= x < z */
-        return x;
+        value_type->copy(r, x);
     }
     else if (comp(y, z)) {
         /* y < z, z <= x, y <= x */
-        return z;
+        value_type->copy(r, z);
     }
     else {
         /* z <= y, y <= x, z <= x */
-        return y;
+        value_type->copy(r, y);
     }
+
+    return r;
 }
 
 __c_static __c_inline
-void __unguarded_partition_by(c_iterator_t* __c_random_iterator first,
-                              c_iterator_t* __c_random_iterator last,
-                              c_iterator_t** __c_random_iterator second_first,
-                              c_ref_t pivot,
-                              c_compare comp)
+void __partition_by(c_iterator_t* __c_random_iterator first,
+                    c_iterator_t* __c_random_iterator last,
+                    c_iterator_t** __c_random_iterator second_first,
+                    c_ref_t pivot,
+                    c_compare comp)
 {
     __C_ALGO_BEGIN_2(first, last)
 
     while (true) {
         /* move __first forward to the first element >= pivot */
-        while (comp(C_ITER_DEREF(__first), pivot)) C_ITER_INC(__first);
+        while (comp(C_ITER_DEREF(__first), pivot)) {
+            C_ITER_INC(__first);
+        }
 
-        /* move __last backward to first element <= pivot */
+        /* move __last backward to the first element <= pivot */
         C_ITER_DEC(__last);
-        while (comp(pivot, C_ITER_DEREF(__last))) C_ITER_DEC(__last);
+        while (comp(pivot, C_ITER_DEREF(__last))) {
+            C_ITER_DEC(__last);
+        }
 
         /* end loop if __first >= __last */
-        if (!C_ITER_LESS(__first, __last)) {
+        if (!(C_ITER_LESS(__first, __last))) {
             __c_iter_copy_or_assign(second_first, __first);
             break;
         }
@@ -105,11 +113,12 @@ void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
                              size_t depth_limit,
                              c_compare comp)
 {
+    const c_type_info_t* value_type = first->value_type;
+
     __C_ALGO_BEGIN_2(first, last)
 
     c_iterator_t* __middle = 0;
     c_iterator_t* __last_prev = 0;
-    c_iterator_t* __part = 0;
 
     /* Handle large number of elements in intro sort,
      * and leave small set unsorted for insertion sort
@@ -127,18 +136,22 @@ void __introspective_sort_by(c_iterator_t* __c_random_iterator first,
         __c_iter_copy_and_move(&__middle, __first, C_ITER_DISTANCE(__first, __last) / 2);
         __c_iter_copy_and_move(&__last_prev, __last, -1);
 
-        /* __pivot is a reference to the median value, DO NOT free it */
-        c_ref_t __pivot = __median_of_three_by(C_ITER_DEREF(__first),
+        c_ref_t __pivot = __median_of_three_by(value_type,
+                                               C_ITER_DEREF(__first),
                                                C_ITER_DEREF(__middle),
                                                C_ITER_DEREF(__last_prev),
                                                comp);
 
-        __unguarded_partition_by(__first, __last, &__part, __pivot, comp);
+        c_iterator_t* __part = 0;
+        __partition_by(__first, __last, &__part, __pivot, comp);
         __introspective_sort_by(__part, __last, depth_limit, comp); /* introsort right half */
         C_ITER_ASSIGN(__last, __part); /* introsort left half */
+
+        value_type->destroy(__pivot);
+        __c_deallocate(value_type, __pivot);
+        __c_free(__part);
     }
 
-    __c_free(__part);
     __c_free(__last_prev);
     __c_free(__middle);
 
@@ -180,13 +193,7 @@ void __linear_sort_by(c_iterator_t* __c_random_iterator first,
 
     const c_type_info_t* value_type = __first->value_type;
 
-    c_ref_t __value = 0;
-    if (value_type->allocate) {
-        __value = value_type->allocate();
-    }
-    else {
-        __value = (c_ref_t)malloc(value_type->size());
-    }
+    c_ref_t __value = __c_allocate(value_type);
     assert(__value);
 
     /* record last element */
@@ -208,7 +215,8 @@ void __linear_sort_by(c_iterator_t* __c_random_iterator first,
         __unguarded_linear_sort_by(__last, __value, comp);
     }
 
-    __c_free(__value);
+    value_type->destroy(__value);
+    __c_deallocate(value_type, __value);
 
     __C_ALGO_END_2(first, last)
 }
@@ -242,9 +250,11 @@ void __unguarded_insertion_sort_by(c_iterator_t* __c_random_iterator first,
     __C_ALGO_BEGIN_2(first, last)
 
     c_iterator_t* __i = 0;
+
     C_ITER_COPY(&__i, __first);
     while (C_ITER_NE(__i, __last)) {
         __unguarded_linear_sort_by(__i, C_ITER_DEREF(__i), comp);
+        C_ITER_INC(__i);
     }
 
     __c_free(__i);
@@ -348,10 +358,8 @@ void algo_sort_by(c_iterator_t* __c_random_iterator first,
 
     __C_ALGO_BEGIN_2(first, last)
 
-    __c_measure(__introspective_sort_by(__first, __last, __lg(C_ITER_DISTANCE(__first, __last)) * 2, comp));
-    //__c_measure(__final_insertion_sort_by(__first, __last, comp));
-    //__c_measure(__insertion_sort_by(__first, __last, comp));
-    //algo_partial_sort_by(__first, __last, __last, comp);
+    __introspective_sort_by(__first, __last, __lg(C_ITER_DISTANCE(__first, __last)) * 2, comp);
+    __final_insertion_sort_by(__first, __last, comp);
 
     __C_ALGO_END_2(first, last)
 }

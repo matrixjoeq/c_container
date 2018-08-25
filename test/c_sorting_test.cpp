@@ -110,12 +110,11 @@ TEST_F(CSortTest, Sort)
 
 TEST_F(CSortTest, SortPerformance)
 {
-    //std::vector<int> v(100000);
-    std::vector<int> v(20);
+    std::vector<int> v(100000);
     srandom(static_cast<unsigned int>(time(0)));
     int data = 0;
     for (std::vector<int>::iterator iter = v.begin(); iter != v.end(); ++iter) {
-        data = random() % 100;//INT32_MAX;
+        data = random() % INT32_MAX;
         *iter = data;
         c_vector_push_back(vector, C_REF_T(&data));
     }
@@ -123,9 +122,11 @@ TEST_F(CSortTest, SortPerformance)
     last = c_vector_end(vector);
 
     __c_measure(std::sort(v.begin(), v.end()));
+
+    // in c_algo_sort, intro sort takes about 80ms for 100000 integers
+    // and final insertion sort takes about 30ms for 100000 integers when threshold is 16
+    // after changing it to 512, total performance improved to 70ms
     __c_measure(c_algo_sort(&first, &last));
-    c_algo_for_each(&first, &last, print_value);
-    print_newline();
 
     EXPECT_TRUE(c_algo_is_sorted(&first, &last));
 }
