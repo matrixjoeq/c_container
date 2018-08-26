@@ -29,6 +29,7 @@
 #include "c_internal.h"
 #include "c_forward_list.h"
 #include "c_algorithm.h"
+#include "c_test_util.hpp"
 
 namespace c_container {
 namespace {
@@ -70,7 +71,7 @@ public:
     void SetupPerformance(void)
     {
         std_list.clear();
-        std_list.resize(100000);
+        std_list.resize(__PERF_SET_SIZE);
         srandom(static_cast<unsigned int>(time(0)));
         int data = 0;
         c_slist_iterator_t before_begin = c_slist_before_begin(list);

@@ -29,6 +29,7 @@
 #include "c_internal.h"
 #include "c_vector.h"
 #include "c_algorithm.h"
+#include "c_test_util.hpp"
 
 namespace c_container {
 namespace {
@@ -110,7 +111,7 @@ TEST_F(CSortTest, Sort)
 
 TEST_F(CSortTest, SortPerformance)
 {
-    std::vector<int> v(100000);
+    std::vector<int> v(__PERF_SET_SIZE);
     srandom(static_cast<unsigned int>(time(0)));
     int data = 0;
     for (std::vector<int>::iterator iter = v.begin(); iter != v.end(); ++iter) {

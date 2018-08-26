@@ -55,7 +55,7 @@ public:
     void SetupPerformance(void)
     {
         std_list_.clear();
-        std_list_.resize(100000);
+        std_list_.resize(__PERF_SET_SIZE);
         srand(static_cast<unsigned int>(time(0)));
         int data = 0;
         for (auto iter = std_list_.begin(); iter != std_list_.end(); ++iter) {

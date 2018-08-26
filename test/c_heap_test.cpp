@@ -60,9 +60,9 @@ public:
     void SetupPerformance(void)
     {
         std_v_.clear();
-        std_v_.reserve(100000);
+        std_v_.reserve(__PERF_SET_SIZE);
         c_vector_clear(v_);
-        c_vector_reserve(v_, 100000);
+        c_vector_reserve(v_, __PERF_SET_SIZE);
         srandom(static_cast<unsigned int>(time(0)));
         int data = 0;
         for (auto iter = std_v_.begin(); iter != std_v_.end(); ++iter) {
