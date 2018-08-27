@@ -527,7 +527,7 @@ c_vector_t* c_vector_create(const c_type_info_t* value_type)
     return vector;
 }
 
-c_vector_t* c_vector_create_from(const c_type_info_t* value_type, c_ref_t values, size_t length)
+c_vector_t* c_vector_create_from_array(const c_type_info_t* value_type, c_ref_t values, size_t length)
 {
     if (!values || length == 0) return 0;
 
@@ -537,6 +537,17 @@ c_vector_t* c_vector_create_from(const c_type_info_t* value_type, c_ref_t values
     c_vector_reserve(vector, length);
     memcpy(vector->start, values, value_type->size() * length);
 
+    return vector;
+}
+
+c_vector_t* c_vector_create_n(const c_type_info_t* value_type, size_t count, c_ref_t value)
+{
+    if (!value || count == 0) return 0;
+
+    c_vector_t* vector = c_vector_create(value_type);
+    if (!vector) return 0;
+
+    c_vector_resize_with_value(vector, count, value);
     return vector;
 }
 

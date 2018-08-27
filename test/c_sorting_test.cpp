@@ -153,9 +153,9 @@ TEST_F(CSortTest, PartialSortCopy)
     int v1_numbers[] = { 10, 11, 12 };
     int v2_numbers[] = { 10, 11, 12, 13, 14, 15, 16 };
 
-    c_vector_t* v0 = c_vector_create_from(c_get_int_type_info(), v0_numbers, __array_length(v0_numbers));
-    c_vector_t* v1 = c_vector_create_from(c_get_int_type_info(), v1_numbers, __array_length(v1_numbers));
-    c_vector_t* v2 = c_vector_create_from(c_get_int_type_info(), v2_numbers, __array_length(v2_numbers));
+    c_vector_t* v0 = c_vector_create_from_array(c_get_int_type_info(), v0_numbers, __array_length(v0_numbers));
+    c_vector_t* v1 = c_vector_create_from_array(c_get_int_type_info(), v1_numbers, __array_length(v1_numbers));
+    c_vector_t* v2 = c_vector_create_from_array(c_get_int_type_info(), v2_numbers, __array_length(v2_numbers));
 
     c_vector_iterator_t v0_first = c_vector_begin(v0);
     c_vector_iterator_t v0_last = c_vector_end(v0);
